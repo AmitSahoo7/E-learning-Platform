@@ -2,10 +2,10 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
-    "start":"node index.js",
-    "dev":"nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,7 +15,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.15.1"
+    "mongoose": "^8.15.1",
+    "nodemailer": "^7.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

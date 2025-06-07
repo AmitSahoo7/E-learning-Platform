@@ -9,6 +9,9 @@ app.get('/',(req,res)=>{
     res.send("Server is working");
 });
 
+// using middlewares
+app.use(express.json());
+
 //importing routes
 import userRoutes from './routes/user.js'
 
