@@ -31,7 +31,8 @@ header {
         transition: 0.3s;
   
         &:hover {
-          color: #8a4baf;
+          color: #9a2bda;
+          text-decoration: underline;
         }
       }
     }
