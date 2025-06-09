@@ -1,41 +1,106 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  height: 100vh;
+}
+
 .auth-page {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 80vh;
-    background-color: white;
-  
-    .auth-form {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      width: 300px;
-  
-      h2 {
-        font-size: 24px;
-        color: #8a4baf;
-        margin-bottom: 15px;
-      }
-  
-      form {
-        text-align: left;
-  
-        label {
-          display: block;
-          margin-bottom: 5px;
-          font-size: 14px;
-          color: #333;
-        }
-  
-        input {
-          width: 92%;
-          padding: 10px;
-          margin-bottom: 15px;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-        }
-      }
-    }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.auth-form {
+
+  background-color: #ffffff;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+    margin: 10rem;
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.auth-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.auth-form input {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 0 5px rgba(118, 75, 162, 0.5);
+}
+
+.common-btn {
+  padding: 0.75rem;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.common-btn:hover {
+  background: linear-gradient(to right, #5a67d8, #6b46c1);
+}
+
+.auth-form p {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.auth-form a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-form a:hover {
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 480px) {
+  .auth-form {
+    padding: 2rem 1.5rem;
+    border-radius: 15px;
   }
+
+  .auth-form h2 {
+    font-size: 1.5rem;
+  }
+
+  .auth-form input,
+  .common-btn {
+    font-size: 0.95rem;
+    padding: 0.65rem 0.9rem;
+  }
+
+  .auth-form p {
+    font-size: 0.85rem;
+  }
+}
