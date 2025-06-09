@@ -1,5 +1,6 @@
 import express from 'express';
-import {register , verifyUser} from "../controllers/user.js"
+import {register , verifyUser,loginUser,myProfile} from "../controllers/user.js";
+import { isAuth } from '../middlewares/isAuth.js';
 const router=express.Router();
 
 router.post("/user/register",register);
