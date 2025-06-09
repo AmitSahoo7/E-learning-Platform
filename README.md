@@ -87,8 +87,8 @@ A full-stack **E-Learning Management System** built using the **MERN Stack (Mong
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/Mern-Elearning-Clone.git
-cd Mern-Elearning-Clone
+git clone https://github.com/AmitSahoo7/E-learning-Platform.git
+cd E-learning-Platform
 ```
 
 ---
@@ -123,13 +123,6 @@ cd client
 npm install
 npm start
 ```
-
----
-
-## 📸 Screenshots (Optional)
-_Add screenshots here to show login, course page, dashboard, etc._
-
----
 
 ## 🛠️ Tools Used
 - VS Code
