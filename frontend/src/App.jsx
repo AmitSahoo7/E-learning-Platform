@@ -6,6 +6,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Header from "./components/header/Header";
 import Verify from "./pages/auth/Verify";
+import Footer from "./components/footer/Footer";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
           <Route path="/verify" element={<Verify />} />
         </Routes>
       </BrowserRouter>
+      <Footer />
     </>
   );
 };
