@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your existing styles below */
 body {
   margin: 0;
   padding: 0;
@@ -7,7 +12,7 @@ body {
 }
 
 .common-btn {
-  background-color: #972fd3;
+  background-color: #44d588;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -18,7 +23,7 @@ body {
   margin-top: 10px;
 
   &:hover {
-    background-color: #5f357e;
+    background-color: #10b981;
   }
 
   @media (max-width: 768px) {
