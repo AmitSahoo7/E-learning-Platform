@@ -31,6 +31,45 @@ export const UserContextProvider = ({ children }) => {
     }
   }
 
+
+  async function registerUser(name, email, password, navigate) {
+    setBtnLoading(true);
+    try {
+      const { data } = await axios.post(`${server}/api/user/register`, {
+        name,
+        email,
+        password,
+      });
+
+      toast.success(data.message);
+      localStorage.setItem("activationToken", data.activationToken);
+      setBtnLoading(false);
+      navigate("/verify");
+    } catch (error) {
+      setBtnLoading(false);
+      toast.error(error.response.data.message);
+    }
+  }
+
+  async function verifyOtp(otp, navigate) {
+    setBtnLoading(true);
+    const activationToken = localStorage.getItem("activationToken");
+    try {
+      const { data } = await axios.post(`${server}/api/user/verify`, {
+        otp,
+        activationToken,
+      });
+
+      toast.success(data.message);
+      navigate("/login");
+      localStorage.clear();
+      setBtnLoading(false);
+    } catch (error) {
+      toast.error(error.response.data.message);
+      setBtnLoading(false);
+    }
+  }
+
   async function fetchUser() {
     try {
       const { data } = await axios.get(`${server}/api/user/me`, {
@@ -59,7 +98,9 @@ export const UserContextProvider = ({ children }) => {
         setIsAuth,
         isAuth,
         loginUser,
-        btnLoading, 
+        btnLoading,
+        registerUser,
+        verifyOtp, 
       }}
     >
       {children}

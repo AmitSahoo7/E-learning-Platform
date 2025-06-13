@@ -10,22 +10,34 @@ import Footer from "./components/footer/Footer";
 import About from "./pages/about/About";
 import Account from "./pages/account/Account";
 import { UserData } from "./context/UserContext";
+import Loading from "./components/loading/Loading";
+
 const App = () => {
-  const {isAuth, user} = UserData;
+  const { isAuth, user, loading } = UserData;
   return (
     <>
-      <BrowserRouter>
-        <Header isAuth={isAuth} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/account" element={isAuth?<Account user ={user}/> : <Login/>} />
-          <Route path="/login" element={isAuth? <Home/> : <Login />} />
-          <Route path="/register" element={isAuth? <Home/> : <Register />} />
-          <Route path="/verify" element={isAuth? <Home/> : <Verify />} />
-        </Routes>
-      </BrowserRouter>
-      <Footer />
+      {loading ? (
+        <Loading />
+      ) : (
+        <BrowserRouter>
+          <Header isAuth={isAuth} />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route
+              path="/account"
+              element={isAuth ? <Account user={user} /> : <Login />}
+            />
+            <Route path="/login" element={isAuth ? <Home /> : <Login />} />
+            <Route
+              path="/register"
+              element={isAuth ? <Home /> : <Register />}
+            />
+            <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
+          </Routes>
+          <Footer />
+        </BrowserRouter>
+      )}
     </>
   );
 };

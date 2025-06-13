@@ -4,10 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserData } from "../../context/UserContext";
 
 const Login = () => {  
+  const navigate = useNavigate();
   const { btnLoading, loginUser } = UserData();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
   const submitHandler = async (e) => {
     e.preventDefault();
     await loginUser(email, password, navigate);
