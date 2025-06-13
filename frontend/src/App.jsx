@@ -11,19 +11,24 @@ import About from "./pages/about/About";
 import Account from "./pages/account/Account";
 import { UserData } from "./context/UserContext";
 import Loading from "./components/loading/Loading";
+import Courses from "./pages/courses/Courses";
 
 const App = () => {
-  const { isAuth, user, loading } = UserData;
+  console.log("App component rendering");
+  const { isAuth, user, loading } = UserData();
+  console.log("Context values:", { isAuth, user, loading });
+  
   return (
-    <>
+    <BrowserRouter>
       {loading ? (
         <Loading />
       ) : (
-        <BrowserRouter>
+        <>
           <Header isAuth={isAuth} />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
+            <Route path="/courses" element={<Courses />} />
             <Route
               path="/account"
               element={isAuth ? <Account user={user} /> : <Login />}
@@ -36,9 +41,9 @@ const App = () => {
             <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
           </Routes>
           <Footer />
-        </BrowserRouter>
+        </>
       )}
-    </>
+    </BrowserRouter>
   );
 };
 
