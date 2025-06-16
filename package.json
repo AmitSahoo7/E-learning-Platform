@@ -1,12 +1,13 @@
 {
   "dependencies": {
-    "express": "^5.1.0"
+    "axios": "^1.10.0",
+    "express": "^5.1.0",
+    "react-router-dom": "^7.6.2"
   },
   "name": "e-learning-platform",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
