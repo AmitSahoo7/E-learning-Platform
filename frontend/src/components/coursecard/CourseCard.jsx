@@ -1,9 +1,26 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { UserData } from '../../context/UserContext';
+import axios from 'axios';
 import "./courseCard.css";
+
+const server = "http://localhost:5000";
 
 const CourseCard = ({course}) => {
   const navigate = useNavigate();
   const { user, isAuth } = UserData();
+
+  const deleteHandler = async (id) => {
+    try {
+      const { data } = await axios.delete(`${server}/api/course/${id}`);
+      if (data.success) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="course-card">
       <img src={`${server}/${course.image}`} alt="" className="course-image" />

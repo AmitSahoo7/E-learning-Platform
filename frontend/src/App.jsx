@@ -10,10 +10,13 @@ import Footer from "./components/footer/Footer";
 import About from "./pages/about/About";
 import Account from "./pages/account/Account";
 import { UserData } from "./context/UserContext";
+import { CourseContextProvider } from "./context/CourseContext";
 import Loading from "./components/loading/Loading";
 import Courses from "./pages/courses/Courses";
 import CourseDescription from "./pages/coursedescription/CourseDescription";
 import PaymentSuccess from "./pages/paymentsuccess/PaymentSuccess";
+import Dashboard from "./pages/dashboard/Dashboard";
+import CourseStudy from "./pages/coursestudy/CourseStudy";
 
 const App = () => {
   console.log("App component rendering");
@@ -21,39 +24,50 @@ const App = () => {
   console.log("Context values:", { isAuth, user, loading });
   
   return (
-    <BrowserRouter>
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <Header isAuth={isAuth} />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route
-              path="/account"
-              element={isAuth ? <Account user={user} /> : <Login />}
-            />
-            <Route path="/login" element={isAuth ? <Home /> : <Login />} />
-            <Route
-              path="/register"
-              element={isAuth ? <Home /> : <Register />}
-            />
-            <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
-            <Route
-              path="/course/:id"
-              element={isAuth ? <CourseDescription user={user} /> : <Login />}
-            />
-          </Routes>
-           <Route
-              path="/payment-success/:id"
-              element={isAuth ? <PaymentSuccess user={user} /> : <Login />}
-            />
-          <Footer />
-        </>
-      )}
-    </BrowserRouter>
+    <CourseContextProvider>
+      <BrowserRouter>
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+            <Header isAuth={isAuth} />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route
+                path="/account"
+                element={isAuth ? <Account user={user} /> : <Login />}
+              />
+              <Route path="/login" element={isAuth ? <Home /> : <Login />} />
+              <Route
+                path="/register"
+                element={isAuth ? <Home /> : <Register />}
+              />
+              <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
+              <Route
+                path="/course/:id"
+                element={isAuth ? <CourseDescription user={user} /> : <Login />}
+              />
+              <Route
+                path="/payment-success/:id"
+                element={isAuth ? <PaymentSuccess user={user} /> : <Login />}
+              />
+              <Route
+                path="/:id/dashboard"
+                element={isAuth ? <Dashboard user={user} /> : <Login />}
+              />
+              <Route
+                path="/course/study"
+                element={isAuth ? <CourseStudy user={user} /> : <Login />}
+              />
+              
+            </Routes>
+            <Footer />
+          </>
+        )}
+      </BrowserRouter>
+    </CourseContextProvider>
   );
 };
 
