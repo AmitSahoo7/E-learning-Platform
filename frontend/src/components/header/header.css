@@ -1,39 +1,56 @@
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: #5bf08f;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-  
-    .logo {
-      font-size: 25px;
-      font-weight: 600;
-      color: #000000;
-  
-      @media (max-width: 768px) {
-        font-size: 18px;
-      }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+
+  .logo {
+    font-size: 25px;
+    font-weight: 600;
+    color: #10b981;
+
+    @media (max-width: 768px) {
+      font-size: 18px;
     }
-  
-    .link {
-      display: flex;
-      gap: 2rem;
-  
-      @media (max-width: 768px) {
-        gap: 0.5rem;
-      }
-  
-      a {
-        text-decoration: none;
-        color: #333;
-        transition: 0.3s;
-  
-        &:hover {
-          color: #ffffff;
-          text-decoration: underline;
-        }
+  }
+
+  .link {
+    display: flex;
+    gap: 2rem;
+
+    @media (max-width: 768px) {
+      gap: 0.5rem;
+    }
+
+    a {
+      text-decoration: none;
+      color: #333;
+      transition: 0.3s;
+
+      &:hover {
+        color: #10b981;
+        text-decoration: underline;
       }
     }
   }
+}
+
+#login {
+  background-color: #10b981;
+  color: white;
+  padding: 6px 20px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 0 0 4px rgba(179, 147, 255, 0.2);
+  transition: background-color 0.3s ease;
+}
+
+#login:hover{
+  color: #000000;
+}

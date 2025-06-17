@@ -12,49 +12,9 @@ const Home = () => {
     { icon: <Target className="skill-icon" />, label: "Career-Oriented" },
     { icon: <Lightbulb className="skill-icon" />, label: "Creative Thinking" }
   ];
-
   return (
     <div>
-      {/* Header */}
-      <header className="header">
-        <div className="header-container">
-          <div className="header-content">
-            {/* Logo */}
-            <div className="logo">
-              <div className="logo-icon">
-                <span>W</span>
-              </div>
-              <span className="logo-text">WEEKEND</span>
-            </div>
-
-            {/* Search Bar */}
-            <div className="search-container">
-              <div className="search-bar">
-                <Search className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="Want to learn?"
-                  className="search-input"
-                />
-                <button className="search-btn">Explore</button>
-              </div>
-            </div>
-
-            {/* Navigation */}
-            <nav className="navigation">
-              <a href="#" className="nav-link active">Home</a>
-              <a href="#" className="nav-link">About us</a>
-              <a href="#" className="nav-link">Courses</a>
-              <a href="#" className="nav-link">Contact us</a>
-              <a href="#" className="nav-link">FAQ's</a>
-              <a href="#" className="nav-link">Sign in</a>
-              <button className="create-account-btn">
-                Create free account
-              </button>
-            </nav>
-          </div>
-        </div>
-      </header>
+    
 
       {/* Hero Section */}
       <div className="hero-section">
@@ -112,7 +72,7 @@ const Home = () => {
                 {/* Main circle background */}
                 <div className="main-circle">
                   <div className="student-placeholder">
-                    <Users className="student-icon" />
+                     <img src="https://media.istockphoto.com/id/1282140880/photo/happy-asian-female-college-student-smiling-at-camera-on-yellow-background-and-copy-space.jpg?s=612x612&w=0&k=20&c=24liclh4T3PC3u7_uHzERooS1cHczjcSa7TKLP_N-aM=" alt="Student" className="student-hero-image" />
                   </div>
                 </div>
                 

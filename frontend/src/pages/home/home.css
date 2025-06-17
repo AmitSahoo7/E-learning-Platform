@@ -332,6 +332,13 @@
   color: white;
 }
 
+.student-hero-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 /* Floating Stats Cards */
 .stat-card {
   position: absolute;
