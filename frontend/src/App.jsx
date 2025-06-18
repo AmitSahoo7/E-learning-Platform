@@ -19,6 +19,10 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import CourseStudy from "./pages/coursestudy/CourseStudy";
 import Lecture from "./pages/lecture/Lecture";
 import GeneralChatbot from "./components/GeneralChatbot";
+import AdminDashbord from "./admin/Dashboard/AdminDashbord";
+import AdminCourses from "./admin/Courses/AdminCourses";
+
+
 
 const App = () => {
   console.log("App component rendering");
@@ -62,6 +66,14 @@ const App = () => {
               <Route
                 path="/course/study/:id"
                 element={isAuth ? <CourseStudy user={user} /> : <Login />}
+              />
+              <Route
+              path="/admin/dashboard"
+              element={isAuth ? <AdminDashbord user={user} /> : <Login />}
+              />
+              <Route
+              path="/admin/course"
+              element={isAuth ? <AdminCourses user={user} /> : <Login />}
               />
               
             </Routes>
