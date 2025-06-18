@@ -17,6 +17,8 @@ import CourseDescription from "./pages/coursedescription/CourseDescription";
 import PaymentSuccess from "./pages/paymentsuccess/PaymentSuccess";
 import Dashboard from "./pages/dashboard/Dashboard";
 import CourseStudy from "./pages/coursestudy/CourseStudy";
+import Lecture from "./pages/lecture/Lecture";
+import GeneralChatbot from "./components/GeneralChatbot";
 
 const App = () => {
   console.log("App component rendering");
