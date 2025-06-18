@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import { server } from "../../main";
 
+
 const CourseStudy = ({ user }) => {
   const params = useParams();
 
@@ -28,6 +29,7 @@ const CourseStudy = ({ user }) => {
           <Link to={`/lectures/${course._id}`}>
             <h2>Lectures</h2>
           </Link>
+          <CourseChatbot course={course} />
         </div>
       )}
     </>

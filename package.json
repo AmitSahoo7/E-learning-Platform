@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "@google/genai": "^1.5.1",
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.0.5",
     "axios": "^1.10.0",
     "express": "^5.1.0",
     "react-router-dom": "^7.6.2"
@@ -22,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/AmitSahoo7/E-learning-Platform/issues"
   },
-  "homepage": "https://github.com/AmitSahoo7/E-learning-Platform#readme"
+  "homepage": "https://github.com/AmitSahoo7/E-learning-Platform#readme",
+  "devDependencies": {
+    "@types/node": "^24.0.3"
+  }
 }
