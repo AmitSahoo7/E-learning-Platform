@@ -7,7 +7,7 @@ import { UserData } from "../../context/UserContext";
 import toast from "react-hot-toast";
 
 const Account = ({ user }) => {
-  const {setisAuth, setUser} = UserData();
+  const {setIsAuth, setUser} = UserData();
   const navigate = useNavigate();
 
   const logoutHandler = () => {

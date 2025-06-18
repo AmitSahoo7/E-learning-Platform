@@ -13,7 +13,7 @@ import { UserData } from "./context/UserContext";
 import Loading from "./components/loading/Loading";
 
 const App = () => {
-  const { isAuth, user, loading } = UserData;
+  const { isAuth, user, loading } = UserData();
   return (
     <>
       {loading ? (
