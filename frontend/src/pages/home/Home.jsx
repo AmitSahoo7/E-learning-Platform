@@ -1,127 +1,137 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Play, MessageSquare, Target, Lightbulb, Users } from "lucide-react";
+import {
+  Play,
+  CheckCircle,
+  User,
+  BookOpen,
+  Code,
+  Database,
+  LayoutDashboard,
+  ArrowRightCircle,
+} from "lucide-react";
 import "./home.css";
-import Testimonials from "../../components/testimonials/Testimonials";
+import image from "../../assets/image.png";
 
 const Home = () => {
   const navigate = useNavigate();
 
-  const skills = [
-    { icon: <MessageSquare className="skill-icon" />, label: "Public Speaking" },
-    { icon: <Target className="skill-icon" />, label: "Career-Oriented" },
-    { icon: <Lightbulb className="skill-icon" />, label: "Creative Thinking" }
-  ];
   return (
-    <div>
-    
-
+    <div className="home-main-wrapper">
       {/* Hero Section */}
-      <div className="hero-section">
-        {/* Decorative circles */}
-        <div className="circle circle-1"></div>
-        <div className="circle circle-2"></div>
-        <div className="circle circle-3"></div>
-        <div className="circle circle-4"></div>
-
-        <div className="hero-container">
-          <div className="hero-content">
-            {/* Left Content */}
-            <div className="hero-left">
-              <h1 className="hero-title">
-                Up Your <span className="text-green">Skills</span><br />
-                To <span className="text-green">Advance</span> Your<br />
-                <span className="text-green">Career</span> Path
-              </h1>
+      <section className="hero-section-custom">
+        <div className="hero-content-custom">
+          <div className="hero-left-custom">
+            <h1 className="hero-title-custom">
+              <span style={{ color: "#FFA500", fontWeight: 700 }}>
+                Studying
+              </span>{" "}
+              Online is now
+              <br />
+              <span style={{ color: "#3ecf8e", fontWeight: 700 }}>
+                much easier
+              </span>
+            </h1>
+            <p className="hero-subtitle-custom">
+              LOTS of interesting platform that will teach you in more an
+              interactive way
+            </p>
+            <div className="hero-cta-row">
+              <button
+                className="join-btn"
+                onClick={() => navigate("/courses")}
+              >
+                Get Started
+              </button>
               
-              <p className="hero-description">
-                Learn UI-UX Design skills with weekend UX. The latest online learning 
-                system and material that help your knowledge growing.
-              </p>
-              
-              <div className="hero-buttons">
-                <button 
-                  onClick={() => navigate("/courses")}
-                  className="btn-primary"
-                >
-                  Get Started
-                </button>
-                
-                <button className="btn-secondary">
-                  <Play className="play-icon" />
-                  Get free trial
-                </button>
-              </div>
-              
-              {/* Skills */}
-              <div className="skills-list">
-                {skills.map((skill, index) => (
-                  <div key={index} className="skill-item">
-                    <div className="skill-icon-container">
-                      {skill.icon}
-                    </div>
-                    <span className="skill-label">{skill.label}</span>
-                  </div>
-                ))}
-              </div>
             </div>
-            
-            {/* Right Content - Hero Image */}
-            <div className="hero-right">
-              <div className="hero-image-container">
-                {/* Main circle background */}
-                <div className="main-circle">
-                  <div className="student-placeholder">
-                     <img src="https://media.istockphoto.com/id/1282140880/photo/happy-asian-female-college-student-smiling-at-camera-on-yellow-background-and-copy-space.jpg?s=612x612&w=0&k=20&c=24liclh4T3PC3u7_uHzERooS1cHczjcSa7TKLP_N-aM=" alt="Student" className="student-hero-image" />
-                  </div>
+          </div>
+          <div className="hero-right-custom">
+            <div className="hero-img-outer">
+              <div className="hero-img-dotted">
+                <div className="hero-img-green"></div>
+                <img
+                  src={image}
+                  alt="Student"
+                  className="hero-student-img"
+                />
+                <div className="hero-laptop-label">Skill Nest</div>
+                <div className="active-students-bubble">
+                  <span className="active-students-number">10k+</span>
+                  <br />
+                  <span className="active-students-label">Active Students</span>
                 </div>
-                
-                {/* Floating stats cards */}
-                <div className="stat-card stat-card-1">
-                  <div className="stat-content">
-                    <div className="stat-icon-container">
-                      <div className="stat-icon-circle"></div>
-                    </div>
-                    <div className="stat-info">
-                      <div className="stat-number">5K+</div>
-                      <div className="stat-label">Online Courses</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="stat-card stat-card-2">
-                  <div className="stat-content">
-                    <div className="stat-icon-container">
-                      <Play className="stat-play-icon" />
-                    </div>
-                    <div className="stat-info">
-                      <div className="stat-number">2K+</div>
-                      <div className="stat-label">Video Courses</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="stat-card stat-card-3">
-                  <div className="stat-content">
-                    <div className="stat-icon-container">
-                      <Users className="stat-users-icon" />
-                    </div>
-                    <div className="stat-info">
-                      <div className="stat-title">Tutors</div>
-                      <div className="stat-number">250+</div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Small decorative circle */}
-                <div className="decorative-circle"></div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <Testimonials />
+      {/* How It Works Section */}
+      <section className="how-it-works-section">
+        <h2 className="section-title">How It Works?</h2>
+        <div className="how-steps-row">
+          <div className="how-step-card">
+            <span className="how-step-icon">
+              <BookOpen size={32} />
+            </span>
+            <h3>Get Started</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          </div>
+          <div className="how-step-card">
+            <span className="how-step-icon">
+              <User size={32} />
+            </span>
+            <h3>Enroll Course</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          </div>
+          <div className="how-step-card">
+            <span className="how-step-icon">
+              <CheckCircle size={32} color="#3ecf8e" />
+            </span>
+            <h3>Get Certified</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Browse Top Essential Career Courses */}
+      <section className="browse-courses-section">
+        <h2 className="section-title">
+          Browse Top Essential
+          <br />
+          Career Courses
+        </h2>
+        <div className="courses-row">
+          <div className="course-card web-dev">
+            <span className="course-icon">
+              <Code size={32} />
+            </span>
+            <div className="course-title">Web Development</div>
+          </div>
+          <div className="course-card data-structure">
+            <span className="course-icon">
+              <Database size={32} />
+            </span>
+            <div className="course-title">Data Structure</div>
+          </div>
+          <div className="course-card uiux-design">
+            <span className="course-icon">
+              <LayoutDashboard size={32} />
+            </span>
+            <div className="course-title">UI UX Design</div>
+          </div>
+          <div
+            className="course-card browse-all"
+            onClick={() => navigate("/courses")}
+          >
+            <span className="course-icon">
+              <ArrowRightCircle size={32} />
+            </span>
+            <div className="course-title">Browse All</div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

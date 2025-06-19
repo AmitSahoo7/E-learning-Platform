@@ -1,21 +1,20 @@
 import React from "react";
 import "./header.css";
 import { Link } from "react-router-dom";
-const Header = ({isAuth}) => {
+const Header = ({ isAuth }) => {
   return (
-    <header>
-      <div className="logo">E-Learning</div>
-      <div className="link">
-        <Link to={"/"}>Home</Link>
-        <Link to={"/courses"}>Courses</Link>
-        <Link to={"/about"}>About</Link>
+    <header className="hero-header-bar">
+      <div className="logo">Skill Nest</div>
+      <nav className="hero-nav">
+        <Link to="/">Home</Link>
+        <Link to="/courses">Courses</Link>
+        <Link to="/about">About</Link>
         {isAuth ? (
-          <Link to={"/account"}>Account</Link>
+          <Link to="/account">Account</Link>
         ) : (
-          <Link to={"/login"} id="login">Login</Link>
+          <Link to="/login" className="login-btn" id="login">Login</Link>
         )}
-        
-      </div>
+      </nav>
     </header>
   );
 };
