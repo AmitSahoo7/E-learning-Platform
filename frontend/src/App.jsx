@@ -21,6 +21,7 @@ import Lecture from "./pages/lecture/Lecture";
 import GeneralChatbot from "./components/GeneralChatbot";
 
 const App = () => {
+
   console.log("App component rendering");
   const { isAuth, user, loading } = UserData();
   console.log("Context values:", { isAuth, user, loading });

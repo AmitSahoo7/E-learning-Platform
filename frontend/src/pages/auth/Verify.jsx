@@ -19,12 +19,12 @@ const Verify = () => {
           <label htmlFor="otp">Otp</label>
           <input type="number" value={otp} 
            onChange={(e)=> setOtp(e.target.value)} required/>
-        </form>
         <button disabled={btnLoading} type="submit" className="common-btn" >
          {btnLoading? "Please Wait.. ":"Verify" } </button>
         <p>
           Go to <Link to="/login">Login</Link> page
         </p>
+        </form>
       </div>
     </div>
   );
