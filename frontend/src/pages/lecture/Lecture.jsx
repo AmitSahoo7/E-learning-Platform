@@ -12,6 +12,15 @@ const Lecture = ({ user }) => {
   const [lecLoading, setLecLoading] = useState(false);
   const [show, setShow] = useState(false);
   const params = useParams();
+  const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [video, setvideo] = useState("");
+  const [videoPrev, setVideoPrev] = useState("");
+  const [btnLoading, setBtnLoading] = useState(false);
+
+  if (user && user.role !== "admin" && !user.subscription.includes(params.id))
+    return navigate("/");
 
   async function fetchLectures() {
     try {
@@ -44,6 +53,70 @@ const Lecture = ({ user }) => {
     }
   }
 
+  const changeVideoHandler = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+
+    reader.onloadend = () => {
+      setVideoPrev(reader.result);
+      setvideo(file);
+    };
+  };
+
+  const submitHandler = async (e) => {
+    setBtnLoading(true);
+    e.preventDefault();
+    const myForm = new FormData();
+
+    myForm.append("title", title);
+    myForm.append("description", description);
+    myForm.append("file", video);
+
+    try {
+      const { data } = await axios.post(
+        `${server}/api/course/${params.id}`,
+        myForm,
+        {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        }
+      );
+
+      toast.success(data.message);
+      setBtnLoading(false);
+      setShow(false);
+      fetchLectures();
+      setTitle("");
+      setDescription("");
+      setvideo("");
+      setVideoPrev("");
+    } catch (error) {
+      toast.error(error.response.data.message);
+      setBtnLoading(false);
+    }
+  };
+
+  const deleteHandler = async (id) => {
+    if (confirm("Are you sure you want to delete this lecture")) {
+      try {
+        const { data } = await axios.delete(`${server}/api/lecture/${id}`, {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        });
+
+        toast.success(data.message);
+        fetchLectures();
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
+    }
+  };
+ 
+
   const [completed, setCompleted] = useState("");
   const [completedLec, setCompletedLec] = useState("");
   const [lectLength, setLectLength] = useState("");
@@ -68,6 +141,8 @@ const Lecture = ({ user }) => {
       console.log(error);
     }
   }
+
+
 
   const addProgress = async (id) => {
     try {
@@ -140,31 +215,45 @@ const Lecture = ({ user }) => {
               {show && (
                 <div className="lecture-form">
                   <h2>Add Lecture</h2>
-                  <form >
+                  <form onsubmit = {submitHandler}>
                     <label htmlFor="text">Title</label>
                     <input
                       type="text"
-                      required
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required 
                     />
 
                     <label htmlFor="text">Description</label>
                     <input
                       type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                       required
                     />
 
                     <input
                       type="file"
                       placeholder="choose video"
+                      onChange={changeVideoHandler}
                       required
                     />
 
-                    
+                    {videoPrev && (
+                      <video
+                        src={videoPrev}
+                        alt=""
+                        width={300}
+                        controls
+                      ></video>
+                    )}
 
                     <button
+                      disabled={btnLoading}
                       type="submit"
                       className="common-btn"
                     >
+                      {btnLoading ? "Please Wait..." : "Add"}
                     </button>
                   </form>
                 </div>
@@ -186,6 +275,7 @@ const Lecture = ({ user }) => {
                       <button
                         className="common-btn"
                         style={{ background: "red" }}
+                        onClick={() => deleteHandler(e._id)}
                       >
                         Delete {e.title}
                       </button>
