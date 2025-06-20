@@ -25,6 +25,7 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 
 
 const App = () => {
+
   console.log("App component rendering");
   const { isAuth, user, loading } = UserData();
   console.log("Context values:", { isAuth, user, loading });

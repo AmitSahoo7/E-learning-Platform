@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { server } from "../main";
 import toast, { Toaster } from "react-hot-toast";
 
 const UserContext = createContext();
-const server = "http://localhost:5000"; // Add server URL
 
 export const UserContextProvider = ({ children }) => {
   const [user, setUser] = useState([]);
