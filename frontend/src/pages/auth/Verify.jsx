@@ -31,7 +31,6 @@ const Verify = () => {
           <button disabled={btnLoading} type="submit" className="common-btn">
             {btnLoading ? "Please Wait.." : "Verify"}
           </button>
-        </form>
 
         <p>
           Go to <Link to="/login">Login</Link> page
