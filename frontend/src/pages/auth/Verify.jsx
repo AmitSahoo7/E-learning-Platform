@@ -13,6 +13,7 @@ const Verify = () => {
     e.preventDefault();
     await verifyOtp(Number(otp), navigate);
   };
+
   return (
     <div className="auth-page">
       <div className="auth-form">
