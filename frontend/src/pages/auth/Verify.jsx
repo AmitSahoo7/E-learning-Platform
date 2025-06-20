@@ -32,9 +32,11 @@ const Verify = () => {
             {btnLoading ? "Please Wait.." : "Verify"}
           </button>
         </form>
+
         <p>
           Go to <Link to="/login">Login</Link> page
         </p>
+        </form>
       </div>
     </div>
   );

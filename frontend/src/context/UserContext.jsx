@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { server } from "../main";
 import toast, { Toaster } from "react-hot-toast";
 
 const UserContext = createContext();
@@ -10,7 +11,7 @@ export const UserContextProvider = ({ children }) => {
   const [btnLoading, setBtnLoading] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  async function loginUser(email, password, navigate) {
+  async function loginUser(email, password, navigate,fetchMyCourse) {
     setBtnLoading(true);
     try {
       const { data } = await axios.post(`${server}/api/user/login`, {
@@ -24,6 +25,7 @@ export const UserContextProvider = ({ children }) => {
       setIsAuth(true);
       setBtnLoading(false);
       navigate("/");
+      fetchMyCourse(); // Fetch courses after login
     } catch (error) {
       setBtnLoading(false);
       setIsAuth(false);
@@ -101,6 +103,7 @@ export const UserContextProvider = ({ children }) => {
         btnLoading,
         registerUser,
         verifyOtp, 
+        fetchUser,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-# 📚 MERN E-Learning Platform (Clone)
+# 📚 MERN E-Learning Platform (e-LMS)
 
 A full-stack **E-Learning Management System** built using the **MERN Stack (MongoDB, Express, React, Node.js)**. This is designed to help learners, instructors, and administrators manage and deliver digital learning content seamlessly.
 
@@ -141,7 +141,7 @@ npm start
 ---
 
 ## 🙌 Acknowledgements
-- Project by 
+Project by 
 - Amit Kumar Sahoo
 - Jagannath Patra
 - Silva Simran

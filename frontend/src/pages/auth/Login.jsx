@@ -3,6 +3,7 @@ import "./auth.css";
 import { Link, useNavigate } from "react-router-dom";
 import { UserData } from "../../context/UserContext";
 import { FaUserCircle, FaEye, FaEyeSlash } from "react-icons/fa";
+
 import { CourseData } from "../../context/CourseContext";
 
 const Login = () => {
@@ -17,6 +18,7 @@ const Login = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
     await loginUser(email, password, navigate, fetchMyCourse);
+
   };
 
   return (
