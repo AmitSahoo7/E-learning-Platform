@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserData } from '../../context/UserContext';
 import axios from 'axios';
 import "./courseCard.css";
-
-const server = "http://localhost:5000";
+import { server } from '../../main';
 
 const CourseCard = ({course}) => {
   const navigate = useNavigate();
@@ -23,7 +22,12 @@ const CourseCard = ({course}) => {
 
   return (
     <div className="course-card">
-      <img src={`${server}/${course.image}`} alt="" className="course-image" />
+      <img
+        src={course.image ? `${server}/${course.image.replace(/\\/g, "/")}` : "/default-course.png"}
+        alt={course.title}
+        className="course-image"
+        onError={e => { e.target.onerror = null; e.target.src = "/default-course.png"; }}
+      />
       <h3>{course.title}</h3>
       <p>Instructor- {course.createdBy}</p>
       <p>Duration- {course.duration} weeks</p>
