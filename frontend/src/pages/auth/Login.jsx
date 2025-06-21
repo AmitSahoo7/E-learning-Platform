@@ -53,7 +53,7 @@ const Login = () => {
               role="button"
               aria-label="Toggle password visibility"
             >
-              {showPassword ? <FaEye /> : <FaEyeSlash />}
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
           <button disabled={btnLoading} type="submit" className="common-btn">
