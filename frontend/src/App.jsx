@@ -2,9 +2,9 @@ import React from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/home/Home";
+import Header from "./components/header/Header";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
-import Header from "./components/header/Header";
 import Verify from "./pages/auth/Verify";
 import Footer from "./components/footer/Footer";
 import About from "./pages/about/About";
@@ -18,16 +18,12 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import CourseStudy from "./pages/coursestudy/CourseStudy";
 import Lecture from "./pages/lecture/Lecture";
 import GeneralChatbot from "./components/GeneralChatbot";
-import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AdminCourses from "./admin/Courses/AdminCourses";
-
-
+import AdminUsers from "./admin/Users/AdminUsers";
 
 const App = () => {
-  console.log("App component rendering");
   const { isAuth, user, loading } = UserData();
-  console.log("Context values:", { isAuth, user, loading });
-  
+
   return (
     <BrowserRouter>
       {loading ? (
@@ -66,6 +62,22 @@ const App = () => {
               element={isAuth ? <CourseStudy user={user} /> : <Login />}
             />
             <Route
+              path="/admin/course"
+              element={
+                isAuth && user.role === "admin" ? (
+                  <AdminCourses />
+                ) : (
+                  <Home />
+                )
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                isAuth && user.role === "admin" ? <AdminUsers /> : <Home />
+              }
+            />
+            <Route
               path="/lectures/:id"
               element={isAuth ? <Lecture user={user} /> : <Login />}
             />
@@ -75,7 +87,6 @@ const App = () => {
         </>
       )}
     </BrowserRouter>
-
   );
 };
 
