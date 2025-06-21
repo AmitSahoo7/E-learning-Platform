@@ -4,27 +4,33 @@ import {
   AiFillFacebook,
   AiFillTwitterSquare,
   AiFillInstagram,
+  AiFillYoutube,
+  AiFillMail,
 } from "react-icons/ai";
 
 const Footer = () => {
   return (
-    <footer>
-      <div className="footer-content">
-        <p>
-          &copy; 2025 Your E-Learning Platform. All rights reserved. <br /> Made
-          with ❤️ <a href="">For NPTEL</a>
-        </p>
-        <div className="social-links">
-          <a href="">
-            <AiFillFacebook />
-          </a>
-          <a href="">
-            <AiFillTwitterSquare />
-          </a>
-          <a href="">
-            <AiFillInstagram />
-          </a>
+    <footer className="footer-custom">
+      <div className="footer-main">
+        <div className="footer-logo">Skill Nest</div>
+        <nav className="footer-nav">
+          <a href="/">Home</a>
+          <a href="/courses">Courses</a>
+          <a href="#">Resources</a>
+          <a href="/about">About Us</a>
+          <a href="#">Contact Us</a>
+        </nav>
+        <div className="footer-socials">
+          <a href="#" aria-label="facebook"><AiFillFacebook /></a>
+          <a href="#" aria-label="twitter"><AiFillTwitterSquare /></a>
+          <a href="#" aria-label="mail"><AiFillMail /></a>
+          <a href="#" aria-label="youtube"><AiFillYoutube /></a>
+          <a href="#" aria-label="instagram"><AiFillInstagram /></a>
         </div>
+      </div>
+      <div className="footer-bottom">
+        <div>Skill Nest 2025, All rights reserved</div>
+        <div>Made with <span style={{ color: 'red' }}>❤</span> for NPTEL in India</div>
       </div>
     </footer>
   );

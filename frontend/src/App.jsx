@@ -18,6 +18,10 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import CourseStudy from "./pages/coursestudy/CourseStudy";
 import Lecture from "./pages/lecture/Lecture";
 import GeneralChatbot from "./components/GeneralChatbot";
+import AdminDashbord from "./admin/Dashboard/AdminDashbord";
+import AdminCourses from "./admin/Courses/AdminCourses";
+
+
 
 const App = () => {
   console.log("App component rendering");
@@ -67,6 +71,7 @@ const App = () => {
         </>
       )}
     </BrowserRouter>
+
   );
 };
 
