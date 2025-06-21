@@ -16,7 +16,7 @@ const AdminUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get(`${server}/api/users`, {
+      const { data } = await axios.get(`${server}/api/admin/users`, {
         headers: {
           token: localStorage.getItem("token"),
         },
@@ -34,7 +34,7 @@ const AdminUsers = () => {
     if (window.confirm("Are you sure you want to update this user's role?")) {
       try {
         const { data } = await axios.put(
-          `${server}/api/user/${id}`,
+          `${server}/api/admin/user/${id}`,
           {},
           {
             headers: {
