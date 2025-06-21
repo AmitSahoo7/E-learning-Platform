@@ -120,3 +120,27 @@ export const paymentVerification=TryCatch(async(req,res)=>{
     });
   }
 });
+
+export const addLecture = TryCatch(async (req, res) => {
+  const course = await Courses.findById(req.params.id);
+
+  if (!course)
+    return res.status(404).json({
+      message: "No Course with this id",
+    });
+
+  const { title, description } = req.body;
+  const file = req.file;
+
+  const lecture = await Lecture.create({
+    title,
+    description,
+    video: file?.path,
+    course: course._id,
+  });
+
+  res.status(201).json({
+    message: "Lecture Added",
+    lecture,
+  });
+});

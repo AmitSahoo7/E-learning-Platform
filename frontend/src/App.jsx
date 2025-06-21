@@ -65,6 +65,10 @@ const App = () => {
               path="/course/study/:id"
               element={isAuth ? <CourseStudy user={user} /> : <Login />}
             />
+            <Route
+              path="/lectures/:id"
+              element={isAuth ? <Lecture user={user} /> : <Login />}
+            />
           </Routes>
           <Footer />
           <GeneralChatbot />
