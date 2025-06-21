@@ -1,5 +1,6 @@
 import React from "react";
 import "./courseCard.css";
+
 import { server } from "../../main";
 import { UserData } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
@@ -34,7 +35,12 @@ const CourseCard = ({course}) => {
 
   return (
     <div className="course-card">
-      <img src={`${server}/${course.image}`} alt="" className="course-image" />
+      <img
+        src={course.image ? `${server}/${course.image.replace(/\\/g, "/")}` : "/default-course.png"}
+        alt={course.title}
+        className="course-image"
+        onError={e => { e.target.onerror = null; e.target.src = "/default-course.png"; }}
+      />
       <h3>{course.title}</h3>
       <p>Instructor- {course.createdBy}</p>
       <p>Duration- {course.duration} weeks</p>
