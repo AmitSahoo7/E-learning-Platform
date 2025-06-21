@@ -54,7 +54,7 @@ const Register = () => {
               role="button"
               aria-label="Toggle password visibility"
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showPassword ?<FaEye /> : <FaEyeSlash /> }
             </span>
           </div>
           <button type="submit" disabled={btnLoading} className="common-btn">
