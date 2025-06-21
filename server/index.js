@@ -37,7 +37,7 @@ import adminRoutes from "./routes/admin.js";
 app.use('/api',userRoutes);
 
 app.use("/api", courseRoutes);
-app.use("/api", adminRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`);

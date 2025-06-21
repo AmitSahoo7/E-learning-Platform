@@ -60,7 +60,7 @@ const AdminCourses = ({ user }) => {
     myForm.append("file", image);
 
     try {
-      const { data } = await axios.post(`${server}/api/course/new`, myForm, {
+      const { data } = await axios.post(`${server}/api/admin/course/new`, myForm, {
         headers: {
           token: localStorage.getItem("token"),
         },
@@ -78,7 +78,8 @@ const AdminCourses = ({ user }) => {
       setPrice("");
       setCategory("");
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
+      setBtnLoading(false);
     }
   };
 
