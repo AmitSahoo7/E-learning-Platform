@@ -17,11 +17,9 @@ export const CourseContextProvider = ({ children }) => {
       const { data } = await axios.get(`${server}/api/course/all`);
       console.log("Received courses data:", data);
       setCourses(data.courses);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching courses:", error);
       setError(error.message);
-      setLoading(false);
     }
   }
 
@@ -50,9 +48,12 @@ export const CourseContextProvider = ({ children }) => {
   }
 
   useEffect(() => {
-    console.log("CourseContext mounted, fetching initial data");
-    fetchCourses();
-    fetchMyCourse();
+    let isMounted = true;
+    setLoading(true);
+    Promise.all([fetchCourses(), fetchMyCourse()]).then(() => {
+      if (isMounted) setLoading(false);
+    });
+    return () => { isMounted = false; };
   }, []);
 
   return (

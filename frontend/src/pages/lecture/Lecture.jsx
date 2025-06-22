@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./lecture.css";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
@@ -215,8 +215,8 @@ const Lecture = ({ user }) => {
               {show && (
                 <div className="lecture-form">
                   <h2>Add Lecture</h2>
-                  <form onsubmit = {submitHandler}>
-                    <label htmlFor="text">Title</label>
+                  <form onSubmit={submitHandler}>
+                    <label htmlFor="title">Title</label>
                     <input
                       type="text"
                       value={title}

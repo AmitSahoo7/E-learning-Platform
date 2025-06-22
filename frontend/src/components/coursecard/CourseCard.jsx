@@ -1,5 +1,6 @@
 import React from "react";
 import "./courseCard.css";
+
 import { server } from "../../main";
 import { UserData } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
@@ -18,11 +19,14 @@ const CourseCard = ({course}) => {
   const deleteHandler = async (id) => {
     if (confirm("Are you sure you want to delete this course")) {
       try {
-        const { data } = await axios.delete(`${server}/api/course/${id}`, {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        });
+        const { data } = await axios.delete(
+          `${server}/api/admin/course/${id}`,
+          {
+            headers: {
+              token: localStorage.getItem("token"),
+            },
+          }
+        );
 
         toast.success(data.message);
         fetchCourses();
@@ -34,7 +38,12 @@ const CourseCard = ({course}) => {
 
   return (
     <div className="course-card">
-      <img src={`${server}/${course.image}`} alt="" className="course-image" />
+      <img
+        src={course.image ? `${server}/${course.image.replace(/\\/g, "/")}` : "/default-course.png"}
+        alt={course.title}
+        className="course-image"
+        onError={e => { e.target.onerror = null; e.target.src = "/default-course.png"; }}
+      />
       <h3>{course.title}</h3>
       <p>Instructor- {course.createdBy}</p>
       <p>Duration- {course.duration} weeks</p>

@@ -119,9 +119,9 @@ npm run dev
 ### 3️⃣ Setup Frontend
 
 ```bash
-cd client
+cd frontend
 npm install
-npm start
+npm run dev
 ```
 
 ## 🛠️ Tools Used

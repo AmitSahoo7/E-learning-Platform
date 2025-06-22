@@ -3,11 +3,18 @@ import "./coursedescription.css";
 
 import { useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
+import { UserData } from "../../context/UserContext";
+import axios from "axios";
+import { server } from "../../main";
+import { toast } from "react-toastify";
+import Loading from "../../components/loading/Loading";
+
 
 const CourseDescription = ({ user }) => {
   const params = useParams();
   const { fetchCourse, course, fetchCourses, fetchMyCourse } = CourseData();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const { fetchUser } = UserData();
 
