@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 const Header = ({ isAuth }) => {
   return (
     <header className="hero-header-bar">
-      <div className="logo">Skill Nest</div>
+      <Link to="/" className="logo">
+        Skill Nest
+      </Link>
       <nav className="hero-nav">
         <Link to="/">Home</Link>
         <Link to="/courses">Courses</Link>
