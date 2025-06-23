@@ -1,34 +1,67 @@
 .course-study-page {
-  padding: 50px 0;
-  background-color: #f5f5f5;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.course-study-content {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 2.5rem 2.5rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(138, 75, 175, 0.08);
+}
+
+.course-study-image {
+  width: 350px;
+  max-width: 100%;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 12px rgba(138, 75, 175, 0.10);
+}
+
+.course-study-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #8a4baf;
+  margin-bottom: 1rem;
+}
+
+.course-study-description {
+  font-size: 1.15rem;
+  color: #8a4baf;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.course-study-meta {
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 80vh;
+  gap: 0.3rem;
+}
 
-  h2 {
-    font-size: 24px;
-    color: #8a4baf;
-    text-align: center;
-  }
+.course-study-lectures-btn {
+  background: #fff;
+  color: #8a4baf;
+  border: 2px solid #8a4baf;
+  border-radius: 8px;
+  padding: 0.7rem 2.2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 0.5rem;
+}
 
-  h4 {
-    font-size: 21px;
-    color: #8a4baf;
-    text-align: center;
-  }
-
-  h5 {
-    font-size: 20px;
-    color: #8a4baf;
-    text-align: center;
-  }
-
-  a {
-    text-decoration: none;
-    background-color: white;
-    padding: 5px 10px;
-    border: 1px solid black;
-    border-radius: 5px;
-  }
+.course-study-lectures-btn:hover {
+  background: #8a4baf;
+  color: #fff;
+  border-color: #8a4baf;
 }

@@ -4,10 +4,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import { server } from "../../main";
 
-
 const CourseStudy = ({ user }) => {
   const params = useParams();
-
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
 
@@ -16,23 +14,30 @@ const CourseStudy = ({ user }) => {
 
   useEffect(() => {
     fetchCourse(params.id);
+    // eslint-disable-next-line
   }, []);
+
+  if (!course) return null;
+
   return (
-    <>
-      {course && (
-        <div className="course-study-page">
-          <img src={`${server}/${course.image}`} alt="" width={350} />
-          <h2>{course.title}</h2>
-          <h4>{course.description}</h4>
-          <h5>by - {course.createdBy}</h5>
-          <h5>Duration - {course.duration} weeks</h5>
-          <Link to={`/lectures/${course._id}`}>
-            <h2>Lectures</h2>
-          </Link>
-          
+    <div className="course-study-page">
+      <div className="course-study-content">
+        <img
+          src={`${server}/${course.image}`}
+          alt={course.title}
+          className="course-study-image"
+        />
+        <h2 className="course-study-title">{course.title}</h2>
+        <p className="course-study-description">{course.description}</p>
+        <div className="course-study-meta">
+          <span>by - {course.createdBy}</span>
+          <span>Duration - {course.duration} weeks</span>
         </div>
-      )}
-    </>
+        <Link to={`/lectures/${course._id}`}>
+          <button className="course-study-lectures-btn">Lectures</button>
+        </Link>
+      </div>
+    </div>
   );
 };
 

@@ -4,8 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
-import toast from "react-hot-toast";
-import { TiTick } from "react-icons/ti";
+import { toast } from "react-toastify";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);

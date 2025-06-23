@@ -8,9 +8,11 @@ import {
   checkout,
   paymentVerification,
   addLecture,
+  deleteLecture,
 } from "../controllers/course.js";
 import { isAuth } from "../middlewares/isAuth.js";
 import { uploadFiles } from "../middlewares/multer.js";
+// import { deleteLecture } from "../controllers/lecture.js";
 
 const router = express.Router();
 
@@ -26,5 +28,7 @@ router.post("/verification/:id", isAuth, paymentVerification);
 
 // Generic route last
 router.post("/course/:id", isAuth, uploadFiles, addLecture);
+
+router.delete("/lecture/:id", isAuth, deleteLecture);
 
 export default router;

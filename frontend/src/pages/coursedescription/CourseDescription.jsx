@@ -49,20 +49,13 @@ const CourseDescription = ({ user }) => {
       handler: async function (response) {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
           response;
-
+        // console.log(response);
         try {
+          console.log(response);
           const { data } = await axios.post(
-            `${server}/api/verification/${params.id}`,
-            {
-              razorpay_order_id,
-              razorpay_payment_id,
-              razorpay_signature,
-            },
-            {
-              headers: {
-                token,
-              },
-            }
+            `${server}/api/verification/${course._id}`,
+            { razorpay_order_id, razorpay_payment_id, razorpay_signature },
+            { headers: { token } }
           );
 
           await fetchUser();
