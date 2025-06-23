@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./lecture.css";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
+import toast from "react-hot-toast";
+import { TiTick } from "react-icons/ti";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -19,8 +21,11 @@ const Lecture = ({ user }) => {
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
 
-  if (user && user.role !== "admin" && !user.subscription.includes(params.id))
-    return navigate("/");
+  useEffect(() => {
+    if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
+      navigate("/");
+    }
+  }, [user, params.id, navigate]);
 
   async function fetchLectures() {
     try {
@@ -115,7 +120,6 @@ const Lecture = ({ user }) => {
       }
     }
   };
- 
 
   const [completed, setCompleted] = useState("");
   const [completedLec, setCompletedLec] = useState("");
@@ -141,8 +145,6 @@ const Lecture = ({ user }) => {
       console.log(error);
     }
   }
-
-
 
   const addProgress = async (id) => {
     try {
@@ -216,12 +218,12 @@ const Lecture = ({ user }) => {
                 <div className="lecture-form">
                   <h2>Add Lecture</h2>
                   <form onSubmit={submitHandler}>
-                    <label htmlFor="title">Title</label>
+                    <label htmlFor="text">Title</label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      required 
+                      required
                     />
 
                     <label htmlFor="text">Description</label>
@@ -269,7 +271,20 @@ const Lecture = ({ user }) => {
                         lecture._id === e._id && "active"
                       }`}
                     >
-                      {i+1}. {e.title}
+                      {i + 1}. {e.title}{" "}
+                      {progress[0] &&
+                        progress[0].completedLectures.includes(e._id) && (
+                          <span
+                            style={{
+                              background: "red",
+                              padding: "2px",
+                              borderRadius: "6px",
+                              color: "greenyellow",
+                            }}
+                          >
+                            <TiTick />
+                          </span>
+                        )}
                     </div>
                     {user && user.role === "admin" && (
                       <button

@@ -152,3 +152,48 @@ export const addLecture = TryCatch(async (req, res) => {
     lecture,
   });
 });
+
+export const addProgress = TryCatch(async (req, res) => {
+  const progress = await Progress.findOne({
+    user: req.user._id,
+    course: req.query.course,
+  });
+
+  const { lectureId } = req.query;
+
+  if (progress.completedLectures.includes(lectureId)) {
+    return res.json({
+      message: "Progress recorded",
+    });
+  }
+
+  progress.completedLectures.push(lectureId);
+
+  await progress.save();
+
+  res.status(201).json({
+    message: "new Progress added",
+  });
+});
+
+export const getYourProgress = TryCatch(async (req, res) => {
+  const progress = await Progress.find({
+    user: req.user._id,
+    course: req.query.course,
+  });
+
+  if (!progress) return res.status(404).json({ message: "null" });
+
+  const allLectures = (await Lecture.find({ course: req.query.course })).length;
+
+  const completedLectures = progress[0].completedLectures.length;
+
+  const courseProgressPercentage = (completedLectures * 100) / allLectures;
+
+  res.json({
+    courseProgressPercentage,
+    completedLectures,
+    allLectures,
+    progress,
+  });
+});
