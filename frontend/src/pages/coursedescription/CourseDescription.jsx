@@ -72,7 +72,7 @@ const CourseDescription = ({ user }) => {
           setLoading(false);
           navigate(`/payment-success/${razorpay_payment_id}`);
         } catch (error) {
-          toast.error(error.response.data.message);
+          toast.error(error.response?.data?.message || "Payment verification failed");
           setLoading(false);
         }
       },
