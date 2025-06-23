@@ -4,6 +4,7 @@ import { Courses } from "../models/Courses.js";
 import { Lecture } from "../models/Lecture.js";
 import { Payment } from "../models/Payment.js";
 import { User } from "../models/User.js";
+import { Progress } from "../models/Progress.js";
 import crypto from 'crypto';
 
 export const getAllCourses = TryCatch(async (req, res) => {
@@ -99,7 +100,10 @@ export const paymentVerification=TryCatch(async(req,res)=>{
 
   const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-  const expectedSignature=crypto.createHmac("sha256",process.env.Razorpay_Secret).update(body).digest("hex");
+  const expectedSignature=crypto
+    .createHmac("sha256",process.env.Razorpay_Secret)
+    .update(body)
+    .digest("hex");
 
   const isAuthentic= expectedSignature===razorpay_signature;
 
