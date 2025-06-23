@@ -5,6 +5,7 @@
     "@huggingface/inference": "^4.0.5",
     "axios": "^1.10.0",
     "express": "^5.1.0",
+    "razorpay": "^2.9.6",
     "react-router-dom": "^7.6.2"
   },
   "name": "e-learning-platform",

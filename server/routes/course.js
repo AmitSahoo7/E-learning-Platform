@@ -5,6 +5,7 @@ import {
   fetchLectures,
   fetchLecture,
   getMyCourses,
+  checkout,
   paymentVerification,
   addLecture,
 } from "../controllers/course.js";
@@ -18,9 +19,12 @@ router.get("/course/:id", getSingleCourse);
 router.get("/lectures/:id", isAuth, fetchLectures);
 router.get("/lecture/:id", isAuth, fetchLecture);
 router.get("/mycourse", isAuth, getMyCourses);
-router.post("/course/checkout/:id", isAuth, paymentVerification);
 
-// Add Lecture
+// More specific routes first
+router.post("/course/checkout/:id", isAuth, checkout);
+router.post("/verification/:id", isAuth, paymentVerification);
+
+// Generic route last
 router.post("/course/:id", isAuth, uploadFiles, addLecture);
 
 export default router;

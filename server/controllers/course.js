@@ -68,6 +68,12 @@ export const checkout=TryCatch(async(req,res)=>{
 
   const course=await Courses.findById(req.params.id);
 
+  if(!course) {
+    return res.status(404).json({
+      message: "Course not found",
+    });
+  }
+
   if(user.subscription.includes(course._id)) {
     return res.status(400).json({
       message:"You already have this course",
@@ -84,6 +90,7 @@ export const checkout=TryCatch(async(req,res)=>{
   res.status(201).json({
     order,
     course,
+    key: process.env.Razorpay_Key,
   });
 });
 
