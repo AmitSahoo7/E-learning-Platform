@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
+import { toast } from "react-toastify";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);

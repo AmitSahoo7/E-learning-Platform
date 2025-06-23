@@ -5,6 +5,7 @@ import { Lecture } from "../models/Lecture.js";
 import { Payment } from "../models/Payment.js";
 import { User } from "../models/User.js";
 import crypto from 'crypto';
+// import { deleteLecture } from "../controllers/course.js";
 
 export const getAllCourses = TryCatch(async (req, res) => {
   const courses = await Courses.find();
@@ -151,4 +152,11 @@ export const addLecture = TryCatch(async (req, res) => {
     message: "Lecture Added",
     lecture,
   });
+});
+
+export const deleteLecture = TryCatch(async (req, res) => {
+  const lecture = await Lecture.findById(req.params.id);
+  if (!lecture) return res.status(404).json({ message: "Lecture not found" });
+  await lecture.deleteOne();
+  res.json({ message: "Lecture Deleted" });
 });
