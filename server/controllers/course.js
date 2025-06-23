@@ -4,6 +4,7 @@ import { Courses } from "../models/Courses.js";
 import { Lecture } from "../models/Lecture.js";
 import { Payment } from "../models/Payment.js";
 import { User } from "../models/User.js";
+import { Progress } from "../models/Progress.js";
 import crypto from 'crypto';
 // import { deleteLecture } from "../controllers/course.js";
 
@@ -100,7 +101,10 @@ export const paymentVerification=TryCatch(async(req,res)=>{
 
   const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-  const expectedSignature=crypto.createHmac("sha256",process.env.Razorpay_Secret).update(body).digest("hex");
+  const expectedSignature=crypto
+    .createHmac("sha256",process.env.Razorpay_Secret)
+    .update(body)
+    .digest("hex");
 
   const isAuthentic= expectedSignature===razorpay_signature;
 
@@ -154,9 +158,54 @@ export const addLecture = TryCatch(async (req, res) => {
   });
 });
 
+
 export const deleteLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);
   if (!lecture) return res.status(404).json({ message: "Lecture not found" });
   await lecture.deleteOne();
   res.json({ message: "Lecture Deleted" });
+
+export const addProgress = TryCatch(async (req, res) => {
+  const progress = await Progress.findOne({
+    user: req.user._id,
+    course: req.query.course,
+  });
+
+  const { lectureId } = req.query;
+
+  if (progress.completedLectures.includes(lectureId)) {
+    return res.json({
+      message: "Progress recorded",
+    });
+  }
+
+  progress.completedLectures.push(lectureId);
+
+  await progress.save();
+
+  res.status(201).json({
+    message: "new Progress added",
+  });
+});
+
+export const getYourProgress = TryCatch(async (req, res) => {
+  const progress = await Progress.find({
+    user: req.user._id,
+    course: req.query.course,
+  });
+
+  if (!progress) return res.status(404).json({ message: "null" });
+
+  const allLectures = (await Lecture.find({ course: req.query.course })).length;
+
+  const completedLectures = progress[0].completedLectures.length;
+
+  const courseProgressPercentage = (completedLectures * 100) / allLectures;
+
+  res.json({
+    courseProgressPercentage,
+    completedLectures,
+    allLectures,
+    progress,
+  });
 });
