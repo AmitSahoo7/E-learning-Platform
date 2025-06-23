@@ -164,6 +164,7 @@ export const deleteLecture = TryCatch(async (req, res) => {
   if (!lecture) return res.status(404).json({ message: "Lecture not found" });
   await lecture.deleteOne();
   res.json({ message: "Lecture Deleted" });
+});
 
 export const addProgress = TryCatch(async (req, res) => {
   const progress = await Progress.findOne({
