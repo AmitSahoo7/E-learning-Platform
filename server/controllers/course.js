@@ -167,12 +167,22 @@ export const deleteLecture = TryCatch(async (req, res) => {
 });
 
 export const addProgress = TryCatch(async (req, res) => {
-  const progress = await Progress.findOne({
+  let progress = await Progress.findOne({
     user: req.user._id,
     course: req.query.course,
   });
 
   const { lectureId } = req.query;
+
+  if (!progress) {
+    // Create a new progress document if it doesn't exist
+    progress = await Progress.create({
+      user: req.user._id,
+      course: req.query.course,
+      completedLectures: [lectureId],
+    });
+    return res.status(201).json({ message: "Progress started" });
+  }
 
   if (progress.completedLectures.includes(lectureId)) {
     return res.json({
@@ -185,7 +195,7 @@ export const addProgress = TryCatch(async (req, res) => {
   await progress.save();
 
   res.status(201).json({
-    message: "new Progress added",
+    message: "New Progress added",
   });
 });
 
