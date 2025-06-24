@@ -5,6 +5,7 @@ import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
 import { toast } from "react-toastify";
+import { MdOutlineDone } from "react-icons/md";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -275,13 +276,15 @@ const Lecture = ({ user }) => {
                         progress[0].completedLectures.includes(e._id) && (
                           <span
                             style={{
-                              background: "red",
+                              background: "green",
                               padding: "2px",
-                              borderRadius: "6px",
-                              color: "greenyellow",
+                              borderRadius: "50%",
+                              width: "20px",
+                              color: "white",
                             }}
                           >
-                            <TiTick />
+                          <MdOutlineDone />
+                            
                           </span>
                         )}
                     </div>
