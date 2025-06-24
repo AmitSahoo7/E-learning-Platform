@@ -145,19 +145,27 @@ export const addLecture = TryCatch(async (req, res) => {
   const { title, description } = req.body;
   const file = req.file;
 
-  const lecture = await Lecture.create({
+  let lectureData = {
     title,
     description,
-    video: file?.path,
     course: course._id,
-  });
+  };
+
+  if (file) {
+    if (file.mimetype === "application/pdf") {
+      lectureData.pdf = file.path;
+    } else if (file.mimetype === "video/mp4") {
+      lectureData.video = file.path;
+    }
+  }
+
+  const lecture = await Lecture.create(lectureData);
 
   res.status(201).json({
     message: "Lecture Added",
     lecture,
   });
 });
-
 
 export const deleteLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);

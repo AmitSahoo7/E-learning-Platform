@@ -17,3 +17,9 @@ const storage = multer.diskStorage({
 });
 
 export const uploadFiles = multer({ storage }).single("file");
+
+// For course creation: accept both image and pdf fields
+export const uploadCourseFiles = multer({ storage }).fields([
+  { name: "image", maxCount: 1 },
+  { name: "pdf", maxCount: 1 },
+]);

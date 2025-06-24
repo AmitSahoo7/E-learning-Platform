@@ -11,7 +11,11 @@ const schema = new mongoose.Schema({
   },
   video: {
     type: String,
-    required: true,
+    required: false,
+  },
+  pdf: {
+    type: String,
+    required: false,
   },
   course: {
     type: mongoose.Schema.Types.ObjectId,
