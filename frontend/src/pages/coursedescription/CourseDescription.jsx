@@ -101,6 +101,19 @@ const CourseDescription = ({ user }) => {
 
               <p>{course.description}</p>
 
+              {/* PDF Download Button */}
+              {course.pdf && (
+                <a
+                  href={`${server}/${course.pdf}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="common-btn"
+                  style={{ margin: '16px 0', display: 'inline-block' }}
+                >
+                  Download Course PDF
+                </a>
+              )}
+
               <p>Let's get started with course At ₹{course.price}</p>
 
               {user && user.subscription.includes(course._id) ? (

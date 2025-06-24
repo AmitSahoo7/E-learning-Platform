@@ -34,6 +34,10 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  pdf: {
+    type: String,
+    required: false,
+  },
 });
 
 export const Courses = mongoose.model("Courses", schema);

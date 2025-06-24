@@ -20,6 +20,12 @@ const Lecture = ({ user }) => {
   const [video, setvideo] = useState("");
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
+  const [toggle, setToggle] = useState("video"); // 'video' or 'pdf'
+  // PDF upload states
+  const [pdf, setPdf] = useState("");
+  const [pdfTitle, setPdfTitle] = useState("");
+  const [pdfDescription, setPdfDescription] = useState("");
+  const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
 
   useEffect(() => {
     if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
@@ -170,6 +176,38 @@ const Lecture = ({ user }) => {
     fetchLectures();
     fetchProgress();
   }, []);
+
+  // PDF upload handler
+  const submitPdfHandler = async (e) => {
+    setPdfBtnLoading(true);
+    e.preventDefault();
+    const myForm = new FormData();
+    myForm.append("title", pdfTitle);
+    myForm.append("description", pdfDescription);
+    if (pdf) myForm.append("file", pdf);
+    try {
+      const { data } = await axios.post(
+        `${server}/api/course/${params.id}`,
+        myForm,
+        {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        }
+      );
+      toast.success(data.message);
+      setPdfBtnLoading(false);
+      setShow(false);
+      fetchLectures();
+      setPdf("");
+      setPdfTitle("");
+      setPdfDescription("");
+    } catch (error) {
+      toast.error(error.response.data.message);
+      setPdfBtnLoading(false);
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -186,7 +224,21 @@ const Lecture = ({ user }) => {
                 <Loading />
               ) : (
                 <>
-                  {lecture.video ? (
+                  {lecture.pdf ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', border: '2px solid #8a4baf', borderRadius: '12px', padding: '32px', background: '#fff' }}>
+                      <h1 style={{ color: '#8a4baf', marginBottom: '12px' }}>{lecture.title}</h1>
+                      <h3 style={{ color: '#333', marginBottom: '24px' }}>{lecture.description}</h3>
+                      <a
+                        href={`${server}/${lecture.pdf}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="common-btn"
+                        style={{ fontSize: '1.2rem', padding: '16px 32px', background: '#8a4baf', color: '#fff', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', margin: '0 auto' }}
+                      >
+                        Download PDF
+                      </a>
+                    </div>
+                  ) : lecture.video ? (
                     <>
                       <video
                         src={`${server}/${lecture.video}`}
@@ -216,48 +268,98 @@ const Lecture = ({ user }) => {
 
               {show && (
                 <div className="lecture-form">
-                  <h2>Add Lecture</h2>
-                  <form onSubmit={submitHandler}>
-                    <label htmlFor="text">Title</label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                    />
-
-                    <label htmlFor="text">Description</label>
-                    <input
-                      type="text"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                    />
-
-                    <input
-                      type="file"
-                      placeholder="choose video"
-                      onChange={changeVideoHandler}
-                      required
-                    />
-
-                    {videoPrev && (
-                      <video
-                        src={videoPrev}
-                        alt=""
-                        width={300}
-                        controls
-                      ></video>
-                    )}
-
+                  <div className="toggle-upload" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                     <button
-                      disabled={btnLoading}
-                      type="submit"
-                      className="common-btn"
+                      className={toggle === "video" ? "common-btn active" : "common-btn"}
+                      onClick={() => setToggle("video")}
+                      type="button"
                     >
-                      {btnLoading ? "Please Wait..." : "Add"}
+                      Video
                     </button>
-                  </form>
+                    <button
+                      className={toggle === "pdf" ? "common-btn active" : "common-btn"}
+                      onClick={() => setToggle("pdf")}
+                      type="button"
+                    >
+                      PDF
+                    </button>
+                  </div>
+                  {toggle === "video" ? (
+                    <>
+                      <h2>Add Lecture</h2>
+                      <form onSubmit={submitHandler}>
+                        <label htmlFor="text">Title</label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          required
+                        />
+                        <label htmlFor="text">Description</label>
+                        <input
+                          type="text"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          required
+                        />
+                        <input
+                          type="file"
+                          placeholder="choose video"
+                          onChange={changeVideoHandler}
+                          required
+                          accept="video/mp4"
+                        />
+                        {videoPrev && (
+                          <video
+                            src={videoPrev}
+                            alt=""
+                            width={300}
+                            controls
+                          ></video>
+                        )}
+                        <button
+                          disabled={btnLoading}
+                          type="submit"
+                          className="common-btn"
+                        >
+                          {btnLoading ? "Please Wait..." : "Add"}
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <>
+                      <h2>Add Lecture PDF</h2>
+                      <form onSubmit={submitPdfHandler}>
+                        <label htmlFor="text">Title</label>
+                        <input
+                          type="text"
+                          value={pdfTitle}
+                          onChange={(e) => setPdfTitle(e.target.value)}
+                          required
+                        />
+                        <label htmlFor="text">Description</label>
+                        <input
+                          type="text"
+                          value={pdfDescription}
+                          onChange={(e) => setPdfDescription(e.target.value)}
+                          required
+                        />
+                        <input
+                          type="file"
+                          accept="application/pdf"
+                          onChange={e => setPdf(e.target.files[0])}
+                          required
+                        />
+                        <button
+                          disabled={pdfBtnLoading}
+                          type="submit"
+                          className="common-btn"
+                        >
+                          {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
+                        </button>
+                      </form>
+                    </>
+                  )}
                 </div>
               )}
 
