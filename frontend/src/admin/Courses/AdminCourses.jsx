@@ -21,6 +21,9 @@ const AdminCourses = ({ user }) => {
 
   if (user && user.role !== "admin") return navigate("/");
 
+  const [toggle, setToggle] = useState("video"); // 'video' or 'pdf'
+
+  // Video upload states
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -30,6 +33,11 @@ const AdminCourses = ({ user }) => {
   const [image, setImage] = useState("");
   const [imagePrev, setImagePrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
+
+  // PDF upload states
+  const [pdfTitle, setPdfTitle] = useState("");
+  const [pdf, setPdf] = useState("");
+  const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
 
   const changeImageHandler = (e) => {
     const file = e.target.files[0];
@@ -45,19 +53,19 @@ const AdminCourses = ({ user }) => {
 
   const { courses, fetchCourses } = CourseData();
 
+  // Video upload handler (course creation)
   const submitHandler = async (e) => {
     e.preventDefault();
     setBtnLoading(true);
 
     const myForm = new FormData();
-
     myForm.append("title", title);
     myForm.append("description", description);
     myForm.append("category", category);
     myForm.append("price", price);
     myForm.append("createdBy", createdBy);
     myForm.append("duration", duration);
-    myForm.append("file", image);
+    myForm.append("image", image);
 
     try {
       const { data } = await axios.post(`${server}/api/admin/course/new`, myForm, {
@@ -83,6 +91,31 @@ const AdminCourses = ({ user }) => {
     }
   };
 
+  // PDF upload handler (only PDF)
+  const submitPdfHandler = async (e) => {
+    e.preventDefault();
+    setPdfBtnLoading(true);
+    const myForm = new FormData();
+    myForm.append("title", pdfTitle);
+    if (pdf) myForm.append("pdf", pdf);
+    // You may want to add more fields as needed
+    try {
+      const { data } = await axios.post(`${server}/api/admin/course/new`, myForm, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      toast.success(data.message);
+      setPdfBtnLoading(false);
+      await fetchCourses();
+      setPdf("");
+      setPdfTitle("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+      setPdfBtnLoading(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="admin-courses">
@@ -101,73 +134,109 @@ const AdminCourses = ({ user }) => {
 
         <div className="right">
           <div className="add-course">
-            <div className="course-form">
-              <h2>Add Course</h2>
-              <form onSubmit={submitHandler}>
-                <label htmlFor="text">Title</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-
-                <label htmlFor="text">Description</label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                />
-
-                <label htmlFor="text">Price</label>
-                <input
-                  type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
-
-                <label htmlFor="text">createdBy</label>
-                <input
-                  type="text"
-                  value={createdBy}
-                  onChange={(e) => setCreatedBy(e.target.value)}
-                  required
-                />
-
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  <option value={""}>Select Category</option>
-                  {categories.map((e) => (
-                    <option value={e} key={e}>
-                      {e}
-                    </option>
-                  ))}
-                </select>
-
-                <label htmlFor="text">Duration</label>
-                <input
-                  type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  required
-                />
-
-                <input type="file" required onChange={changeImageHandler} />
-                {imagePrev && <img src={imagePrev} alt="" width={300} />}
-
-                <button
-                  type="submit"
-                  disabled={btnLoading}
-                  className="common-btn"
-                >
-                  {btnLoading ? "Please Wait..." : "Add"}
-                </button>
-              </form>
+            <div className="toggle-upload">
+              <button
+                className={toggle === "video" ? "common-btn active" : "common-btn"}
+                onClick={() => setToggle("video")}
+              >
+                Video Upload
+              </button>
+              <button
+                className={toggle === "pdf" ? "common-btn active" : "common-btn"}
+                onClick={() => setToggle("pdf")}
+              >
+                PDF Upload
+              </button>
             </div>
+            {toggle === "video" ? (
+              <div className="course-form">
+                <h2>Add Course (Video)</h2>
+                <form onSubmit={submitHandler}>
+                  <label htmlFor="text">Title</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                  <label htmlFor="text">Description</label>
+                  <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                  />
+                  <label htmlFor="text">Price</label>
+                  <input
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                  />
+                  <label htmlFor="text">createdBy</label>
+                  <input
+                    type="text"
+                    value={createdBy}
+                    onChange={(e) => setCreatedBy(e.target.value)}
+                    required
+                  />
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                  >
+                    <option value={""}>Select Category</option>
+                    {categories.map((e) => (
+                      <option value={e} key={e}>
+                        {e}
+                      </option>
+                    ))}
+                  </select>
+                  <label htmlFor="text">Duration</label>
+                  <input
+                    type="number"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    required
+                  />
+                  <input type="file" required onChange={changeImageHandler} />
+                  {imagePrev && <img src={imagePrev} alt="" width={300} />}
+                  <button
+                    type="submit"
+                    disabled={btnLoading}
+                    className="common-btn"
+                  >
+                    {btnLoading ? "Please Wait..." : "Add"}
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="course-form">
+                <h2>Add Course PDF</h2>
+                <form onSubmit={submitPdfHandler}>
+                  <label htmlFor="text">Title</label>
+                  <input
+                    type="text"
+                    value={pdfTitle}
+                    onChange={(e) => setPdfTitle(e.target.value)}
+                    required
+                  />
+                  <label htmlFor="pdf">Upload PDF</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={e => setPdf(e.target.files[0])}
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={pdfBtnLoading}
+                    className="common-btn"
+                  >
+                    {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
+                  </button>
+                </form>
+              </div>
+            )}
           </div>
         </div>
       </div>

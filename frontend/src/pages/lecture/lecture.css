@@ -77,8 +77,19 @@
     }
 
     .active {
-      background-color: #8a4baf;
+      background-color: #63e642;
       color: white;
     }
   }
+}
+
+
+.progress {
+  width: 20%;
+  background-color: #333;
+  padding: 6px;
+  border-radius: 5px;
+  margin: 3px auto;
+  text-align: center;
+  color: white;
 }

@@ -9,7 +9,8 @@ import { User } from "../models/User.js";
 export const createCourse = TryCatch(async (req, res) => {
   const { title, description, category, createdBy, duration, price } = req.body;
 
-  const image = req.file;
+  const image = req.files?.image?.[0] || req.file;
+  const pdf = req.files?.pdf?.[0];
 
   await Courses.create({
     title,
@@ -19,6 +20,7 @@ export const createCourse = TryCatch(async (req, res) => {
     image: image?.path,
     duration,
     price,
+    pdf: pdf?.path,
   });
 
   res.status(201).json({
@@ -35,15 +37,23 @@ export const addLectures = TryCatch(async (req, res) => {
     });
 
   const { title, description } = req.body;
-
   const file = req.file;
 
-  const lecture = await Lecture.create({
+  let lectureData = {
     title,
     description,
-    video: file?.path,
     course: course._id,
-  });
+  };
+
+  if (file) {
+    if (file.mimetype === "application/pdf") {
+      lectureData.pdf = file.path;
+    } else if (file.mimetype === "video/mp4") {
+      lectureData.video = file.path;
+    }
+  }
+
+  const lecture = await Lecture.create(lectureData);
 
   res.status(201).json({
     message: "Lecture Added",
@@ -68,20 +78,27 @@ const unlinkAsync = promisify(fs.unlink);
 export const deleteCourse = TryCatch(async (req, res) => {
   const course = await Courses.findById(req.params.id);
 
+  if (!course) {
+    return res.status(404).json({ message: "Course not found" });
+  }
+
   const lectures = await Lecture.find({ course: course._id });
 
   await Promise.all(
     lectures.map(async (lecture) => {
-      await unlinkAsync(lecture.video);
-      console.log("video deleted");
+      if (lecture.video && fs.existsSync(lecture.video)) {
+        await unlinkAsync(lecture.video);
+        console.log("video deleted");
+      }
     })
   );
 
-  rm(course.image, () => {
+  if (course.image && fs.existsSync(course.image)) {
+    await unlinkAsync(course.image);
     console.log("image deleted");
-  });
+  }
 
-  await Lecture.find({ course: req.params.id }).deleteMany();
+  await Lecture.deleteMany({ course: req.params.id });
 
   await course.deleteOne();
 

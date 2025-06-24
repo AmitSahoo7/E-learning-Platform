@@ -27,7 +27,7 @@ const CourseDescription = ({ user }) => {
     setLoading(true);
 
     const {
-      data: { order },
+      data: { order, key },
     } = await axios.post(
       `${server}/api/course/checkout/${params.id}`,
       {},
@@ -39,8 +39,8 @@ const CourseDescription = ({ user }) => {
     );
 
     const options = {
-      key: "rzp_test_mZRQxQuVvK5KBJ", // Enter the Key ID generated from the Dashboard ///I have added mine 
-      amount: order.id, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+      key,
+      amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
       currency: "INR",
       name: "E learning", //your business name
       description: "Learn with us",
@@ -49,20 +49,13 @@ const CourseDescription = ({ user }) => {
       handler: async function (response) {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
           response;
-
+        // console.log(response);
         try {
+          console.log(response);
           const { data } = await axios.post(
-            `${server}/api/verification/${params.id}`,
-            {
-              razorpay_order_id,
-              razorpay_payment_id,
-              razorpay_signature,
-            },
-            {
-              headers: {
-                token,
-              },
-            }
+            `${server}/api/verification/${course._id}`,
+            { razorpay_order_id, razorpay_payment_id, razorpay_signature },
+            { headers: { token } }
           );
 
           await fetchUser();
@@ -72,7 +65,7 @@ const CourseDescription = ({ user }) => {
           setLoading(false);
           navigate(`/payment-success/${razorpay_payment_id}`);
         } catch (error) {
-          toast.error(error.response.data.message);
+          toast.error(error.response?.data?.message || "Payment verification failed");
           setLoading(false);
         }
       },
@@ -107,6 +100,19 @@ const CourseDescription = ({ user }) => {
               </div>
 
               <p>{course.description}</p>
+
+              {/* PDF Download Button */}
+              {course.pdf && (
+                <a
+                  href={`${server}/${course.pdf}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="common-btn"
+                  style={{ margin: '16px 0', display: 'inline-block' }}
+                >
+                  Download Course PDF
+                </a>
+              )}
 
               <p>Let's get started with course At ₹{course.price}</p>
 
