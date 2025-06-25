@@ -6,6 +6,7 @@ import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
 import { toast } from "react-toastify";
 import { MdOutlineDone } from "react-icons/md";
+import { CourseData } from "../../context/CourseContext";
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -26,6 +27,8 @@ const Lecture = ({ user }) => {
   const [pdfTitle, setPdfTitle] = useState("");
   const [pdfDescription, setPdfDescription] = useState("");
   const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
+
+  const { fetchCourse, course } = CourseData();
 
   useEffect(() => {
     if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
@@ -175,6 +178,7 @@ const Lecture = ({ user }) => {
   useEffect(() => {
     fetchLectures();
     fetchProgress();
+    fetchCourse(params.id);
   }, []);
 
   // PDF upload handler
@@ -213,200 +217,189 @@ const Lecture = ({ user }) => {
       {loading ? (
         <Loading />
       ) : (
-        <>
-          <div className="progress">
-            Lecture completed - {completedLec} out of {lectLength} <br />
-            <progress value={completed} max={100}></progress> {completed} %
-          </div>
-          <div className="lecture-page">
-            <div className="left">
-              {lecLoading ? (
-                <Loading />
-              ) : (
-                <>
-                  {lecture.pdf ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', border: '2px solid #8a4baf', borderRadius: '12px', padding: '32px', background: '#fff' }}>
-                      <h1 style={{ color: '#8a4baf', marginBottom: '12px' }}>{lecture.title}</h1>
-                      <h3 style={{ color: '#333', marginBottom: '24px' }}>{lecture.description}</h3>
-                      <a
-                        href={`${server}/${lecture.pdf}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="common-btn"
-                        style={{ fontSize: '1.2rem', padding: '16px 32px', background: '#8a4baf', color: '#fff', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none', margin: '0 auto' }}
-                      >
-                        Download PDF
-                      </a>
-                    </div>
-                  ) : lecture.video ? (
-                    <>
-                      <video
-                        src={`${server}/${lecture.video}`}
-                        width={"100%"}
-                        controls
-                        controlsList="nodownload noremoteplayback"
-                        disablePictureInPicture
-                        disableRemotePlayback
-                        autoPlay
-                        onEnded={() => addProgress(lecture._id)}
-                      ></video>
-                      <h1>{lecture.title}</h1>
-                      <h3>{lecture.description}</h3>
-                    </>
-                  ) : (
-                    <h1>Please Select a Lecture</h1>
-                  )}
-                </>
-              )}
+        <div className="lecture-modern">
+          {/* Course Progress */}
+          <div className="lecture-progress-bar">
+            Course Progress - {completedLec} out of {lectLength}
+            <div className="lecture-progress-bar-track">
+              <div className="lecture-progress-bar-fill" style={{ width: `${completed}%` }}></div>
             </div>
-            <div className="right">
-              {user && user.role === "admin" && (
-                <button className="common-btn" onClick={() => setShow(!show)}>
-                  {show ? "Close" : "Add Lecture +"}
-                </button>
-              )}
-
-              {show && (
-                <div className="lecture-form">
-                  <div className="toggle-upload" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <button
-                      className={toggle === "video" ? "common-btn active" : "common-btn"}
-                      onClick={() => setToggle("video")}
-                      type="button"
-                    >
-                      Video
-                    </button>
-                    <button
-                      className={toggle === "pdf" ? "common-btn active" : "common-btn"}
-                      onClick={() => setToggle("pdf")}
-                      type="button"
-                    >
-                      PDF
-                    </button>
-                  </div>
-                  {toggle === "video" ? (
-                    <>
-                      <h2>Add Lecture</h2>
-                      <form onSubmit={submitHandler}>
-                        <label htmlFor="text">Title</label>
-                        <input
-                          type="text"
-                          value={title}
-                          onChange={(e) => setTitle(e.target.value)}
-                          required
-                        />
-                        <label htmlFor="text">Description</label>
-                        <input
-                          type="text"
-                          value={description}
-                          onChange={(e) => setDescription(e.target.value)}
-                          required
-                        />
-                        <input
-                          type="file"
-                          placeholder="choose video"
-                          onChange={changeVideoHandler}
-                          required
-                          accept="video/mp4"
-                        />
-                        {videoPrev && (
-                          <video
-                            src={videoPrev}
-                            alt=""
-                            width={300}
-                            controls
-                          ></video>
-                        )}
-                        <button
-                          disabled={btnLoading}
-                          type="submit"
-                          className="common-btn"
-                        >
-                          {btnLoading ? "Please Wait..." : "Add"}
-                        </button>
-                      </form>
-                    </>
-                  ) : (
-                    <>
-                      <h2>Add Lecture PDF</h2>
-                      <form onSubmit={submitPdfHandler}>
-                        <label htmlFor="text">Title</label>
-                        <input
-                          type="text"
-                          value={pdfTitle}
-                          onChange={(e) => setPdfTitle(e.target.value)}
-                          required
-                        />
-                        <label htmlFor="text">Description</label>
-                        <input
-                          type="text"
-                          value={pdfDescription}
-                          onChange={(e) => setPdfDescription(e.target.value)}
-                          required
-                        />
-                        <input
-                          type="file"
-                          accept="application/pdf"
-                          onChange={e => setPdf(e.target.files[0])}
-                          required
-                        />
-                        <button
-                          disabled={pdfBtnLoading}
-                          type="submit"
-                          className="common-btn"
-                        >
-                          {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
-                        </button>
-                      </form>
-                    </>
-                  )}
+            <span className="lecture-progress-bar-percent">{Math.round(completed)}%</span>
+          </div>
+          {/* Admin Add Lecture Button */}
+          {user && user.role === "admin" && (
+            <button className="common-btn" style={{ margin: '0 auto 16px auto', display: 'block' }} onClick={() => setShow(!show)}>
+              {show ? "Close" : "Add Lecture +"}
+            </button>
+          )}
+          {/* Admin Add Lecture Form */}
+          {show && user && user.role === "admin" && (
+            <div className="lecture-form-box">
+              <div className="lecture-form">
+                <div className="toggle-upload">
+                  <button
+                    className={toggle === "video" ? "common-btn active" : "common-btn"}
+                    onClick={() => setToggle("video")}
+                    type="button"
+                  >
+                    Video
+                  </button>
+                  <button
+                    className={toggle === "pdf" ? "common-btn active" : "common-btn"}
+                    onClick={() => setToggle("pdf")}
+                    type="button"
+                  >
+                    PDF
+                  </button>
                 </div>
-              )}
-
+                {toggle === "video" ? (
+                  <div className="lecture-form-box">
+                    <h2>Add Lecture</h2>
+                    <form onSubmit={submitHandler}>
+                      <label htmlFor="lecture-title">Title</label>
+                      <input
+                        id="lecture-title"
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        required
+                      />
+                      <label htmlFor="lecture-description">Description</label>
+                      <input
+                        id="lecture-description"
+                        type="text"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        required
+                      />
+                      <input
+                        type="file"
+                        placeholder="choose video"
+                        onChange={changeVideoHandler}
+                        required
+                        accept="video/mp4"
+                      />
+                      {videoPrev && (
+                        <video
+                          src={videoPrev}
+                          alt=""
+                          width={300}
+                          controls
+                        ></video>
+                      )}
+                      <button
+                        disabled={btnLoading}
+                        type="submit"
+                        className="common-btn"
+                      >
+                        {btnLoading ? "Please Wait..." : "Add"}
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="lecture-form-box">
+                    <h2>Add Lecture PDF</h2>
+                    <form onSubmit={submitPdfHandler}>
+                      <label htmlFor="pdf-title">Title</label>
+                      <input
+                        id="pdf-title"
+                        type="text"
+                        value={pdfTitle}
+                        onChange={(e) => setPdfTitle(e.target.value)}
+                        required
+                      />
+                      <label htmlFor="pdf-description">Description</label>
+                      <input
+                        id="pdf-description"
+                        type="text"
+                        value={pdfDescription}
+                        onChange={(e) => setPdfDescription(e.target.value)}
+                        required
+                      />
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={e => setPdf(e.target.files[0])}
+                        required
+                      />
+                      <button
+                        disabled={pdfBtnLoading}
+                        type="submit"
+                        className="common-btn"
+                      >
+                        {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {/* Video Section (if present) */}
+          {lecture?.video ? (
+            <div className="lecture-video-section-modern">
+              <video
+                src={`${server}/${lecture.video}`}
+                width="100%"
+                controls
+                controlsList="nodownload noremoteplayback"
+                disablePictureInPicture
+                disableRemotePlayback
+                autoPlay
+                onEnded={() => addProgress(lecture._id)}
+                style={{ borderRadius: "16px", marginBottom: "1.5rem", marginTop: "2rem" }}
+              ></video>
+            </div>
+          ) : (
+            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>Please Select a Lecture</h2>
+          )}
+          {/* Side by Side Layout for Info and List */}
+          <div className="lecture-main-flex">
+            {lecture?.title && (
+              <div className="lecture-info-modern">
+                <h2>Lecture {lectures.findIndex(l => l._id === lecture._id) + 1}: {lecture?.title}</h2>
+                <div style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
+                  <span>Design</span>
+                  <span style={{ marginLeft: 16 }}>3 Month</span>
+                </div>
+                <div style={{ margin: "8px 0" }}>
+                  <b>Description:</b>
+                  <div style={{ marginTop: 4 }}>{lecture?.description}</div>
+                </div>
+                <button className="notes-btn-modern">Notes</button>
+              </div>
+            )}
+            <div className="lecture-list-vertical-scroll">
               {lectures && lectures.length > 0 ? (
                 lectures.map((e, i) => (
-                  <>
-                    <div
+                  <div key={e._id} style={{ position: 'relative', display: 'inline-block' }}>
+                    <button
+                      className={`lecture-list-btn-modern${lecture._id === e._id ? " active" : ""}`}
                       onClick={() => fetchLecture(e._id)}
-                      key={i}
-                      className={`lecture-number ${
-                        lecture._id === e._id && "active"
-                      }`}
                     >
-                      {i + 1}. {e.title}{" "}
-                      {progress[0] &&
-                        progress[0].completedLectures.includes(e._id) && (
-                          <span
-                            style={{
-                              background: "green",
-                              padding: "2px",
-                              borderRadius: "50%",
-                              width: "20px",
-                              color: "white",
-                            }}
-                          >
-                          <MdOutlineDone />
-                            
-                          </span>
-                        )}
-                    </div>
+                      {i + 1}. {e.title}
+                      {progress[0] && progress[0].completedLectures.includes(e._id) && (
+                        <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
+                      )}
+                    </button>
                     {user && user.role === "admin" && (
                       <button
-                        className="common-btn"
-                        style={{ background: "red" }}
+                        className="delete-lecture-btn"
+                        style={{ position: 'absolute', top: 6, right: 6, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontWeight: 700, fontSize: 14, zIndex: 2 }}
                         onClick={() => deleteHandler(e._id)}
+                        title={`Delete ${e.title}`}
                       >
-                        Delete {e.title}
+                        ×
                       </button>
                     )}
-                  </>
+                  </div>
                 ))
               ) : (
                 <p>No Lectures Yet!</p>
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
