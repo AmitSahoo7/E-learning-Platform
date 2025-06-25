@@ -72,7 +72,7 @@ const Account = ({ user }) => {
             </button>
           </div>
         </div>
-  )}
+      )}
     </div>
   );
 };

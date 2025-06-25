@@ -5,6 +5,7 @@ import { rm } from "fs";
 import { promisify } from "util";
 import fs from "fs";
 import { User } from "../models/User.js";
+import { Payment } from "../models/Payment.js";
 
 export const createCourse = TryCatch(async (req, res) => {
   const { title, description, category, createdBy, duration, price } = req.body;
@@ -110,12 +111,12 @@ export const deleteCourse = TryCatch(async (req, res) => {
 });
 
 export const getAllStats = TryCatch(async (req, res) => {
-  const totalCoures = (await Courses.find()).length;
+  const totalCourses = (await Courses.find()).length;
   const totalLectures = (await Lecture.find()).length;
   const totalUsers = (await User.find()).length;
 
   const stats = {
-    totalCoures,
+    totalCourses,
     totalLectures,
     totalUsers,
   };
@@ -158,4 +159,66 @@ export const updateRole = TryCatch(async (req, res) => {
       message: "Role updated to user",
     });
   }
+});
+
+export const getCoursesWithLectures = TryCatch(async (req, res) => {
+  const courses = await Courses.find();
+  const result = await Promise.all(
+    courses.map(async (course) => {
+      const lectures = await Lecture.find({ course: course._id });
+      return {
+        ...course.toObject(),
+        lectures,
+      };
+    })
+  );
+  res.json({ courses: result });
+});
+
+export const getUsersWithSubscriptions = TryCatch(async (req, res) => {
+  const users = await User.find().populate('subscription');
+  res.json({ users });
+});
+
+export const getUserActivityStats = TryCatch(async (req, res) => {
+  // Get all users' updatedAt timestamps
+  const users = await User.find({}, 'updatedAt');
+  // Create a histogram for 24 hours
+  const activity = Array(24).fill(0);
+  users.forEach(user => {
+    const hour = new Date(user.updatedAt).getHours();
+    activity[hour]++;
+  });
+  res.json({ activity });
+});
+
+export const getRecentPayments = TryCatch(async (req, res) => {
+  const payments = await Payment.find().sort({ createdAt: -1 }).limit(5).populate('user').populate('course');
+  res.json({ payments });
+});
+
+export const getEnrollmentTrends = TryCatch(async (req, res) => {
+  // Mock data for last 7 days
+  const today = new Date();
+  const trends = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - (6 - i));
+    return {
+      date: d.toLocaleDateString(),
+      enrollments: Math.floor(Math.random() * 10) + 1,
+    };
+  });
+  res.json({ trends });
+});
+
+export const getFeedbacks = TryCatch(async (req, res) => {
+  // Mock feedbacks
+  const feedbacks = [
+    { _id: 1, user: { name: "Alice" }, message: "Great platform!", createdAt: new Date() },
+    { _id: 2, user: { name: "Bob" }, message: "Need more courses.", createdAt: new Date() },
+    { _id: 3, user: { name: "Charlie" }, message: "Support was helpful.", createdAt: new Date() },
+    { _id: 4, user: { name: "Diana" }, message: "Found a bug in lectures.", createdAt: new Date() },
+    { _id: 5, user: { name: "Eve" }, message: "Loving the new UI!", createdAt: new Date() },
+  ];
+  res.json({ feedbacks });
 });

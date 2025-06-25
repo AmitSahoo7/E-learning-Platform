@@ -1,7 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import "./about.css";
+import axios from "axios";
+import { server } from "../../main";
 
 const About = () => {
+  // Feedback form state
+  const [feedback, setFeedback] = useState("");
+  const [feedbackStatus, setFeedbackStatus] = useState("");
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${server}/api/feedback`, { message: feedback }, {
+        headers: { token: localStorage.getItem("token") }
+      });
+      setFeedbackStatus("Feedback submitted!");
+      setFeedback("");
+    } catch (err) {
+      setFeedbackStatus("Failed to submit feedback. You must be logged in.");
+    }
+  };
+
   return (
     <div className="about">
       <div className="about-container">
@@ -27,6 +46,29 @@ const About = () => {
           <div className="image-container bottom-image">
             <img src="https://img.freepik.com/free-photo/side-view-cropped-unrecognizable-business-people-working-common-desk_1098-20474.jpg?semt=ais_hybrid&w=740" alt="People working on laptops" />
           </div>
+        </div>
+      </div>
+
+      {/* Feedback Form */}
+      <div className="feedback-section" style={{ padding: '4rem 2rem' }}>
+        <div style={{ maxWidth: 600, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 6px 24px #8a4baf22', padding: '2rem' }}>
+          <h3 style={{ color: '#8a4baf', marginBottom: '1rem', textAlign: 'center', fontSize: '1.8rem' }}>We Value Your Feedback</h3>
+          <form onSubmit={handleFeedbackSubmit}>
+            <label htmlFor="feedback-textarea" style={{ fontWeight: 500, marginBottom: '0.5rem', display: 'block' }}>Your Feedback</label>
+            <textarea
+              id="feedback-textarea"
+              value={feedback}
+              onChange={e => setFeedback(e.target.value)}
+              placeholder="Share your thoughts, suggestions, or issues..."
+              required
+              rows={5}
+              style={{ width: "100%", borderRadius: 8, padding: 12, border: '1px solid #ccc', fontSize: 16, marginBottom: '1rem' }}
+            />
+            <button type="submit" className="common-btn" style={{ width: '100%', marginTop: '0.5rem', background: '#8a4baf', color: '#fff', fontWeight: 600, borderRadius: 8, padding: '12px 24px', fontSize: 16, cursor: 'pointer' }}>
+              Submit Feedback
+            </button>
+          </form>
+          {feedbackStatus && <div style={{ marginTop: '1rem', textAlign: 'center', color: feedbackStatus.includes('submitted') ? '#34c759' : '#ff3b30', fontWeight: 500, fontSize: 15 }}>{feedbackStatus}</div>}
         </div>
       </div>
     </div>
