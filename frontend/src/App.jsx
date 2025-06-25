@@ -20,6 +20,7 @@ import Lecture from "./pages/lecture/Lecture";
 import GeneralChatbot from "./components/GeneralChatbot";
 import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
+import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
@@ -80,6 +81,12 @@ const App = () => {
             <Route
               path="/lectures/:id"
               element={isAuth ? <Lecture user={user} /> : <Login />}
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                isAuth && user.role === "admin" ? <AdminDashbord user={user} /> : <Home />
+              }
             />
           </Routes>
           <Footer />

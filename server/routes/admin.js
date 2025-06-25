@@ -8,8 +8,15 @@ import {
   getAllStats,
   getAllUsers,
   updateRole,
+  getCoursesWithLectures,
+  getUsersWithSubscriptions,
+  getUserActivityStats,
+  getRecentPayments,
+  getEnrollmentTrends,
+  getFeedbacks,
 } from "../controllers/admin.js";
 import { uploadFiles, uploadCourseFiles } from "../middlewares/multer.js";
+import { getAllCourses } from "../controllers/course.js";
 
 const router = express.Router();
 
@@ -20,5 +27,12 @@ router.delete("/lecture/:id", isAuth, isAdmin, deleteLecture);
 router.get("/stats", isAuth, isAdmin, getAllStats);
 router.get("/users", isAuth, isAdmin, getAllUsers);
 router.put("/user/:id", isAuth, isAdmin, updateRole);
+router.get("/courses-with-lectures", isAuth, isAdmin, getCoursesWithLectures);
+router.get("/users-with-subscriptions", isAuth, isAdmin, getUsersWithSubscriptions);
+router.get("/user-activity-stats", isAuth, isAdmin, getUserActivityStats);
+router.get("/payments", isAuth, isAdmin, getRecentPayments);
+router.get("/enrollment-trends", isAuth, isAdmin, getEnrollmentTrends);
+router.get("/feedbacks", isAuth, isAdmin, getFeedbacks);
+router.get("/course", isAuth, isAdmin, getAllCourses);
 
 export default router;

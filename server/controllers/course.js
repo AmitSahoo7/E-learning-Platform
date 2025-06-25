@@ -113,6 +113,9 @@ export const paymentVerification=TryCatch(async(req,res)=>{
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      user: req.user._id,
+      course: req.params.id,
+      amount: course.price,
     });
 
     const user=await User.findById(req.user._id);
