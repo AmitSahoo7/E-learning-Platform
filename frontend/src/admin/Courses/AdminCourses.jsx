@@ -118,6 +118,12 @@ const AdminCourses = ({ user }) => {
 
   return (
     <Layout>
+      <nav className="admin-feature-nav">
+        <a href="/admin/dashboard" className="admin-feature-link">Dashboard Home</a>
+        <a href="/admin/course/add" className="admin-feature-link">Add Course</a>
+        <a href="/admin/course" className="admin-feature-link">Manage Courses</a>
+        <a href="/admin/users" className="admin-feature-link">Manage Users</a>
+      </nav>
       <div className="admin-courses">
         <div className="left">
           <h1>All Courses</h1>
@@ -128,114 +134,6 @@ const AdminCourses = ({ user }) => {
               })
             ) : (
               <p>No Courses Yet</p>
-            )}
-          </div>
-        </div>
-
-        <div className="right">
-          <div className="add-course">
-            <div className="toggle-upload">
-              <button
-                className={toggle === "video" ? "common-btn active" : "common-btn"}
-                onClick={() => setToggle("video")}
-              >
-                Video Upload
-              </button>
-              <button
-                className={toggle === "pdf" ? "common-btn active" : "common-btn"}
-                onClick={() => setToggle("pdf")}
-              >
-                PDF Upload
-              </button>
-            </div>
-            {toggle === "video" ? (
-              <div className="course-form">
-                <h2>Add Course (Video)</h2>
-                <form onSubmit={submitHandler}>
-                  <label htmlFor="text">Title</label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                  <label htmlFor="text">Description</label>
-                  <input
-                    type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                  />
-                  <label htmlFor="text">Price</label>
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                  />
-                  <label htmlFor="text">createdBy</label>
-                  <input
-                    type="text"
-                    value={createdBy}
-                    onChange={(e) => setCreatedBy(e.target.value)}
-                    required
-                  />
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                  >
-                    <option value={""}>Select Category</option>
-                    {categories.map((e) => (
-                      <option value={e} key={e}>
-                        {e}
-                      </option>
-                    ))}
-                  </select>
-                  <label htmlFor="text">Duration</label>
-                  <input
-                    type="number"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    required
-                  />
-                  <input type="file" required onChange={changeImageHandler} />
-                  {imagePrev && <img src={imagePrev} alt="" width={300} />}
-                  <button
-                    type="submit"
-                    disabled={btnLoading}
-                    className="common-btn"
-                  >
-                    {btnLoading ? "Please Wait..." : "Add"}
-                  </button>
-                </form>
-              </div>
-            ) : (
-              <div className="course-form">
-                <h2>Add Course PDF</h2>
-                <form onSubmit={submitPdfHandler}>
-                  <label htmlFor="text">Title</label>
-                  <input
-                    type="text"
-                    value={pdfTitle}
-                    onChange={(e) => setPdfTitle(e.target.value)}
-                    required
-                  />
-                  <label htmlFor="pdf">Upload PDF</label>
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={e => setPdf(e.target.files[0])}
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={pdfBtnLoading}
-                    className="common-btn"
-                  >
-                    {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
-                  </button>
-                </form>
-              </div>
             )}
           </div>
         </div>

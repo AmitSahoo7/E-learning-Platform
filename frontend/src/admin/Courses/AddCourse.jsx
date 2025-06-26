@@ -1,0 +1,219 @@
+import React, { useState } from "react";
+import Layout from "../Utils/Layout";
+import "./admincourses.css";
+import toast from "react-hot-toast";
+import axios from "axios";
+import { server } from "../../main";
+
+const categories = [
+  "Web Development",
+  "App Development",
+  "Game Development",
+  "Data Science",
+  "Artificial Intelligence",
+];
+
+const AddCourse = ({ user }) => {
+  const [toggle, setToggle] = useState("video");
+  // Video upload states
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [price, setPrice] = useState("");
+  const [createdBy, setCreatedBy] = useState("");
+  const [duration, setDuration] = useState("");
+  const [image, setImage] = useState("");
+  const [imagePrev, setImagePrev] = useState("");
+  const [btnLoading, setBtnLoading] = useState(false);
+  // PDF upload states
+  const [pdfTitle, setPdfTitle] = useState("");
+  const [pdf, setPdf] = useState("");
+  const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
+
+  const changeImageHandler = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setImagePrev(reader.result);
+      setImage(file);
+    };
+  };
+
+  // Video upload handler (course creation)
+  const submitHandler = async (e) => {
+    e.preventDefault();
+    setBtnLoading(true);
+    const myForm = new FormData();
+    myForm.append("title", title);
+    myForm.append("description", description);
+    myForm.append("category", category);
+    myForm.append("price", price);
+    myForm.append("createdBy", createdBy);
+    myForm.append("duration", duration);
+    myForm.append("image", image);
+    try {
+      const { data } = await axios.post(`${server}/api/admin/course/new`, myForm, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      toast.success(data.message);
+      setBtnLoading(false);
+      setImage("");
+      setTitle("");
+      setDescription("");
+      setDuration("");
+      setImagePrev("");
+      setCreatedBy("");
+      setPrice("");
+      setCategory("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+      setBtnLoading(false);
+    }
+  };
+
+  // PDF upload handler (only PDF)
+  const submitPdfHandler = async (e) => {
+    e.preventDefault();
+    setPdfBtnLoading(true);
+    const myForm = new FormData();
+    myForm.append("title", pdfTitle);
+    if (pdf) myForm.append("pdf", pdf);
+    try {
+      const { data } = await axios.post(`${server}/api/admin/course/new`, myForm, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      toast.success(data.message);
+      setPdfBtnLoading(false);
+      setPdf("");
+      setPdfTitle("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+      setPdfBtnLoading(false);
+    }
+  };
+
+  return (
+    <Layout>
+      <nav className="admin-feature-nav">
+        <a href="/admin/dashboard" className="admin-feature-link">Dashboard Home</a>
+        <a href="/admin/course/add" className="admin-feature-link">Add Course</a>
+        <a href="/admin/course" className="admin-feature-link">Manage Courses</a>
+        <a href="/admin/users" className="admin-feature-link">Manage Users</a>
+      </nav>
+      <div className="add-course-page">
+        <div className="add-course">
+          <div className="toggle-upload">
+            <button
+              className={toggle === "video" ? "common-btn active" : "common-btn"}
+              onClick={() => setToggle("video")}
+            >
+              Video Upload
+            </button>
+            <button
+              className={toggle === "pdf" ? "common-btn active" : "common-btn"}
+              onClick={() => setToggle("pdf")}
+            >
+              PDF Upload
+            </button>
+          </div>
+          {toggle === "video" ? (
+            <div className="course-form">
+              <h2>Add Course (Video)</h2>
+              <form onSubmit={submitHandler}>
+                <label htmlFor="text">Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+                <label htmlFor="text">Description</label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+                <label htmlFor="text">Price</label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  required
+                />
+                <label htmlFor="text">createdBy</label>
+                <input
+                  type="text"
+                  value={createdBy}
+                  onChange={(e) => setCreatedBy(e.target.value)}
+                  required
+                />
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                >
+                  <option value={""}>Select Category</option>
+                  {categories.map((e) => (
+                    <option value={e} key={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+                <label htmlFor="text">Duration</label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  required
+                />
+                <input type="file" required onChange={changeImageHandler} />
+                {imagePrev && <img src={imagePrev} alt="" width={300} />}
+                <button
+                  type="submit"
+                  disabled={btnLoading}
+                  className="common-btn"
+                >
+                  {btnLoading ? "Please Wait..." : "Add"}
+                </button>
+              </form>
+            </div>
+          ) : (
+            <div className="course-form">
+              <h2>Add Course PDF</h2>
+              <form onSubmit={submitPdfHandler}>
+                <label htmlFor="text">Title</label>
+                <input
+                  type="text"
+                  value={pdfTitle}
+                  onChange={(e) => setPdfTitle(e.target.value)}
+                  required
+                />
+                <label htmlFor="pdf">Upload PDF</label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={e => setPdf(e.target.files[0])}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={pdfBtnLoading}
+                  className="common-btn"
+                >
+                  {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
+};
+
+export default AddCourse; 

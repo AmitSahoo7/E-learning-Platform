@@ -1,12 +1,10 @@
 import React from "react";
-import Sidebar from "./Sidebar";
 import "./common.css";
 
 const Layout = ({ children }) => {
   return (
-    <div className="dashboard-admin">
-      <Sidebar />
-      <div className="content">{children}</div>
+    <div className="dashboard-admin-no-sidebar">
+      {children}
     </div>
   );
 };

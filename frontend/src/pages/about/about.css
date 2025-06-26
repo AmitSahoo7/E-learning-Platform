@@ -165,3 +165,70 @@
     height: 200px;
   }
 }
+
+.feedback-green-card {
+  background: #e6fff3;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px #10b98122;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  margin: 32px 0 32px 0;
+  max-width: 480px;
+}
+.feedback-title {
+  color: #10b981;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.feedback-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+  color: #10b981;
+}
+.feedback-textarea {
+  width: 100%;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1.5px solid #b2f5ea;
+  font-size: 16px;
+  margin-bottom: 1rem;
+  resize: vertical;
+  background: #fff;
+  transition: border 0.18s;
+}
+.feedback-textarea:focus {
+  border: 1.5px solid #10b981;
+  outline: none;
+}
+.feedback-btn-green {
+  width: 100%;
+  margin-top: 0.5rem;
+  background: #10b981;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.18s;
+}
+.feedback-btn-green:hover {
+  background: #059669;
+}
+.feedback-success {
+  margin-top: 1rem;
+  text-align: center;
+  color: #10b981;
+  font-weight: 600;
+  font-size: 15px;
+}
+.feedback-error {
+  margin-top: 1rem;
+  text-align: center;
+  color: #ff3b30;
+  font-weight: 600;
+  font-size: 15px;
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/home/Home";
@@ -21,9 +21,37 @@ import GeneralChatbot from "./components/GeneralChatbot";
 import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
+import AddCourse from "./admin/Courses/AddCourse";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
+
+  // Announcement state
+  const [announcements, setAnnouncements] = useState([]);
+  const [readAnnouncements, setReadAnnouncements] = useState([]);
+  useEffect(() => {
+    const stored = localStorage.getItem("announcements");
+    if (stored) setAnnouncements(JSON.parse(stored));
+    const read = localStorage.getItem("readAnnouncements");
+    if (read) setReadAnnouncements(JSON.parse(read));
+  }, []);
+  const addAnnouncement = (msg) => {
+    const newAnnouncement = {
+      id: Date.now(),
+      message: msg,
+      timestamp: new Date().toISOString(),
+    };
+    const updated = [newAnnouncement, ...announcements];
+    setAnnouncements(updated);
+    localStorage.setItem("announcements", JSON.stringify(updated));
+  };
+  const markAnnouncementRead = (id) => {
+    if (!readAnnouncements.includes(id)) {
+      const updated = [id, ...readAnnouncements];
+      setReadAnnouncements(updated);
+      localStorage.setItem("readAnnouncements", JSON.stringify(updated));
+    }
+  };
 
   return (
     <BrowserRouter>
@@ -31,7 +59,12 @@ const App = () => {
         <Loading />
       ) : (
         <>
-          <Header isAuth={isAuth} />
+          <Header
+            isAuth={isAuth}
+            announcements={announcements}
+            readAnnouncements={readAnnouncements}
+            markAnnouncementRead={markAnnouncementRead}
+          />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
@@ -85,7 +118,19 @@ const App = () => {
             <Route
               path="/admin/dashboard"
               element={
-                isAuth && user.role === "admin" ? <AdminDashbord user={user} /> : <Home />
+                isAuth && user.role === "admin"
+                  ? <AdminDashbord user={user} addAnnouncement={addAnnouncement} />
+                  : <Home />
+              }
+            />
+            <Route
+              path="/admin/course/add"
+              element={
+                isAuth && user.role === "admin" ? (
+                  <AddCourse user={user} />
+                ) : (
+                  <Home />
+                )
               }
             />
           </Routes>

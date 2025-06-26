@@ -52,3 +52,61 @@
     }
   }
 }
+
+.add-course-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 60vh;
+  padding: 2rem 0;
+}
+
+.add-course {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 8px rgba(16, 185, 129, 0.08);
+  width: 350px;
+  margin: 0 auto;
+}
+
+.add-course .toggle-upload {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-course .course-form {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  text-align: left;
+}
+
+.add-course .course-form h2 {
+  font-size: 22px;
+  color: #10b981;
+  margin-bottom: 15px;
+}
+
+.add-course .course-form form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 15px;
+  color: #333;
+}
+
+.add-course .course-form form input,
+.add-course .course-form form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-course .course-form button {
+  width: 100%;
+}
