@@ -14,9 +14,14 @@ import {
   getRecentPayments,
   getEnrollmentTrends,
   getFeedbacks,
+
+  getAllComments
 } from "../controllers/admin.js";
 import { uploadFiles, uploadCourseFiles } from "../middlewares/multer.js";
 import { getAllCourses } from "../controllers/course.js";
+
+
+
 
 const router = express.Router();
 
@@ -34,5 +39,10 @@ router.get("/payments", isAuth, isAdmin, getRecentPayments);
 router.get("/enrollment-trends", isAuth, isAdmin, getEnrollmentTrends);
 router.get("/feedbacks", isAuth, isAdmin, getFeedbacks);
 router.get("/course", isAuth, isAdmin, getAllCourses);
+
+router.get("/comments", isAuth, isAdmin, getAllComments);
+
+
+
 
 export default router;

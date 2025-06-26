@@ -7,6 +7,8 @@ import Loading from "../../components/loading/Loading";
 import { toast } from "react-toastify";
 import { MdOutlineDone } from "react-icons/md";
 import { CourseData } from "../../context/CourseContext";
+import LectureCommentSection from "../../components/comment/LectureCommentSection";
+
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -29,6 +31,12 @@ const Lecture = ({ user }) => {
   const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
 
   const { fetchCourse, course } = CourseData();
+  //comment 
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  
+
+
 
   useEffect(() => {
     if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
@@ -60,12 +68,53 @@ const Lecture = ({ user }) => {
         },
       });
       setLecture(data.lecture);
+      fetchComments();
       setLecLoading(false);
     } catch (error) {
       console.log(error);
       setLecLoading(false);
     }
   }
+
+  // 👇 Place this after fetchLecture()
+  const fetchComments = async () => {
+    try {
+      const { data } = await axios.get(`${server}/api/comments/${lecture._id}`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      setComments(data.comments);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  const submitComment = async (e) => {
+    e.preventDefault();
+    try {
+      const { data } = await axios.post(
+        `${server}/api/comments/${lecture._id}`,
+        { text: newComment },
+        { headers: { token: localStorage.getItem("token") } }
+      );
+      toast.success(data.message);
+      setNewComment("");
+      fetchComments();
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
+
+  const deleteComment = async (id) => {
+    try {
+      const { data } = await axios.delete(`${server}/api/comments/${id}`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      toast.success(data.message);
+      fetchComments();
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
 
   const changeVideoHandler = (e) => {
     const file = e.target.files[0];
@@ -180,6 +229,12 @@ const Lecture = ({ user }) => {
     fetchProgress();
     fetchCourse(params.id);
   }, []);
+
+  useEffect(() => {
+    if (lecture._id) {
+      fetchComments();
+    }
+  }, [lecture._id]);
 
   // PDF upload handler
   const submitPdfHandler = async (e) => {
@@ -359,6 +414,8 @@ const Lecture = ({ user }) => {
           ) : (
             <h2 style={{ marginTop: "2rem", textAlign: "center" }}>Please Select a Lecture</h2>
           )}
+          
+          
           {/* Side by Side Layout for Info and List */}
           <div className="lecture-main-flex">
             {lecture?.title && (
@@ -372,7 +429,48 @@ const Lecture = ({ user }) => {
                   <b>Description:</b>
                   <div style={{ marginTop: 4 }}>{lecture?.description}</div>
                 </div>
+                
                 <button className="notes-btn-modern">Notes</button>
+                {/* ✅ Comment box for students only */}
+                {user?.role !== "admin" && lecture?._id && (
+                  <LectureCommentSection lectureId={lecture._id} user={user} />
+                  )}
+                  {/* ✅ Add this directly below the description */}
+              <div className="comment-section-modern">
+                <h3>Comments</h3>
+
+                <form onSubmit={submitComment}>
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Add a comment"
+                    className="comment-input"
+                    required
+                  />
+                  <button type="submit" className="common-btn">Post</button>
+                </form>
+
+                <div className="comments-list">
+                  {comments.length > 0 ? (
+                    comments.map((c, i) => (
+                      <div key={i} className="comment-box">
+                        <b>{c.userId?.name || "User"}:</b> <span>{c.text}</span>
+                        {user?._id === c.userId?._id && (
+                          <button
+                            className="delete-comment-btn"
+                            onClick={() => deleteComment(c._id)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p>No comments yet.</p>
+                  )}
+                </div>
+              </div>
               </div>
             )}
             <div className="lecture-list-vertical-scroll">

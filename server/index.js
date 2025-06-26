@@ -45,3 +45,7 @@ app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`);
     connectDb()
 });
+
+
+import commentRoutes from "./routes/commentRoutes.js";
+app.use("/api/comments", commentRoutes);
