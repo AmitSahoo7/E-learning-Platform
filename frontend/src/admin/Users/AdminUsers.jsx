@@ -63,6 +63,12 @@ const AdminUsers = () => {
 
   return (
     <Layout>
+      <nav className="admin-feature-nav">
+        <a href="/admin/dashboard" className="admin-feature-link">Dashboard Home</a>
+        <a href="/admin/course/add" className="admin-feature-link">Add Course</a>
+        <a href="/admin/course" className="admin-feature-link">Manage Courses</a>
+        <a href="/admin/users" className="admin-feature-link">Manage Users</a>
+      </nav>
       <div className="admin-users-page">
         <h2>All Users</h2>
         <div className="table-container">
@@ -84,12 +90,14 @@ const AdminUsers = () => {
                   <td>{userItem.email}</td>
                   <td>{userItem.role}</td>
                   <td>
-                    <button
-                      onClick={() => updateRole(userItem._id)}
-                      className="common-btn"
-                    >
-                      Update
-                    </button>
+                    <label className="switch">
+                      <input
+                        type="checkbox"
+                        checked={userItem.role === "admin"}
+                        onChange={() => updateRole(userItem._id)}
+                      />
+                      <span className="slider"></span>
+                    </label>
                   </td>
                 </tr>
               ))}

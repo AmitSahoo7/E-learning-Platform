@@ -32,12 +32,34 @@ const About = () => {
           <p className="about-description">
           We are dedicated to providing high quality online courses to help individuals learn and grow in their desired fields. Our experienced instruction ensure that each course is tailored for effective learning and practical application.
           </p>
+
           <button className="join-btn">
             Join Us
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
+
+          {/* Feedback Form - now inside left column */}
+          <div className="feedback-green-card">
+            <h3 className="feedback-title">We Value Your Feedback</h3>
+            <form onSubmit={handleFeedbackSubmit}>
+              <label htmlFor="feedback-textarea" className="feedback-label">Your Feedback</label>
+              <textarea
+                id="feedback-textarea"
+                value={feedback}
+                onChange={e => setFeedback(e.target.value)}
+                placeholder="Share your thoughts, suggestions, or issues..."
+                required
+                rows={4}
+                className="feedback-textarea"
+              />
+              <button type="submit" className="feedback-btn-green">
+                Submit Feedback
+              </button>
+            </form>
+            {feedbackStatus && <div className={feedbackStatus.includes('submitted') ? 'feedback-success' : 'feedback-error'}>{feedbackStatus}</div>}
+          </div>
         </div>
         <div className="about-right">
           <div className="image-container top-image">
@@ -46,29 +68,6 @@ const About = () => {
           <div className="image-container bottom-image">
             <img src="https://img.freepik.com/free-photo/side-view-cropped-unrecognizable-business-people-working-common-desk_1098-20474.jpg?semt=ais_hybrid&w=740" alt="People working on laptops" />
           </div>
-        </div>
-      </div>
-
-      {/* Feedback Form */}
-      <div className="feedback-section" style={{ padding: '4rem 2rem' }}>
-        <div style={{ maxWidth: 600, margin: '0 auto', background: '#fff', borderRadius: 12, boxShadow: '0 6px 24px #8a4baf22', padding: '2rem' }}>
-          <h3 style={{ color: '#8a4baf', marginBottom: '1rem', textAlign: 'center', fontSize: '1.8rem' }}>We Value Your Feedback</h3>
-          <form onSubmit={handleFeedbackSubmit}>
-            <label htmlFor="feedback-textarea" style={{ fontWeight: 500, marginBottom: '0.5rem', display: 'block' }}>Your Feedback</label>
-            <textarea
-              id="feedback-textarea"
-              value={feedback}
-              onChange={e => setFeedback(e.target.value)}
-              placeholder="Share your thoughts, suggestions, or issues..."
-              required
-              rows={5}
-              style={{ width: "100%", borderRadius: 8, padding: 12, border: '1px solid #ccc', fontSize: 16, marginBottom: '1rem' }}
-            />
-            <button type="submit" className="common-btn" style={{ width: '100%', marginTop: '0.5rem', background: '#8a4baf', color: '#fff', fontWeight: 600, borderRadius: 8, padding: '12px 24px', fontSize: 16, cursor: 'pointer' }}>
-              Submit Feedback
-            </button>
-          </form>
-          {feedbackStatus && <div style={{ marginTop: '1rem', textAlign: 'center', color: feedbackStatus.includes('submitted') ? '#34c759' : '#ff3b30', fontWeight: 500, fontSize: 15 }}>{feedbackStatus}</div>}
         </div>
       </div>
     </div>
