@@ -1,3 +1,8 @@
+import 'aos/dist/aos.css'; // Import AOS CSS
+import AOS from 'aos';
+
+AOS.init(); // Initialize AOS
+
 export const server = "http://localhost:4000";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
