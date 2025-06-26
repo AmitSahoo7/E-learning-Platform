@@ -212,6 +212,12 @@ const Lecture = ({ user }) => {
     }
   };
 
+  // --- Progress bar safety logic ---
+  const safeLectLength = lectLength > 0 ? lectLength : 1; // avoid division by zero
+  const safeCompletedLec = Math.min(completedLec, safeLectLength);
+  const percent = Math.round((safeCompletedLec / safeLectLength) * 100);
+  const safeCompleted = Math.min(percent, 100);
+
   return (
     <>
       {loading ? (
@@ -220,11 +226,11 @@ const Lecture = ({ user }) => {
         <div className="lecture-modern">
           {/* Course Progress */}
           <div className="lecture-progress-bar">
-            Course Progress - {completedLec} out of {lectLength}
+            Course Progress - {safeCompletedLec} out of {safeLectLength}
             <div className="lecture-progress-bar-track">
-              <div className="lecture-progress-bar-fill" style={{ width: `${completed}%` }}></div>
+              <div className="lecture-progress-bar-fill" style={{ width: `${safeCompleted}%` }}></div>
             </div>
-            <span className="lecture-progress-bar-percent">{Math.round(completed)}%</span>
+            <span className="lecture-progress-bar-percent">{safeCompleted}%</span>
           </div>
           {/* Admin Add Lecture Button */}
           {user && user.role === "admin" && (

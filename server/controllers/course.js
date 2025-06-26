@@ -109,6 +109,8 @@ export const paymentVerification=TryCatch(async(req,res)=>{
   const isAuthentic= expectedSignature===razorpay_signature;
 
   if(isAuthentic){
+    const course = await Courses.findById(req.params.id);
+
     await Payment.create({
       razorpay_order_id,
       razorpay_payment_id,
@@ -119,8 +121,6 @@ export const paymentVerification=TryCatch(async(req,res)=>{
     });
 
     const user=await User.findById(req.user._id);
-    const course=await Courses.findById(req.params.id);
-
     if (!user.subscription.includes(course._id)) {
       user.subscription.push(course._id);
       await user.save();
