@@ -225,13 +225,45 @@ const Lecture = ({ user }) => {
       ) : (
         <div className="lecture-modern">
           {/* Course Progress */}
-          <div className="lecture-progress-bar">
-            Course Progress - {safeCompletedLec} out of {safeLectLength}
-            <div className="lecture-progress-bar-track">
-              <div className="lecture-progress-bar-fill" style={{ width: `${safeCompleted}%` }}></div>
+          {user && user.role === "admin" ? (
+            <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                All lectures available for management
+              </div>
             </div>
-            <span className="lecture-progress-bar-percent">{safeCompleted}%</span>
-          </div>
+          ) : user && user.subscription.includes(params.id) ? (
+            lectLength === 0 ? (
+              <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  No lectures available yet.
+                </div>
+              </div>
+            ) : completedLec === 0 ? (
+              <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                  Course Progress: 0% (No lectures completed yet)
+                </div>
+                <div className="lecture-progress-bar-track" style={{ width: '100%', maxWidth: 400 }}>
+                  <div className="lecture-progress-bar-fill" style={{ width: `0%` }}></div>
+                </div>
+                <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem", marginTop: 12 }}>
+                  Start your first lecture!
+                </span>
+              </div>
+            ) : (
+              <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                  Course Progress - {safeCompletedLec} out of {safeLectLength}
+                </div>
+                <div className="lecture-progress-bar-track" style={{ width: '100%', maxWidth: 400 }}>
+                  <div className="lecture-progress-bar-fill" style={{ width: `${safeCompleted}%` }}></div>
+                </div>
+                <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem", marginTop: 12 }}>
+                  {safeCompleted}%
+                </span>
+              </div>
+            )
+          ) : null}
           {/* Admin Add Lecture Button */}
           {user && user.role === "admin" && (
             <button className="common-btn" style={{ margin: '0 auto 16px auto', display: 'block' }} onClick={() => setShow(!show)}>
