@@ -39,6 +39,9 @@ const CourseStudy = ({ user }) => {
   const [lectLength, setLectLength] = useState(1);
   const [enrolling, setEnrolling] = useState(false);
 
+  const isEnrolled = user && course && user.subscription.includes(course._id);
+  const isAdmin = user && user.role === "admin";
+
   useEffect(() => {
     fetchCourse(params.id);
     // Fetch course progress
@@ -69,8 +72,6 @@ const CourseStudy = ({ user }) => {
     if (user && course && user.subscription.includes(course._id)) fetchProgress();
     // eslint-disable-next-line
   }, [params.id, user, course]);
-
-  const isEnrolled = user && course && user.subscription.includes(course._id);
 
   const handleEnroll = async () => {
     setEnrolling(true);
@@ -131,27 +132,63 @@ const CourseStudy = ({ user }) => {
               <span className="cd-info-label">Duration:</span>
               <span className="cd-info-value">{course.duration} weeks</span>
             </div>
-            {/* Progress tracker for enrolled users */}
-            {isEnrolled && (
-              <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
-                <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                  Course Progress - {completedLec} out of {lectLength}
+            {/* Progress tracker for admins and enrolled users */}
+            {isAdmin ? (
+              <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  All lectures available for management
                 </div>
-                <div className="lecture-progress-bar-track">
-                  <div className="lecture-progress-bar-fill" style={{ width: `${completed}%` }}></div>
-                </div>
-                <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem" }}>
-                  {completed}%
-                </span>
               </div>
+            ) : isEnrolled ? (
+              lectLength === 0 ? (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                    No lectures available yet.
+                  </div>
+                </div>
+              ) : completed === 0 ? (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                    Course Progress: 0% (No lectures completed yet)
+                  </div>
+                  <div className="lecture-progress-bar-track">
+                    <div className="lecture-progress-bar-fill" style={{ width: `0%` }}></div>
+                  </div>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem" }}>
+                    Start your first lecture!
+                  </span>
+                </div>
+              ) : (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                    Course Progress - {completedLec} out of {lectLength}
+                  </div>
+                  <div className="lecture-progress-bar-track">
+                    <div className="lecture-progress-bar-fill" style={{ width: `${completed}%` }}></div>
+                  </div>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem" }}>
+                    {completed}%
+                  </span>
+                </div>
+              )
+            ) : null}
+            {isAdmin || isEnrolled ? (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                onClick={() => navigate(`/lectures/${course._id}`)}
+                disabled={enrolling}
+              >
+                Lectures
+              </button>
+            ) : (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                onClick={handleEnroll}
+                disabled={enrolling}
+              >
+                {enrolling ? "Processing..." : "Enroll"}
+              </button>
             )}
-            <button
-              className="cd-btn-primary cd-enroll-btn"
-              onClick={() => isEnrolled ? navigate(`/lectures/${course._id}`) : handleEnroll()}
-              disabled={enrolling}
-            >
-              {isEnrolled ? "Lectures" : enrolling ? "Processing..." : "Enroll"}
-            </button>
             {/* Preview Video Placeholder */}
             <div className="cd-preview-video">
               <video width="100%" height="160" controls style={{ borderRadius: 12, marginTop: 12 }}>
