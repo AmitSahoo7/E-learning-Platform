@@ -5,15 +5,31 @@ import { CourseData } from "../../context/CourseContext";
 import axios from "axios";
 import { server } from "../../main";
 
-const placeholderAvatar = "https://ui-avatars.com/api/?name=Instructor&background=6c63ff&color=fff&rounded=true&size=64";
-const placeholderIcon = (
-  <span style={{ display: 'inline-block', width: 20, height: 20, background: '#ececec', borderRadius: '5px', marginRight: 6, verticalAlign: 'middle' }}></span>
-);
-
 const CourseStudy = ({ user }) => {
   const params = useParams();
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
+
+  const [quiz, setQuiz] = useState(null);
+
+  // Fetch quiz data when component mounts or when course ID changes
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const { data } = await axios.get(`${server}/api/quiz/${course._id}`, {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        });
+        setQuiz(data); // Set quiz if available
+      } catch (err) {
+        console.log("No quiz or user not enrolled");
+        setQuiz(null);
+      }
+    };
+
+    fetchQuiz();
+  }, [course._id]);
 
   // Placeholder data for demo
   const prerequisites = [
@@ -42,9 +58,10 @@ const CourseStudy = ({ user }) => {
   const isEnrolled = user && course && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
 
+  // Fetch course and progress data
   useEffect(() => {
     fetchCourse(params.id);
-    // Fetch course progress
+
     async function fetchProgress() {
       try {
         const { data } = await axios.get(
@@ -63,19 +80,34 @@ const CourseStudy = ({ user }) => {
         setCompleted(percent);
         setCompletedLec(safeCompletedLec);
         setLectLength(safeLectLength);
-      } catch (error) {
+      } catch (err) {
         setCompleted(0);
         setCompletedLec(0);
         setLectLength(1);
       }
     }
-    if (user && course && user.subscription.includes(course._id)) fetchProgress();
+
+    if (user && course && isEnrolled) {
+      fetchProgress();
+    }
     // eslint-disable-next-line
   }, [params.id, user, course]);
 
   const handleEnroll = async () => {
     setEnrolling(true);
-    // ...enroll logic here (reuse from your course description page)...
+    try {
+      // Example enroll request to backend (adjust endpoint and payload as needed)
+      await axios.post(
+        `${server}/api/course/enroll`, 
+        { courseId: course._id },
+        { headers: { token: localStorage.getItem("token") } }
+      );
+      // After successful enrollment, navigate to lectures
+      navigate(`/lectures/${course._id}`);
+    } catch (error) {
+      console.error("Enrollment failed:", error);
+    }
+    setEnrolling(false);
   };
 
   if (!course) return null;
@@ -90,6 +122,7 @@ const CourseStudy = ({ user }) => {
           <span className="cd-category-badge">Medium</span>
         </div>
       </div>
+
       {/* Main Content */}
       <div className="cd-main">
         {/* Left Side */}
@@ -99,7 +132,10 @@ const CourseStudy = ({ user }) => {
               <h3>Prerequisites</h3>
               <ul className="cd-list">
                 {prerequisites.map((item, i) => (
-                  <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
+                  <li key={i}>
+                    <span className="cd-list-icon">✔️</span>
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -107,7 +143,10 @@ const CourseStudy = ({ user }) => {
               <h3>What you'll learn</h3>
               <ul className="cd-list">
                 {whatYouLearn.map((item, i) => (
-                  <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
+                  <li key={i}>
+                    <span className="cd-list-icon">✔️</span>
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -115,12 +154,16 @@ const CourseStudy = ({ user }) => {
               <h3>Course Outcome</h3>
               <ul className="cd-list">
                 {courseOutcome.map((item, i) => (
-                  <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
+                  <li key={i}>
+                    <span className="cd-list-icon">✔️</span>
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>
           </div>
         </div>
+
         {/* Right Side */}
         <div className="cd-main-right">
           <div className="cd-card cd-info-card" data-aos="fade-up">
@@ -132,6 +175,7 @@ const CourseStudy = ({ user }) => {
               <span className="cd-info-label">Duration:</span>
               <span className="cd-info-value">{course.duration} weeks</span>
             </div>
+
             {/* Progress tracker for admins and enrolled users */}
             {isAdmin ? (
               <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
@@ -172,6 +216,7 @@ const CourseStudy = ({ user }) => {
                 </div>
               )
             ) : null}
+
             {isAdmin || isEnrolled ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
@@ -189,6 +234,7 @@ const CourseStudy = ({ user }) => {
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
             )}
+
             {/* Preview Video Placeholder */}
             <div className="cd-preview-video">
               <video width="100%" height="160" controls style={{ borderRadius: 12, marginTop: 12 }}>
@@ -199,7 +245,35 @@ const CourseStudy = ({ user }) => {
           </div>
         </div>
       </div>
-      {/* Instructor Card at Bottom */}
+
+      {/* Quiz Section Button */}
+      <div className="quiz-section">
+  <h3 style={{ marginTop: "2rem", color: "#007aff" }}>📋 Take Quiz</h3>
+  {quiz ? (
+    <>
+      <p>This course contains a quiz with {quiz.questions.length} questions.</p>
+      <button
+        className="cd-btn-primary"
+        onClick={() => navigate(`/course/${course._id}/quiz`)}
+      >
+        Start Quiz
+      </button>
+    </>
+  ) : (
+    <>
+      <p>No quiz has been added yet. Stay tuned!</p>
+      {(isAdmin || isEnrolled) && (
+        <button
+          className="cd-btn-primary"
+          onClick={() => navigate(`/course/${course._id}/quiz`)}
+        >
+          Go to Quiz
+        </button>
+      )}
+    </>
+  )}
+</div>
+
       <div className="cd-instructor-card" data-aos="fade-up">
         <img
           src={"https://ui-avatars.com/api/?name=" + encodeURIComponent(course.createdBy || "Instructor") + "&background=34c759&color=fff&rounded=true&size=64"}

@@ -7,6 +7,7 @@ import "./admincourses.css";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { server } from "../../main";
+import AddQuiz from "./AddQuiz"; 
 
 const categories = [
   "Web Development",
@@ -21,7 +22,7 @@ const AdminCourses = ({ user }) => {
 
   if (user && user.role !== "admin") return navigate("/");
 
-  const [toggle, setToggle] = useState("video"); // 'video' or 'pdf'
+  const [toggle, setToggle] = useState("video");
 
   // Video upload states
   const [title, setTitle] = useState("");
@@ -44,7 +45,6 @@ const AdminCourses = ({ user }) => {
     const reader = new FileReader();
 
     reader.readAsDataURL(file);
-
     reader.onloadend = () => {
       setImagePrev(reader.result);
       setImage(file);
@@ -53,7 +53,6 @@ const AdminCourses = ({ user }) => {
 
   const { courses, fetchCourses } = CourseData();
 
-  // Video upload handler (course creation)
   const submitHandler = async (e) => {
     e.preventDefault();
     setBtnLoading(true);
@@ -91,14 +90,13 @@ const AdminCourses = ({ user }) => {
     }
   };
 
-  // PDF upload handler (only PDF)
   const submitPdfHandler = async (e) => {
     e.preventDefault();
     setPdfBtnLoading(true);
     const myForm = new FormData();
     myForm.append("title", pdfTitle);
     if (pdf) myForm.append("pdf", pdf);
-    // You may want to add more fields as needed
+
     try {
       const { data } = await axios.post(`${server}/api/admin/course/new`, myForm, {
         headers: {
@@ -124,14 +122,23 @@ const AdminCourses = ({ user }) => {
         <a href="/admin/course" className="admin-feature-link">Manage Courses</a>
         <a href="/admin/users" className="admin-feature-link">Manage Users</a>
       </nav>
+
       <div className="admin-courses">
         <div className="left">
           <h1>All Courses</h1>
           <div className="dashboard-content">
             {courses && courses.length > 0 ? (
-              courses.map((e) => {
-                return <CourseCard key={e._id} course={e} />;
-              })
+              courses.map((course) => (
+                <div key={course._id} className="admin-course-wrapper">
+                  <CourseCard course={course} />
+                  
+                  {/* ✅ Add Quiz Form For Each Course */}
+                  <div className="quiz-section">
+                    <h3>Add Quiz for: {course.title}</h3>
+                    <AddQuiz courseId={course._id} />
+                  </div>
+                </div>
+              ))
             ) : (
               <p>No Courses Yet</p>
             )}

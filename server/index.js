@@ -7,6 +7,7 @@ import cors from 'cors';
 //
 
 
+
 dotenv.config();
 
 export const instance=new Razorpay({
@@ -30,13 +31,13 @@ app.use("/uploads", express.static("uploads"));
 
 //importing routes
 import userRoutes from './routes/user.js'
-
+import quizRoutes from './routes/quizRoutes.js';
 import courseRoutes from "./routes/course.js";
 import adminRoutes from "./routes/admin.js";
 import feedbackRoutes from "./routes/feedback.js";
 //using routes
 app.use('/api',userRoutes);
-
+app.use('/api/quiz', quizRoutes);
 app.use("/api", courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
