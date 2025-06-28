@@ -14,6 +14,7 @@ import {
   getRecentPayments,
   getEnrollmentTrends,
   getFeedbacks,
+  updateCourse,
 } from "../controllers/admin.js";
 import { uploadFiles, uploadCourseFiles } from "../middlewares/multer.js";
 import { getAllCourses } from "../controllers/course.js";
@@ -34,5 +35,6 @@ router.get("/payments", isAuth, isAdmin, getRecentPayments);
 router.get("/enrollment-trends", isAuth, isAdmin, getEnrollmentTrends);
 router.get("/feedbacks", isAuth, isAdmin, getFeedbacks);
 router.get("/course", isAuth, isAdmin, getAllCourses);
+router.put("/course/:id", isAuth, isAdmin, uploadCourseFiles, updateCourse);
 
 export default router;
