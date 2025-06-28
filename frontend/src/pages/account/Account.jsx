@@ -7,7 +7,7 @@ import { UserData } from "../../context/UserContext";
 import toast from "react-hot-toast";
 
 const Account = ({ user }) => {
-  const {setIsAuth, setUser} = UserData();
+  const { setIsAuth, setUser } = UserData();
   const navigate = useNavigate();
 
   const logoutHandler = () => {
@@ -17,58 +17,57 @@ const Account = ({ user }) => {
     toast.success("Logout Successfully");
     navigate("/login");
   };
-  
+
+  // Generate avatar URL using DiceBear (initials)
+  const avatarUrl = user
+    ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name || user.email)}`
+    : "";
+
+  // Format joined date if available
+  const joined = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : null;
+
   return (
-    <div>
+    <div className="account-bg">
       {user && (
         <div className="profile">
-          <h2>My Profile</h2>
+          <div className="avatar-container">
+            <img src={avatarUrl} alt="User Avatar" className="profile-avatar" />
+          </div>
+          <h2 className="profile-title">My Profile</h2>
           <div className="profile-info">
             <p>
-              <strong>Name - {user.name}</strong>
+              <strong>{user.name}</strong>
             </p>
             <p>
-              <strong>Email - {user.email} </strong>
+              <strong>{user.email}</strong>
             </p>
-
-            <button
-              onClick={() => navigate(`/${user._id}/dashboard`)}
-              className="common-btn"
-            >
-              <MdDashboard />
-              Dashboard
-            </button>
-
-            <br />
-
-            {user.role === "admin" && (
+            <p className="profile-role">Role: <span>{user.role}</span></p>
+            {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
+          </div>
+          <div className="profile-actions">
+            {user.role === "admin" ? (
+              <>
+                <div className="admin-actions-divider">Admin Actions</div>
+                <button
+                  onClick={() => navigate(`/admin/dashboard`)}
+                  className="common-btn profile-btn"
+                >
+                  <MdDashboard style={{ marginRight: 8 }} /> Admin Dashboard
+                </button>
+              </>
+            ) : (
               <button
-                onClick={() => navigate(`/admin/dashboard`)}
-                className="common-btn"
+                onClick={() => navigate(`/${user._id}/dashboard`)}
+                className="common-btn profile-btn"
               >
-                <MdDashboard />
-                Admin Dashboard
+                <MdDashboard style={{ marginRight: 8 }} /> Dashboard
               </button>
             )}
-            <br />
-            {user && user.role === "admin" && (
-              <button
-                onClick={() => navigate("/admin/users")}
-                className="common-btn"
-              >
-                <MdDashboard />
-                All Users
-              </button>
-            )}
-            <br />
-
             <button
               onClick={logoutHandler}
-              className="common-btn"
-              style={{ background: "red" }}
+              className="common-btn profile-btn logout-btn"
             >
-              <IoMdLogOut />
-              Logout
+              <IoMdLogOut style={{ marginRight: 8 }} /> Logout
             </button>
           </div>
         </div>

@@ -55,11 +55,11 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
                 validAnnouncements.map((a, i) => (
                   <div
                     className={`dropdown-announcement${readAnnouncements.includes(a.id) ? '' : ' unread'}`}
-                    key={a.id || i}
+                    key={a.id || a._id || i}
                     onClick={() => handleAnnouncementClick(a)}
                   >
                     <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
-                    <div className="dropdown-announcement-time">{a.timestamp ? timeAgo(a.timestamp) : ''}</div>
+                    <div className="dropdown-announcement-time">{a.createdAt ? timeAgo(a.createdAt) : (a.timestamp ? timeAgo(a.timestamp) : '')}</div>
                   </div>
                 ))
               )}
@@ -72,7 +72,7 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
           <div className="announcement-modal-content" onClick={e => e.stopPropagation()}>
             <div className="announcement-modal-title">Announcement</div>
             <div className="announcement-modal-message">{modal.message}</div>
-            <div className="announcement-modal-time">{new Date(modal.timestamp).toLocaleString()}</div>
+            <div className="announcement-modal-time">{modal.createdAt ? new Date(modal.createdAt).toLocaleString() : (modal.timestamp ? new Date(modal.timestamp).toLocaleString() : '')}</div>
             <button className="announcement-modal-close" onClick={() => setModal(null)}>Close</button>
           </div>
         </div>
