@@ -6,6 +6,7 @@ import { promisify } from "util";
 import fs from "fs";
 import { User } from "../models/User.js";
 import { Payment } from "../models/Payment.js";
+import Announcement from "../models/Announcement.js";
 
 export const createCourse = TryCatch(async (req, res) => {
   const { 
@@ -248,6 +249,7 @@ export const getFeedbacks = TryCatch(async (req, res) => {
   res.json({ feedbacks });
 });
 
+
 export const updateCourse = TryCatch(async (req, res) => {
   const course = await Courses.findById(req.params.id);
   if (!course) return res.status(404).json({ message: "Course not found" });
@@ -271,3 +273,31 @@ export const updateCourse = TryCatch(async (req, res) => {
   await course.save();
   res.json({ message: "Course updated successfully", course });
 });
+
+// Create announcement (admin only)
+export const createAnnouncement = async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ message: "Message is required" });
+    const announcement = await Announcement.create({
+      message,
+      createdBy: req.user._id,
+    });
+    res.status(201).json({ message: "Announcement created", announcement });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get all announcements (latest first)
+export const getAnnouncements = async (req, res) => {
+  try {
+    const announcements = await Announcement.find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "name email role");
+    res.json({ announcements });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
