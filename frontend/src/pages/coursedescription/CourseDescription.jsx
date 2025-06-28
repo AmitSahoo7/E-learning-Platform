@@ -15,23 +15,16 @@ const CourseDescription = ({ user }) => {
   const [loading, setLoading] = useState(false);
   const { fetchUser } = UserData();
 
-  // Placeholder data for demo
-  const prerequisites = [
-    "Basic math skills",
-    "Logical thinking",
-    "No prior coding experience required"
-  ];
-  const whatYouLearn = [
-    "Software development fundamentals",
-    "Algorithms and data structures",
-    "Artificial intelligence basics",
-    "Computer networks overview"
-  ];
-  const courseOutcome = [
-    "Be job-ready for software engineering roles",
-    "Understand core CS concepts",
-    "Build real-world projects"
-  ];
+  // Helper function to convert string to array (for prerequisites, whatYouLearn, courseOutcomes)
+  const stringToArray = (str) => {
+    if (!str) return [];
+    return str.split('\n').filter(item => item.trim() !== '');
+  };
+
+  // Get dynamic data from course object
+  const prerequisites = stringToArray(course?.prerequisites);
+  const whatYouLearn = stringToArray(course?.whatYouLearn);
+  const courseOutcome = stringToArray(course?.courseOutcomes);
 
   useEffect(() => {
     fetchCourse(params.id);
@@ -102,6 +95,7 @@ const CourseDescription = ({ user }) => {
               <img src={`${server}/${course.image}`} alt={course.title} className="cd-banner-img" />
               <div className="cd-banner-overlay">
                 <h1 className="cd-title">{course.title}</h1>
+                {course.tagline && <p className="cd-tagline">{course.tagline}</p>}
                 <button
                   className="cd-btn-primary"
                   onClick={() => isEnrolled ? navigate(`/course/study/${course._id}`) : checkoutHandler()}
@@ -116,30 +110,36 @@ const CourseDescription = ({ user }) => {
               {/* Left Side */}
               <div className="cd-main-left">
                 <div className="cd-main-left-card" data-aos="fade-up">
-                  <div className="cd-section">
-                    <h3>Prerequisites</h3>
-                    <ul className="cd-list">
-                      {prerequisites.map((item, i) => (
-                        <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="cd-section">
-                    <h3>What you'll learn</h3>
-                    <ul className="cd-list">
-                      {whatYouLearn.map((item, i) => (
-                        <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="cd-section">
-                    <h3>Course Outcome</h3>
-                    <ul className="cd-list">
-                      {courseOutcome.map((item, i) => (
-                        <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
+                  {prerequisites.length > 0 && (
+                    <div className="cd-section">
+                      <h3>Prerequisites</h3>
+                      <ul className="cd-list">
+                        {prerequisites.map((item, i) => (
+                          <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {whatYouLearn.length > 0 && (
+                    <div className="cd-section">
+                      <h3>What you'll learn</h3>
+                      <ul className="cd-list">
+                        {whatYouLearn.map((item, i) => (
+                          <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {courseOutcome.length > 0 && (
+                    <div className="cd-section">
+                      <h3>Course Outcome</h3>
+                      <ul className="cd-list">
+                        {courseOutcome.map((item, i) => (
+                          <li key={i}><span className="cd-list-icon">✔️</span>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
               {/* Right Side */}
@@ -153,6 +153,12 @@ const CourseDescription = ({ user }) => {
                     <span className="cd-info-label">Duration:</span>
                     <span className="cd-info-value">{course.duration} weeks</span>
                   </div>
+                  {course.difficulty && (
+                    <div className="cd-info-row">
+                      <span className="cd-info-label">Difficulty:</span>
+                      <span className="cd-info-value">{course.difficulty}</span>
+                    </div>
+                  )}
                   {!isEnrolled && (
                     <button
                       className="cd-btn-primary cd-enroll-btn"
@@ -170,26 +176,32 @@ const CourseDescription = ({ user }) => {
                       Lectures
                     </button>
                   )}
-                  {/* Preview Video Placeholder */}
-                  <div className="cd-preview-video">
-                    <video width="100%" height="160" controls style={{ borderRadius: 12, marginTop: 12 }}>
-                      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
+                  {/* Preview Video */}
+                  {course.previewVideo && (
+                    <div className="cd-preview-video">
+                      <video width="100%" height="160" controls style={{ borderRadius: 12, marginTop: 12 }}>
+                        <source src={`${server}/${course.previewVideo}`} type="video/mp4" />
+                        Your browser does not support the video tag.
+                      </video>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
             {/* Instructor Card at Bottom */}
             <div className="cd-instructor-card" data-aos="fade-up">
               <img
-                src={"https://ui-avatars.com/api/?name=" + encodeURIComponent(course.createdBy || "Instructor") + "&background=34c759&color=fff&rounded=true&size=64"}
+                src={
+                  course.instructorAvatar 
+                    ? `${server}/${course.instructorAvatar}` 
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructorName || course.createdBy || "Instructor")}&background=34c759&color=fff&rounded=true&size=64`
+                }
                 alt="Instructor"
                 className="cd-instructor-avatar"
               />
               <div>
-                <div className="cd-instructor-name">{course.createdBy || "Instructor"}</div>
-                <div className="cd-instructor-bio">Experienced educator and subject matter expert.</div>
+                <div className="cd-instructor-name">{course.instructorName || course.createdBy || "Instructor"}</div>
+                <div className="cd-instructor-bio">{course.instructorBio || "Experienced educator and subject matter expert."}</div>
               </div>
             </div>
           </div>
