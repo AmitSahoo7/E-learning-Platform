@@ -14,6 +14,7 @@ const CourseStudy = ({ user }) => {
 
   // Fetch quiz data when component mounts or when course ID changes
   useEffect(() => {
+    if (!course || !course._id) return; // Guard: only fetch if course and course._id exist
     const fetchQuiz = async () => {
       try {
         const { data } = await axios.get(`${server}/api/quiz/${course._id}`, {
@@ -27,9 +28,8 @@ const CourseStudy = ({ user }) => {
         setQuiz(null);
       }
     };
-
     fetchQuiz();
-  }, [course._id]);
+  }, [course]);
 
   // Placeholder data for demo
   const prerequisites = [
