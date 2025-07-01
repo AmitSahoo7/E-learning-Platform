@@ -49,3 +49,7 @@ app.listen(port, ()=>{
 
 import commentRoutes from "./routes/commentRoutes.js";
 app.use("/api/comments", commentRoutes);
+
+
+import courseReviewRoutes from "./routes/courseReviewRoutes.js";
+app.use("/api/course-review", courseReviewRoutes);

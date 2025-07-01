@@ -27,6 +27,9 @@ export const postComment = async (req, res) => {
       lectureId: req.params.lectureId,
     });
 
+    // Populate username for immediate UI use
+    await comment.populate("userId", "name");
+
     res.status(201).json({ success: true, comment });
   } catch (err) {
     res.status(500).json({ success: false, message: "Failed to post comment" });
@@ -34,12 +37,17 @@ export const postComment = async (req, res) => {
 };
 
 // Delete comment
+// Delete comment
 export const deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findById(req.params.id);
     if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-    if (comment.userId.toString() !== req.user._id.toString()) {
+    // Allow if user owns comment OR is admin
+    if (
+      comment.userId.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({ message: "Unauthorized" });
     }
 

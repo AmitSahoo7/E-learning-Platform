@@ -8,50 +8,111 @@
   }
 
 .admin-users-page {
-  padding: 2rem;
-  width: 100%;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem 1rem;
 }
 
 .admin-users-page h2 {
   font-size: 2.5rem;
+  font-weight: 700;
   margin-bottom: 2rem;
-  color: #333;
-  text-align: left;
+  color: #222;
 }
 
-.admin-users-page .table-container {
+.table-container {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 16px #10b98122;
+  padding: 2rem 1rem;
   overflow-x: auto;
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 8px;
 }
 
 .users-table {
   width: 100%;
-  border-collapse: collapse;
-  background-color: #fff;
-  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 700px;
 }
 
 .users-table th,
 .users-table td {
-  padding: 1rem;
+  padding: 1rem 1.2rem;
   text-align: left;
-  border-bottom: 1px solid #ddd;
-  vertical-align: middle;
-  word-wrap: break-word;
+}
+
+.users-table th {
+  background: #10b981;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.users-table tr {
+  background: #f7fff9;
+  border-bottom: 1px solid #e0f7ea;
+}
+
+.users-table tr:last-child {
+  border-bottom: none;
 }
 
 .users-table td {
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
+  font-size: 1.05rem;
+  color: #222;
 }
 
-.users-table thead {
-  background-color: #8a4baf;
-  color: white;
+/* Custom Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
 }
 
-.users-table tbody tr:hover {
-  background-color: #f1f1f1;
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 26px;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; width: 20px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #10b981;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+@media (max-width: 900px) {
+  .admin-users-page h2 {
+    font-size: 2rem;
+  }
+  .table-container {
+    padding: 1rem 0.2rem;
+  }
+  .users-table th, .users-table td {
+    padding: 0.7rem 0.5rem;
+  }
 }

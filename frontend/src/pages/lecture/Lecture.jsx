@@ -8,7 +8,9 @@ import { toast } from "react-toastify";
 import { MdOutlineDone } from "react-icons/md";
 import { CourseData } from "../../context/CourseContext";
 import LectureCommentSection from "../../components/comment/LectureCommentSection";
+import { useRef } from "react";
 
+// Adjust path
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -31,15 +33,13 @@ const Lecture = ({ user }) => {
   const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
 
   const { fetchCourse, course } = CourseData();
-  //comment 
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
-  
-
-
 
   useEffect(() => {
-    if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
+    if (
+      user &&
+      user.role !== "admin" &&
+      !user.subscription.includes(params.id)
+    ) {
       navigate("/");
     }
   }, [user, params.id, navigate]);
@@ -68,53 +68,12 @@ const Lecture = ({ user }) => {
         },
       });
       setLecture(data.lecture);
-      fetchComments();
       setLecLoading(false);
     } catch (error) {
       console.log(error);
       setLecLoading(false);
     }
   }
-
-  // 👇 Place this after fetchLecture()
-  const fetchComments = async () => {
-    try {
-      const { data } = await axios.get(`${server}/api/comments/${lecture._id}`, {
-        headers: { token: localStorage.getItem("token") },
-      });
-      setComments(data.comments);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  
-  const submitComment = async (e) => {
-    e.preventDefault();
-    try {
-      const { data } = await axios.post(
-        `${server}/api/comments/${lecture._id}`,
-        { text: newComment },
-        { headers: { token: localStorage.getItem("token") } }
-      );
-      toast.success(data.message);
-      setNewComment("");
-      fetchComments();
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
-  };
-
-  const deleteComment = async (id) => {
-    try {
-      const { data } = await axios.delete(`${server}/api/comments/${id}`, {
-        headers: { token: localStorage.getItem("token") },
-      });
-      toast.success(data.message);
-      fetchComments();
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
-  };
 
   const changeVideoHandler = (e) => {
     const file = e.target.files[0];
@@ -230,11 +189,30 @@ const Lecture = ({ user }) => {
     fetchCourse(params.id);
   }, []);
 
+  //css for comment and desc
+  const infoRef = useRef(null);
+  const commentRef = useRef(null);
   useEffect(() => {
-    if (lecture._id) {
-      fetchComments();
-    }
-  }, [lecture._id]);
+  if (!infoRef.current || !commentRef.current) return;
+
+  const setWidth = () => {
+    commentRef.current.style.width = `${infoRef.current.offsetWidth}px`;
+  };
+
+  setWidth(); // Initial sync
+
+  const resizeObserver = new ResizeObserver(setWidth);
+  resizeObserver.observe(infoRef.current);
+
+  window.addEventListener("resize", setWidth); // Optional fallback
+
+  return () => {
+    resizeObserver.disconnect();
+    window.removeEventListener("resize", setWidth);
+  };
+}, []);
+
+
 
   // PDF upload handler
   const submitPdfHandler = async (e) => {
@@ -280,16 +258,132 @@ const Lecture = ({ user }) => {
       ) : (
         <div className="lecture-modern">
           {/* Course Progress */}
-          <div className="lecture-progress-bar">
-            Course Progress - {safeCompletedLec} out of {safeLectLength}
-            <div className="lecture-progress-bar-track">
-              <div className="lecture-progress-bar-fill" style={{ width: `${safeCompleted}%` }}></div>
+          {user && user.role === "admin" ? (
+            <div
+              className="lecture-progress-bar"
+              style={{
+                margin: "12px 0 auto 12px auto",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                All lectures available for management
+              </div>
             </div>
-            <span className="lecture-progress-bar-percent">{safeCompleted}%</span>
-          </div>
+          ) : user && user.subscription.includes(params.id) ? (
+            lectLength === 0 ? (
+              <div
+                className="lecture-progress-bar"
+                style={{
+                  margin: "12px 0 auto 12px auto",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  No lectures available yet.
+                </div>
+              </div>
+            ) : completedLec === 0 ? (
+              <div
+                className="lecture-progress-bar"
+                style={{
+                  margin: "12px 0 auto 12px auto",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  Course Progress: 0% (No lectures completed yet)
+                </div>
+                <div
+                  className="lecture-progress-bar-track"
+                  style={{ width: "100%", maxWidth: 400 }}
+                >
+                  <div
+                    className="lecture-progress-bar-fill"
+                    style={{ width: `0%` }}
+                  ></div>
+                </div>
+                <span
+                  className="lecture-progress-bar-percent"
+                  style={{
+                    color: "#34c759",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                    marginTop: 12,
+                  }}
+                >
+                  Start your first lecture!
+                </span>
+              </div>
+            ) : (
+              <div
+                className="lecture-progress-bar"
+                style={{
+                  margin: "12px 0 auto 12px auto",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  Course Progress - {safeCompletedLec} out of {safeLectLength}
+                </div>
+                <div
+                  className="lecture-progress-bar-track"
+                  style={{ width: "100%", maxWidth: 400 }}
+                >
+                  <div
+                    className="lecture-progress-bar-fill"
+                    style={{ width: `${safeCompleted}%` }}
+                  ></div>
+                </div>
+                <span
+                  className="lecture-progress-bar-percent"
+                  style={{
+                    color: "#34c759",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                    marginTop: 12,
+                  }}
+                >
+                  {safeCompleted}%
+                </span>
+              </div>
+            )
+          ) : null}
           {/* Admin Add Lecture Button */}
           {user && user.role === "admin" && (
-            <button className="common-btn" style={{ margin: '0 auto 16px auto', display: 'block' }} onClick={() => setShow(!show)}>
+            <button
+              className="common-btn"
+              style={{ margin: "0 auto 16px auto", display: "block" }}
+              onClick={() => setShow(!show)}
+            >
               {show ? "Close" : "Add Lecture +"}
             </button>
           )}
@@ -299,14 +393,18 @@ const Lecture = ({ user }) => {
               <div className="lecture-form">
                 <div className="toggle-upload">
                   <button
-                    className={toggle === "video" ? "common-btn active" : "common-btn"}
+                    className={
+                      toggle === "video" ? "common-btn active" : "common-btn"
+                    }
                     onClick={() => setToggle("video")}
                     type="button"
                   >
                     Video
                   </button>
                   <button
-                    className={toggle === "pdf" ? "common-btn active" : "common-btn"}
+                    className={
+                      toggle === "pdf" ? "common-btn active" : "common-btn"
+                    }
                     onClick={() => setToggle("pdf")}
                     type="button"
                   >
@@ -380,7 +478,7 @@ const Lecture = ({ user }) => {
                       <input
                         type="file"
                         accept="application/pdf"
-                        onChange={e => setPdf(e.target.files[0])}
+                        onChange={(e) => setPdf(e.target.files[0])}
                         required
                       />
                       <button
@@ -408,19 +506,26 @@ const Lecture = ({ user }) => {
                 disableRemotePlayback
                 autoPlay
                 onEnded={() => addProgress(lecture._id)}
-                style={{ borderRadius: "16px", marginBottom: "1.5rem", marginTop: "2rem" }}
+                style={{
+                  borderRadius: "16px",
+                  marginBottom: "1.5rem",
+                  marginTop: "2rem",
+                }}
               ></video>
             </div>
           ) : (
-            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>Please Select a Lecture</h2>
+            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>
+              Please Select a Lecture
+            </h2>
           )}
-          
-          
           {/* Side by Side Layout for Info and List */}
-          <div className="lecture-main-flex">
+          <div className={lecture?._id ? "lecture-main-grid" : "lecture-main-flex"}>
             {lecture?.title && (
-              <div className="lecture-info-modern">
-                <h2>Lecture {lectures.findIndex(l => l._id === lecture._id) + 1}: {lecture?.title}</h2>
+              <div className="lecture-info-modern" ref={infoRef}>
+                <h2>
+                  Lecture {lectures.findIndex((l) => l._id === lecture._id) + 1}
+                  : {lecture?.title}
+                </h2>
                 <div style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
                   <span>Design</span>
                   <span style={{ marginLeft: 16 }}>3 Month</span>
@@ -429,67 +534,55 @@ const Lecture = ({ user }) => {
                   <b>Description:</b>
                   <div style={{ marginTop: 4 }}>{lecture?.description}</div>
                 </div>
-                
                 <button className="notes-btn-modern">Notes</button>
-                {/* ✅ Comment box for students only */}
-                {user?.role !== "admin" && lecture?._id && (
-                  <LectureCommentSection lectureId={lecture._id} user={user} />
-                  )}
-                  {/* ✅ Add this directly below the description */}
-              <div className="comment-section-modern">
-                <h3>Comments</h3>
-
-                <form onSubmit={submitComment}>
-                  <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment"
-                    className="comment-input"
-                    required
-                  />
-                  <button type="submit" className="common-btn">Post</button>
-                </form>
-
-                <div className="comments-list">
-                  {comments.length > 0 ? (
-                    comments.map((c, i) => (
-                      <div key={i} className="comment-box">
-                        <b>{c.userId?.name || "User"}:</b> <span>{c.text}</span>
-                        {user?._id === c.userId?._id && (
-                          <button
-                            className="delete-comment-btn"
-                            onClick={() => deleteComment(c._id)}
-                          >
-                            Delete
-                          </button>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p>No comments yet.</p>
-                  )}
-                </div>
-              </div>
               </div>
             )}
+
             <div className="lecture-list-vertical-scroll">
               {lectures && lectures.length > 0 ? (
                 lectures.map((e, i) => (
-                  <div key={e._id} style={{ position: 'relative', display: 'inline-block' }}>
+                  <div
+                    key={e._id}
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
                     <button
-                      className={`lecture-list-btn-modern${lecture._id === e._id ? " active" : ""}`}
+                      className={`lecture-list-btn-modern${
+                        lecture._id === e._id ? " active" : ""
+                      }`}
                       onClick={() => fetchLecture(e._id)}
                     >
                       {i + 1}. {e.title}
-                      {progress[0] && progress[0].completedLectures.includes(e._id) && (
-                        <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
-                      )}
+                      {progress[0] &&
+                        progress[0].completedLectures.includes(e._id) && (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              color: "#000000",
+                              fontWeight: 700,
+                            }}
+                          >
+                            ✔
+                          </span>
+                        )}
                     </button>
                     {user && user.role === "admin" && (
                       <button
                         className="delete-lecture-btn"
-                        style={{ position: 'absolute', top: 6, right: 6, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontWeight: 700, fontSize: 14, zIndex: 2 }}
+                        style={{
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          background: "red",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: 24,
+                          height: 24,
+                          cursor: "pointer",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          zIndex: 2,
+                        }}
                         onClick={() => deleteHandler(e._id)}
                         title={`Delete ${e.title}`}
                       >
@@ -502,6 +595,19 @@ const Lecture = ({ user }) => {
                 <p>No Lectures Yet!</p>
               )}
             </div>
+
+            {lecture?._id && (
+              <div className="lecture-comment" ref={commentRef}>
+                <LectureCommentSection
+                  lectureId={lecture._id}
+                  isPaidUser={
+                    user?.subscription?.includes(params.id) ||
+                    user?.role === "admin"
+                  }
+                  user={user}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

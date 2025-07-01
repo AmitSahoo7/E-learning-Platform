@@ -118,8 +118,8 @@
       cursor: pointer;
 
       &:hover {
-        background-color: #8a4baf;
-        color: white;
+        background-color: #ffffff;
+        color: rgb(0, 0, 0);
       }
     }
 
@@ -629,34 +629,59 @@ footer, .footer {
   color: #fff;
 }
 
-.lecture-main-flex {
+.lecture-main-flex{
   display: flex;
   gap: 32px;
-  align-items: flex-start;
-  justify-content: center;
+  padding: 32px;
   margin: 0 auto;
   max-width: 1100px;
   width: 100%;
 }
+.lecture-main-grid {
+  display: grid;
+  gap: 32px;
+  padding: 32px;
+  margin: 0 auto;
+  max-width: 1100px;
+  width: 100%;
+  grid-template-columns: auto minmax(220px, 400px);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "left right"
+    "bottom right";
+}
 .lecture-info-modern {
-  flex: 2 1 0;
+  grid-area: left;
   min-width: 320px;
   max-width: 700px;
+  box-shadow: 0 0 10px 1px #0000001d;
+
+}
+.lecture-comment{
+  grid-area: bottom;
+  min-width: 320px;
+  max-width: 700px;
+  padding: 0;
 }
 .lecture-list-vertical-scroll {
-  flex: 1 1 0;
+  grid-area: right;
+  padding-top: 25px;
   min-width: 220px;
   max-width: 400px;
 }
 @media (max-width: 900px) {
   .lecture-main-flex {
+    display: flex;
     flex-direction: column;
     gap: 24px;
     align-items: stretch;
   }
-  .lecture-info-modern, .lecture-list-vertical-scroll {
+  .lecture-info-modern {
     max-width: 100%;
-    min-width: 0;
+    min-width: 50px;
+  }
+  .lecture-list-vertical-scroll{
+    min-height: 180px;
   }
 }
 
@@ -749,3 +774,4 @@ footer, .footer {
   color: #d9363e;
 }
 */
+

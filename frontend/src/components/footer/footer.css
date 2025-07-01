@@ -13,10 +13,14 @@
 }
 
 .footer-logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 0.5rem;
+  font-size: 35px;
+    font-weight: 600;
+    color: #000000;
+    text-decoration: none;
+    font-family: 'Nerko One',cursive;
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
 }
 
 .footer-nav {

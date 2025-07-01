@@ -70,7 +70,7 @@ const CourseCard = ({ course }) => {
         <div className="course-instructor-price">
           <div className="instructor-info">
             <FaUserCircle className="instructor-avatar" />
-            <span>{course.createdBy}</span>
+            <span>{course.instructorName || course.createdBy}</span>
           </div>
           <div className="price-info">
             <span className="original-price">₹{course.price + 100}</span>

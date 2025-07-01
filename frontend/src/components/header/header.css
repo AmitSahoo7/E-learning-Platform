@@ -56,3 +56,161 @@ header {
   background-color: #10b981;
   color: #ffffff;
 }
+
+.notification-bell-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 1.2rem;
+}
+.notification-bell {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  transition: filter 0.18s;
+}
+.notification-bell:hover {
+  filter: brightness(0.8);
+}
+.notification-dropdown {
+  position: absolute;
+  top: 2.5rem;
+  right: 10px;
+  left: auto;
+  min-width: 260px;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px #10b98122;
+  padding: 1rem 0.7rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  border: 2px solid #10b981; /* DEBUG: Remove after confirming */
+}
+.dropdown-title {
+  font-weight: 700;
+  color: #10b981;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e0f7ea;
+  padding-bottom: 0.4rem;
+}
+.dropdown-empty {
+  color: #888;
+  font-size: 1rem;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.dropdown-announcement {
+  background: #f7fff9;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  color: #222;
+  box-shadow: 0 2px 8px #10b98108;
+  word-break: break-word;
+}
+@media (max-width: 600px) {
+  .notification-dropdown {
+    min-width: 180px;
+    padding: 0.7rem 0.3rem;
+  }
+  .dropdown-announcement {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.6rem;
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #10b981;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 2px 7px;
+  z-index: 2;
+  box-shadow: 0 2px 8px #10b98133;
+}
+.dropdown-announcement.unread {
+  background: #e6fff3;
+  font-weight: 600;
+  border-left: 4px solid #10b981;
+}
+.dropdown-announcement {
+  cursor: pointer;
+  transition: background 0.18s, font-weight 0.18s;
+}
+.dropdown-announcement-msg {
+  margin-bottom: 2px;
+}
+.dropdown-announcement-time {
+  font-size: 0.92rem;
+  color: #888;
+}
+.announcement-modal-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.announcement-modal-content {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 8px 32px #10b98133;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  min-width: 320px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  position: relative;
+}
+.announcement-modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+}
+.announcement-modal-message {
+  font-size: 1.05rem;
+  color: #222;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+.announcement-modal-time {
+  font-size: 0.97rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+}
+.announcement-modal-close {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.5rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  align-self: flex-end;
+  margin-top: 0.5rem;
+  transition: background 0.18s;
+}
+.announcement-modal-close:hover {
+  background: #059669;
+}
+.hero-header-bar, .hero-nav, .notification-bell-wrapper {
+  overflow: visible !important;
+  z-index: auto !important;
+}

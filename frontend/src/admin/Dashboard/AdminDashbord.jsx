@@ -6,7 +6,7 @@ import { server } from "../../main";
 import CourseCard from "../../components/coursecard/CourseCard";
 import "./dashboard.css";
 
-const AdminDashbord = ({ user }) => {
+const AdminDashbord = ({ user, addAnnouncement }) => {
   const navigate = useNavigate();
   const [stats, setStats] = useState({ totalCourses: 0, totalLectures: 0, totalUsers: 0 });
   const [recentCourses, setRecentCourses] = useState([]);
@@ -100,6 +100,7 @@ const AdminDashbord = ({ user }) => {
   const handleSendAnnouncement = async () => {
     alert("Announcement sent: " + announcement);
     setShowAnnouncement(false);
+    if (announcement && addAnnouncement) addAnnouncement(announcement);
     setAnnouncement("");
     // You can POST to your backend here
   };
@@ -122,9 +123,19 @@ const AdminDashbord = ({ user }) => {
   };
 
 
+  // Calculate total revenue from recentPayments
+  const totalRevenue = recentPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
   return (
     <Layout>
       <div className="admin-dashboard-modern">
+        {/* Admin Feature Navigation */}
+        <nav className="admin-feature-nav">
+          <Link to="/admin/dashboard" className="admin-feature-link">Dashboard Home</Link>
+          <Link to="/admin/course/add" className="admin-feature-link">Add Course</Link>
+          <Link to="/admin/course" className="admin-feature-link">Manage Courses</Link>
+          <Link to="/admin/users" className="admin-feature-link">Manage Users</Link>
+        </nav>
         {/* System Status */}
         <div className={`system-status ${systemStatus === "Online" ? "online" : "offline"}`}>System Status: {systemStatus}</div>
         {/* Welcome Section */}
@@ -149,23 +160,8 @@ const AdminDashbord = ({ user }) => {
           </div>
           <div className="admin-stat-card stat-revenue">
             <h3>Revenue</h3>
-            <p>₹ --</p>
+            <p>₹ {totalRevenue.toLocaleString()}</p>
           </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="admin-quick-actions">
-          <button className="quick-action-btn" onClick={() => navigate("/admin/course?add=true")}>Add New Course</button>
-          <button className="quick-action-btn" onClick={() => setShowAnnouncement(true)}>Send Announcement</button>
-          <button className="quick-action-btn" onClick={handleExport}>Export Data</button>
-        </div>
-
-        {/* Quick Links */}
-        <div className="admin-quick-links">
-          <Link to="/admin/dashboard" className="quick-link">Dashboard Home</Link>
-          <Link to="/admin/course" className="quick-link">Manage Courses</Link>
-          <Link to="/admin/users" className="quick-link">Manage Users</Link>
-          <Link to="/account" className="quick-link">Account</Link>
         </div>
 
         {/* Main Widgets Row */}
@@ -184,14 +180,6 @@ const AdminDashbord = ({ user }) => {
                   {recentCourses.slice(0, 2).map(course => (
                     <CourseCard key={course._id} course={course} />
                   ))}
-                  {recentCourses.length > 2 && (
-                    <button
-                      className="show-more-btn"
-                      onClick={() => navigate("/admin/course")}
-                    >
-                      Show More...
-                    </button>
-                  )}
                 </>
               )}
             </div>
@@ -214,14 +202,6 @@ const AdminDashbord = ({ user }) => {
                       <span className="user-email">{u.email}</span>
                     </div>
                   ))}
-                  {recentUsers.length > 2 && (
-                    <button
-                      className="show-more-btn"
-                      onClick={() => navigate("/admin/users")}
-                    >
-                      Show More...
-                    </button>
-                  )}
                 </>
               )}
             </div>
