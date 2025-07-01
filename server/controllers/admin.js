@@ -301,3 +301,20 @@ export const getAnnouncements = async (req, res) => {
   }
 };
 
+
+
+
+//Adding comment part over here
+import { Comment } from "../models/Comment.js";
+
+export const getAllComments = async (req, res) => {
+  try {
+    const comments = await Comment.find({})
+      .populate("userId", "name")
+      .populate("lectureId", "title");
+
+    res.status(200).json({ success: true, comments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching comments" });
+  }
+};

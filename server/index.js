@@ -45,3 +45,11 @@ app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`);
     connectDb()
 });
+
+
+import commentRoutes from "./routes/commentRoutes.js";
+app.use("/api/comments", commentRoutes);
+
+
+import courseReviewRoutes from "./routes/courseReviewRoutes.js";
+app.use("/api/course-review", courseReviewRoutes);
