@@ -23,6 +23,7 @@ import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
 import { useNavigate, useParams } from "react-router-dom";
+import Quiz from "./pages/quiz/Quiz";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();

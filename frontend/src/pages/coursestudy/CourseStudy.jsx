@@ -262,7 +262,7 @@ const CourseStudy = ({ user }) => {
       {(isAdmin || isEnrolled) && (
         <button
           className="cd-btn-primary"
-          onClick={() => navigate(`/course/${course._id}/quiz`)}
+          onClick={() => navigate(`/quiz/${course._id}`)}
         >
           Go to Quiz
         </button>
