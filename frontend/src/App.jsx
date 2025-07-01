@@ -22,6 +22,7 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
+import { useNavigate, useParams } from "react-router-dom";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
@@ -94,6 +95,10 @@ const App = () => {
             <Route
               path="/course/study/:id"
               element={isAuth ? <CourseStudy user={user} /> : <Login />}
+            />
+            <Route
+              path="/quiz/:courseId"
+              element={isAuth ? <Quiz user={user} /> : <Login />}
             />
             <Route
               path="/admin/course"

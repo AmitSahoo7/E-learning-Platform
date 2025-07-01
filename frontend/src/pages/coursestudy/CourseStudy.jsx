@@ -10,7 +10,7 @@ const CourseStudy = ({ user }) => {
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
 
-  const [quiz, setQuiz] = useState(null);
+  const [quiz, setQuiz] = useState();
 
   // Fetch quiz data when component mounts or when course ID changes
   useEffect(() => {
@@ -252,12 +252,9 @@ const CourseStudy = ({ user }) => {
   {quiz ? (
     <>
       <p>This course contains a quiz with {quiz.questions.length} questions.</p>
-      <button
-        className="cd-btn-primary"
-        onClick={() => navigate(`/course/${course._id}/quiz`)}
-      >
-        Start Quiz
-      </button>
+      <button onClick={() => navigate(`/quiz/${course._id}`)}>
+  Take Quiz
+</button>
     </>
   ) : (
     <>
