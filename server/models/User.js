@@ -20,7 +20,11 @@ const schema=new mongoose.Schema({
     subscription:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Courses",
-    }]
+    }],
+    totalPoints: {
+        type: Number,
+        default: 0,
+    }
 },{
     timestamps:true,
 });

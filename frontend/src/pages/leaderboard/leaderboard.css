@@ -1,0 +1,372 @@
+.leaderboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+  padding: 2rem 1rem;
+}
+
+.leaderboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #155724;
+}
+
+.leaderboard-header h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(21, 87, 36, 0.15);
+}
+
+.leaderboard-header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.leaderboard-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 2rem;
+}
+
+/* User Stats Section */
+.user-stats-section {
+  display: flex;
+  justify-content: center;
+}
+
+.user-stats-card {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.08);
+  border: 1px solid #d4f5e9;
+  max-width: 500px;
+  width: 100%;
+}
+
+.user-stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.user-stats-header h3 {
+  font-size: 1.5rem;
+  color: #218838;
+  margin: 0;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.12);
+}
+
+.user-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: #e6fff2;
+  border-radius: 12px;
+  border: 1px solid #b2f2e5;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #218838;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #155724;
+}
+
+.rank-value {
+  color: #28a745;
+  font-size: 1.5rem;
+}
+
+.points-value {
+  color: #43e97b;
+  font-size: 1.5rem;
+}
+
+/* Leaderboard Section */
+.leaderboard-section {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.08);
+  border: 1px solid #d4f5e9;
+}
+
+.leaderboard-section h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: #e6fff2;
+  border-radius: 12px;
+  border: 1px solid #b2f2e5;
+  transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-item.current-user {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+  border: none;
+}
+
+.rank-position {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-right: 1.5rem;
+  min-width: 40px;
+  text-align: center;
+  color: #218838;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #155724;
+}
+
+.user-points {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.8;
+  color: #218838;
+}
+
+.current-user .user-points {
+  opacity: 0.9;
+}
+
+/* Rewards Section */
+.rewards-section {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.08);
+  border: 1px solid #d4f5e9;
+}
+
+.rewards-section h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.rewards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reward-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #e6fff2;
+  border-radius: 12px;
+  border: 1px solid #b2f2e5;
+  transition: all 0.3s ease;
+}
+
+.reward-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.reward-icon {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  min-width: 40px;
+  text-align: center;
+}
+
+.reward-details {
+  flex: 1;
+}
+
+.reward-description {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.3rem;
+}
+
+.reward-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.reward-points {
+  color: #43e97b;
+  font-weight: 600;
+}
+
+.reward-date {
+  color: #6c757d;
+}
+
+/* Points Info Section */
+.points-info-section {
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.08);
+  border: 1px solid #d4f5e9;
+}
+
+.points-info-section h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  text-align: center;
+}
+
+.points-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.point-item {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  background: #e6fff2;
+  border-radius: 12px;
+  border: 1px solid #b2f2e5;
+  transition: all 0.3s ease;
+}
+
+.point-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.point-icon {
+  font-size: 2rem;
+  margin-right: 1rem;
+  min-width: 50px;
+  text-align: center;
+  color: #28a745;
+}
+
+.point-details h4 {
+  color: #218838;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.point-details p {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .leaderboard-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .leaderboard-header h1 {
+    font-size: 2rem;
+  }
+
+  .leaderboard-header p {
+    font-size: 1rem;
+  }
+
+  .user-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .points-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .reward-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-item {
+    padding: 0.8rem 1rem;
+  }
+
+  .rank-position {
+    font-size: 1.2rem;
+    margin-right: 1rem;
+  }
+
+  .user-name {
+    font-size: 1rem;
+  }
+
+  .user-points {
+    font-size: 0.9rem;
+  }
+} 
