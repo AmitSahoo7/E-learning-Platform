@@ -5,6 +5,7 @@ import { Lecture } from "../models/Lecture.js";
 import { Payment } from "../models/Payment.js";
 import { User } from "../models/User.js";
 import { Progress } from "../models/Progress.js";
+import { Reward } from "../models/Reward.js";
 import crypto from 'crypto';
 // import { deleteLecture } from "../controllers/course.js";
 
@@ -192,6 +193,39 @@ export const addProgress = TryCatch(async (req, res) => {
       course: req.query.course,
       completedLectures: [lectureId],
     });
+    
+    // Award points for video completion
+    try {
+      const lecture = await Lecture.findById(lectureId);
+      if (lecture) {
+        // Check if user already got points for this video
+        const existingReward = await Reward.findOne({
+          user: req.user._id,
+          course: req.query.course,
+          activityType: "video",
+          description: `Completed video lecture: ${lectureId}`
+        });
+
+        if (!existingReward) {
+          // Award 1 point for video completion
+          await Reward.create({
+            user: req.user._id,
+            course: req.query.course,
+            activityType: "video",
+            points: 1,
+            description: `Completed video lecture: ${lecture.title}`
+          });
+
+          // Update user's total points
+          const user = await User.findById(req.user._id);
+          user.totalPoints += 1;
+          await user.save();
+        }
+      }
+    } catch (error) {
+      console.log("Error awarding points:", error.message);
+    }
+    
     return res.status(201).json({ message: "Progress started" });
   }
 
@@ -204,6 +238,38 @@ export const addProgress = TryCatch(async (req, res) => {
   progress.completedLectures.push(lectureId);
 
   await progress.save();
+
+  // Award points for video completion
+  try {
+    const lecture = await Lecture.findById(lectureId);
+    if (lecture) {
+      // Check if user already got points for this video
+      const existingReward = await Reward.findOne({
+        user: req.user._id,
+        course: req.query.course,
+        activityType: "video",
+        description: `Completed video lecture: ${lectureId}`
+      });
+
+      if (!existingReward) {
+        // Award 1 point for video completion
+        await Reward.create({
+          user: req.user._id,
+          course: req.query.course,
+          activityType: "video",
+          points: 1,
+          description: `Completed video lecture: ${lecture.title}`
+        });
+
+        // Update user's total points
+        const user = await User.findById(req.user._id);
+        user.totalPoints += 1;
+        await user.save();
+      }
+    }
+  } catch (error) {
+    console.log("Error awarding points:", error.message);
+  }
 
   res.status(201).json({
     message: "New Progress added",

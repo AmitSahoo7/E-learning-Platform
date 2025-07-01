@@ -61,6 +61,16 @@
 .profile-joined span {
   color: #888;
 }
+.profile-points span {
+  color: #ff6b6b;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.points-value {
+  color: #51cf66 !important;
+  font-weight: 700 !important;
+  font-size: 1.2rem !important;
+}
 
 .profile-actions {
   width: 100%;

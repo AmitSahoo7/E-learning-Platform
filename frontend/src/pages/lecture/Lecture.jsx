@@ -167,6 +167,12 @@ const Lecture = ({ user }) => {
         }
       );
       console.log(data.message);
+      
+      // Show points notification if it's a new completion
+      if (data.message === "New Progress added" || data.message === "Progress started") {
+        toast.success("🎉 +1 point earned for completing this video!");
+      }
+      
       fetchProgress();
     } catch (error) {
       console.log(error);
@@ -416,6 +422,25 @@ const Lecture = ({ user }) => {
                       onClick={() => fetchLecture(e._id)}
                     >
                       {i + 1}. {e.title}
+                      {/* +1 point badge for video lectures only */}
+                      {e.video && (
+                        <span style={{
+                          marginLeft: 10,
+                          background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)',
+                          color: '#155724',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          borderRadius: 8,
+                          padding: '2px 10px',
+                          boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)',
+                          verticalAlign: 'middle',
+                          display: 'inline-block',
+                          letterSpacing: 0.5,
+                          marginTop: -2
+                        }}>
+                          +1 point
+                        </span>
+                      )}
                       {progress[0] && progress[0].completedLectures.includes(e._id) && (
                         <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
                       )}
