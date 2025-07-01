@@ -14,11 +14,20 @@ import {
   getRecentPayments,
   getEnrollmentTrends,
   getFeedbacks,
+
+  updateCourse,
+
   createAnnouncement,
   getAnnouncements,
+
+
+  getAllComments
 } from "../controllers/admin.js";
 import { uploadFiles, uploadCourseFiles } from "../middlewares/multer.js";
 import { getAllCourses } from "../controllers/course.js";
+
+
+
 
 const router = express.Router();
 
@@ -36,9 +45,15 @@ router.get("/payments", isAuth, isAdmin, getRecentPayments);
 router.get("/enrollment-trends", isAuth, isAdmin, getEnrollmentTrends);
 router.get("/feedbacks", isAuth, isAdmin, getFeedbacks);
 router.get("/course", isAuth, isAdmin, getAllCourses);
+router.put("/course/:id", isAuth, isAdmin, uploadCourseFiles, updateCourse);
 
 // Announcements
 router.post("/announcement", isAuth, isAdmin, createAnnouncement);
 router.get("/announcements", isAuth, getAnnouncements);
+
+router.get("/comments", isAuth, isAdmin, getAllComments);
+
+
+
 
 export default router;

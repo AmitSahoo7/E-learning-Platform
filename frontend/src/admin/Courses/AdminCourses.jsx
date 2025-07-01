@@ -3,6 +3,9 @@ import Layout from "../Utils/Layout";
 import { useNavigate } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import CourseCard from "../../components/coursecard/CourseCard";
+import AddCourse from "./AddCourse";
+import Modal from "../../components/Modal";
+import { FaPencilAlt } from "react-icons/fa";
 import "./admincourses.css";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -52,6 +55,17 @@ const AdminCourses = ({ user }) => {
   };
 
   const { courses, fetchCourses } = CourseData();
+  const [editCourse, setEditCourse] = useState(null);
+
+  // Custom onClose for modal: only allow close via close button
+  const handleModalClose = (e) => {
+    // If e is defined and is a click event, prevent closing if not from close button
+    if (e && e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+      // Do nothing (disable close on overlay click)
+      return;
+    }
+    setEditCourse(null);
+  };
 
   // Video upload handler (course creation)
   const submitHandler = async (e) => {
@@ -118,6 +132,7 @@ const AdminCourses = ({ user }) => {
 
   return (
     <Layout>
+      {/* Restore navigation links at the top */}
       <nav className="admin-feature-nav">
         <a href="/admin/dashboard" className="admin-feature-link">Dashboard Home</a>
         <a href="/admin/course/add" className="admin-feature-link">Add Course</a>
@@ -129,15 +144,40 @@ const AdminCourses = ({ user }) => {
           <h1>All Courses</h1>
           <div className="dashboard-content">
             {courses && courses.length > 0 ? (
-              courses.map((e) => {
-                return <CourseCard key={e._id} course={e} />;
-              })
+              courses.map((e) => (
+                <div key={e._id} style={{ position: 'relative' }}>
+                  {/* Floating Edit Button */}
+                  <button
+                    className="edit-fab-btn"
+                    title="Edit Course"
+                    onClick={() => setEditCourse(e)}
+                  >
+                    <FaPencilAlt size={16} />
+                  </button>
+                  <CourseCard course={e} />
+                </div>
+              ))
             ) : (
               <p>No Courses Yet</p>
             )}
           </div>
         </div>
       </div>
+      {/* Edit Form Modal */}
+      <Modal isOpen={!!editCourse} onClose={handleModalClose} disableOverlayClick={true}>
+        {editCourse && (
+          <AddCourse
+            user={user}
+            editMode={true}
+            initialData={editCourse}
+            onSuccess={() => {
+              setEditCourse(null);
+              fetchCourses();
+              toast.success("Course updated!");
+            }}
+          />
+        )}
+      </Modal>
     </Layout>
   );
 };

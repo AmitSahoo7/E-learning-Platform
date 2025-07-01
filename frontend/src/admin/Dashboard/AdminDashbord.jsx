@@ -19,6 +19,8 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
   const [loading, setLoading] = useState(true);
   const [systemStatus, setSystemStatus] = useState("Checking...");
   const [notes, setNotes] = useState(() => localStorage.getItem("adminNotes") || "");
+  const [comments, setComments] = useState([]);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -63,6 +65,13 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
         // System status
         await axios.get(`${server}/api/admin/stats`);
         setSystemStatus("Online");
+
+        // Fetch latest comments
+        const commentsRes = await axios.get(`${server}/api/comments`, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        setComments(commentsRes.data.comments);
+
       } catch (error) {
         setSystemStatus("Offline");
         console.log(error);
@@ -95,6 +104,24 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
     setAnnouncement("");
     // You can POST to your backend here
   };
+  
+  //Delete of any comment by the admin
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) return;
+
+    try {
+      await axios.delete(`${server}/api/comments/${commentId}`, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      toast.success("Comment deleted successfully");
+      setComments(prev => prev.filter(c => c._id !== commentId));
+    } catch (error) {
+      toast.error("Failed to delete comment");
+    }
+  };
+
 
   // Calculate total revenue from recentPayments
   const totalRevenue = recentPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -228,6 +255,50 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
               ))}
             </div>
           </div>
+          {/* Latest Comments */}
+          <div className="admin-widget comments-widget">
+            <div className="widget-header">
+              <h2>Latest Comments</h2>
+              <Link to="/admin/comments" className="see-all-link">See all</Link>
+            </div>
+
+            <div className="widget-content-comments">
+              {loading ? (
+                <p>Loading...</p>
+              ) : comments.length === 0 ? (
+                <p>No comments yet.</p>
+              ) : (
+                <>
+                  {comments.slice(0, 5).map((c) => (
+                    <div key={c._id} className="comment-list-item">
+                      <div className="comment-info">
+                        <span className="comment-user">{c.userId?.name || "User"}</span>
+                        <span className="comment-text">{c.text}</span>
+                        <span className="comment-lecture">Lecture: {c.lecture?.title || "N/A"}</span>
+                      </div>
+                      <button
+                        className="comment-delete-btn"
+                        onClick={() => handleDeleteComment(c._id)}
+                        title="Delete Comment"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {comments.length > 5 && (
+                    <button
+                      className="show-more-btn"
+                      onClick={() => navigate("/admin/comments")}
+                    >
+                      Show More...
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+
         </div>
       </div>
     </Layout>

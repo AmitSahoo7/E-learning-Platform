@@ -282,6 +282,10 @@ export const getYourProgress = TryCatch(async (req, res) => {
     course: req.query.course,
   });
 
+  if (!progress || progress.length === 0) {
+  return res.status(404).json({ message: "No progress found" });
+}
+
   const allLectures = (await Lecture.find({ course: req.query.course })).length;
 
   if (!progress || progress.length === 0) {
@@ -293,8 +297,9 @@ export const getYourProgress = TryCatch(async (req, res) => {
     });
   }
 
+
   const completedLectures = progress[0].completedLectures.length;
-  const courseProgressPercentage = (completedLectures * 100) / (allLectures || 1);
+  const courseProgressPercentage = (completedLectures * 100) / allLectures;
 
   res.json({
     courseProgressPercentage,
