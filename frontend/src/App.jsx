@@ -22,6 +22,7 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
+import Leaderboard from "./pages/leaderboard/Leaderboard";
 import axios from "axios";
 import { server } from "./main";
 
@@ -160,6 +161,10 @@ const App = () => {
                   <Home />
                 )
               }
+            />
+            <Route
+              path="/leaderboard"
+              element={<Leaderboard user={user} />}
             />
           </Routes>
           <Footer />

@@ -25,7 +25,7 @@ const Account = ({ user }) => {
 
   // Format joined date if available
   const joined = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : null;
-
+  
   return (
     <div className="account-bg">
       {user && (
@@ -42,18 +42,19 @@ const Account = ({ user }) => {
               <strong>{user.email}</strong>
             </p>
             <p className="profile-role">Role: <span>{user.role}</span></p>
+            <p className="profile-points">Total Points: <span className="points-value">🏆 {user.totalPoints || 0}</span></p>
             {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
           </div>
           <div className="profile-actions">
             {user.role === "admin" ? (
               <>
                 <div className="admin-actions-divider">Admin Actions</div>
-                <button
-                  onClick={() => navigate(`/admin/dashboard`)}
+              <button
+                onClick={() => navigate(`/admin/dashboard`)}
                   className="common-btn profile-btn"
-                >
+              >
                   <MdDashboard style={{ marginRight: 8 }} /> Admin Dashboard
-                </button>
+              </button>
               </>
             ) : (
               <button
@@ -71,7 +72,7 @@ const Account = ({ user }) => {
             </button>
           </div>
         </div>
-      )}
+  )}
     </div>
   );
 };

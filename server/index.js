@@ -30,18 +30,26 @@ app.use("/uploads", express.static("uploads"));
 
 //importing routes
 import userRoutes from './routes/user.js'
-
 import courseRoutes from "./routes/course.js";
 import adminRoutes from "./routes/admin.js";
 import feedbackRoutes from "./routes/feedback.js";
+import rewardRoutes from "./routes/reward.js";
 //using routes
 app.use('/api',userRoutes);
-
 app.use("/api", courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/reward", rewardRoutes);
 
 app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`);
     connectDb()
 });
+
+
+import commentRoutes from "./routes/commentRoutes.js";
+app.use("/api/comments", commentRoutes);
+
+
+import courseReviewRoutes from "./routes/courseReviewRoutes.js";
+app.use("/api/course-review", courseReviewRoutes);

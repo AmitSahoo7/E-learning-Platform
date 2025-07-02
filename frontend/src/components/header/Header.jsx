@@ -36,6 +36,7 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
         <Link to="/">Home</Link>
         <Link to="/courses">Courses</Link>
         <Link to="/about">About</Link>
+        <Link to="/leaderboard">🏆 Leaderboard</Link>
         {isAuth ? (
           <Link to="/account">Account</Link>
         ) : (
