@@ -18,6 +18,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import CourseStudy from "./pages/coursestudy/CourseStudy";
 import Lecture from "./pages/lecture/Lecture";
 import GeneralChatbot from "./components/GeneralChatbot";
+import Quiz from "./pages/quiz/Quiz";
 import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";

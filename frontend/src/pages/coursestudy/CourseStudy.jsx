@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import axios from "axios";
 import { server } from "../../main";
+import AddQuiz from "../../admin/Courses/AddQuiz.jsx";
+
 
 const CourseStudy = ({ user }) => {
   const params = useParams();
@@ -234,6 +236,23 @@ const CourseStudy = ({ user }) => {
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
             )}
+            {isAdmin || isEnrolled ? (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                onClick={() => navigate(`/quiz/${course._id}`)}
+                disabled={enrolling}
+              >
+                Quizs
+              </button>
+            ) : (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                onClick={handleEnroll}
+                disabled={enrolling}
+              >
+                {enrolling ? "Processing..." : "Enroll"}
+              </button>
+            )}
 
             {/* Preview Video Placeholder */}
             <div className="cd-preview-video">
@@ -247,29 +266,36 @@ const CourseStudy = ({ user }) => {
       </div>
 
       {/* Quiz Section Button */}
-      <div className="quiz-section">
-  <h3 style={{ marginTop: "2rem", color: "#007aff" }}>📋 Take Quiz</h3>
+<div className="quiz-section">
+  <h3 style={{ marginTop: "2rem", color: "#007aff" }}>📋 Quiz Section</h3>
+
   {quiz ? (
     <>
       <p>This course contains a quiz with {quiz.questions.length} questions.</p>
-      <button onClick={() => navigate(`/quiz/${course._id}`)}>
-  Take Quiz
-</button>
+      {!isAdmin && isEnrolled && (
+        <button onClick={() => navigate(`/quiz/${course._id}`)}>Take Quiz</button>
+      )}
     </>
   ) : (
     <>
-      <p>No quiz has been added yet. Stay tuned!</p>
-      {(isAdmin || isEnrolled) && (
-        <button
-          className="cd-btn-primary"
-          onClick={() => navigate(`/course/${course._id}/quiz`)}
-        >
-          Go to Quiz
-        </button>
+      {isAdmin ? (
+        <>
+          <p>No quiz has been added yet.</p>
+          <div className="quiz-section">
+                    <h3>Add Quiz for: {course.title}</h3>
+                    <AddQuiz courseId={course._id} />
+                  </div>
+          
+        </>
+      ) : isEnrolled ? (
+        <p>No quiz available yet. Stay tuned!</p>
+      ) : (
+        <p>Login to access quizzes.</p>
       )}
     </>
   )}
 </div>
+
 
       <div className="cd-instructor-card" data-aos="fade-up">
         <img
