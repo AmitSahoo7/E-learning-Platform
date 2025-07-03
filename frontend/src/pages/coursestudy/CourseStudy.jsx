@@ -57,7 +57,7 @@ const CourseStudy = ({ user }) => {
   const [lectLength, setLectLength] = useState(1);
   const [enrolling, setEnrolling] = useState(false);
 
-  const isEnrolled = user && course && user.subscription.includes(course._id);
+  const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
 
   // Fetch course and progress data
@@ -219,7 +219,7 @@ const CourseStudy = ({ user }) => {
               )
             ) : null}
 
-            {isAdmin || isEnrolled ? (
+            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
                 onClick={() => navigate(`/lectures/${course._id}`)}
@@ -236,7 +236,7 @@ const CourseStudy = ({ user }) => {
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
             )}
-            {isAdmin || isEnrolled ? (
+            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
                 onClick={() => navigate(`/quiz/${course._id}`)}
@@ -272,7 +272,7 @@ const CourseStudy = ({ user }) => {
   {quiz ? (
     <>
       <p>This course contains a quiz with {quiz.questions.length} questions.</p>
-      {!isAdmin && isEnrolled && (
+      {!isAdmin && user && Array.isArray(user.subscription) && user.subscription.includes(course._id) && (
         <button onClick={() => navigate(`/quiz/${course._id}`)}>Take Quiz</button>
       )}
     </>
@@ -287,7 +287,7 @@ const CourseStudy = ({ user }) => {
                   </div>
           
         </>
-      ) : isEnrolled ? (
+      ) : (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
         <p>No quiz available yet. Stay tuned!</p>
       ) : (
         <p>Login to access quizzes.</p>

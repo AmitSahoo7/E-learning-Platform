@@ -31,7 +31,7 @@ const Lecture = ({ user }) => {
   const { fetchCourse, course } = CourseData();
 
   useEffect(() => {
-    if (user && user.role !== "admin" && !user.subscription.includes(params.id)) {
+    if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
       navigate("/");
     }
   }, [user, params.id, navigate]);
@@ -231,7 +231,7 @@ const Lecture = ({ user }) => {
                 All lectures available for management
               </div>
             </div>
-          ) : user && user.subscription.includes(params.id) ? (
+          ) : user && Array.isArray(user.subscription) && user.subscription.includes(params.id) ? (
             lectLength === 0 ? (
               <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>

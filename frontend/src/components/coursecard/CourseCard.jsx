@@ -98,7 +98,7 @@ const CourseCard = ({ course }) => {
         <button
           onClick={() => {
             if (user) {
-              if (user?.subscription?.includes(course._id)) {
+              if (Array.isArray(user?.subscription) && user.subscription.includes(course._id)) {
                 navigate(`/course/study/${course._id}`);
               } else {
                 navigate(`/course/${course._id}`);
@@ -109,7 +109,7 @@ const CourseCard = ({ course }) => {
           }}
           className="common-btn-new"
         >
-          {user?.subscription?.includes(course._id)
+          {Array.isArray(user?.subscription) && user.subscription.includes(course._id)
             ? "Study Now"
             : "Get Started"}
         </button>

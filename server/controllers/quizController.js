@@ -26,10 +26,8 @@ export const getQuizByCourse = async (req, res) => {
     const courseId = req.params.courseId;
     const user = req.user;
 
-    const course = await Courses.findById(courseId);
-    const isEnrolled = course.students.includes(user._id);
-
-    if (!isEnrolled) {
+    // Enrollment check: user.subscription should include courseId
+    if (!user || !Array.isArray(user.subscription) || !user.subscription.includes(courseId)) {
       return res.status(403).json({ message: "You must enroll in this course to take the quiz" });
     }
 

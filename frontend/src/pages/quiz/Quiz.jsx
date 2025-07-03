@@ -69,7 +69,7 @@ const Quiz = ({ user }) => {
 
   if (loading) return <div className="quiz-container">Loading quiz...</div>;
   if (error) return <div className="quiz-container error">{error}</div>;
-  if (!quiz) return <div className="quiz-container">No quiz available.</div>;
+  if (!quiz || !Array.isArray(quiz.questions)) return <div className="quiz-container">No quiz available.</div>;
 
   return (
     <div className="quiz-container">
@@ -90,9 +90,9 @@ const Quiz = ({ user }) => {
           <h4>
             Q{qIndex + 1}. {q.question}
           </h4>
-          {q.options.map((opt, optIndex) => {
-            const selected = answers[qIndex]?.includes(optIndex);
-            const isCorrect = submitted && q.correctAnswers?.includes(optIndex);
+          {Array.isArray(q.options) && q.options.map((opt, optIndex) => {
+            const selected = Array.isArray(answers[qIndex]) && answers[qIndex].includes(optIndex);
+            const isCorrect = submitted && Array.isArray(q.correctAnswers) && q.correctAnswers.includes(optIndex);
             const isWrongSelected = submitted && selected && !isCorrect;
 
             return (

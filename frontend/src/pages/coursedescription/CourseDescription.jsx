@@ -88,7 +88,7 @@ const CourseDescription = ({ user }) => {
   };
 
   // Button logic
-  const isEnrolled = user && course && user.subscription.includes(course._id);
+  const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
 
   return (
     <>
