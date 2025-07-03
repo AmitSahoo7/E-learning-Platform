@@ -2,7 +2,7 @@
   background: #6fffa2;
   padding: 2.5rem 1rem 1.2rem 1rem;
   text-align: center;
-  margin-top: 2rem;
+  /* margin-top: 2rem; */
 }
 
 .footer-main {
@@ -74,6 +74,114 @@
 @media (max-width: 600px) {
   .footer-nav {
     gap: 1rem;
+  }
+  .footer-logo {
+    font-size: 1.2rem;
+  }
+}
+
+.footer-custom.glassy-footer {
+  background: rgb(6, 25, 61);
+  padding: 3rem 1rem 2rem 1rem;
+  text-align: left;
+  /* margin-top: 2rem; */
+  color: #f3f4f6;
+  /* border-radius: 2rem 2rem 0 0; */
+  box-shadow: 0 -4px 32px #232a3444;
+}
+.footer-columns {
+  display: flex;
+  justify-content: space-between;
+  gap: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto 2rem auto;
+  flex-wrap: wrap;
+}
+.footer-col {
+  flex: 1 1 250px;
+  min-width: 220px;
+}
+.footer-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #3ecf8e;
+  font-family: 'Nerko One', cursive;
+  margin-bottom: 0.7rem;
+}
+.footer-about {
+  color: #bdbdbd;
+  font-size: 1.05rem;
+  margin-bottom: 1.2rem;
+}
+.footer-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.7rem;
+}
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.footer-nav a {
+  color: #f3f4f6;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  transition: color 0.2s;
+}
+.footer-nav a:hover {
+  color: #3ecf8e;
+}
+.footer-contact {
+  color: #bdbdbd;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.footer-contact a {
+  color: #3ecf8e;
+  text-decoration: underline;
+}
+.footer-socials {
+  display: flex;
+  gap: 1.2rem;
+  font-size: 1.7rem;
+  margin-top: 0.5rem;
+}
+.footer-socials a {
+  color: #f3f4f6;
+  transition: color 0.2s, transform 0.2s;
+  font-size: 2rem;
+  border-radius: 50%;
+  padding: 0.3rem;
+}
+.footer-socials a:hover {
+  color: #3ecf8e;
+  background: rgba(62, 207, 142, 0.08);
+  transform: scale(1.15);
+}
+.footer-bottom {
+  font-size: 1rem;
+  color: #bdbdbd;
+  margin-top: 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.footer-bottom span {
+  color: #f87171;
+}
+@media (max-width: 900px) {
+  .footer-columns {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  .footer-custom.glassy-footer {
+    border-radius: 1rem 1rem 0 0;
+    padding: 2rem 0.5rem 1rem 0.5rem;
   }
   .footer-logo {
     font-size: 1.2rem;
