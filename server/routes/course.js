@@ -9,6 +9,9 @@ import {
   paymentVerification,
   addLecture,
   deleteLecture,
+  getInstructorCourses,
+  getInstructorCourseStats,
+  getCourseUserStats,
 } from "../controllers/course.js";
 import { isAuth } from "../middlewares/isAuth.js";
 import { uploadFiles } from "../middlewares/multer.js";
@@ -21,6 +24,9 @@ router.get("/course/:id", getSingleCourse);
 router.get("/lectures/:id", isAuth, fetchLectures);
 router.get("/lecture/:id", isAuth, fetchLecture);
 router.get("/mycourse", isAuth, getMyCourses);
+router.get("/instructor/courses", isAuth, getInstructorCourses);
+router.get("/instructor/course-stats", isAuth, getInstructorCourseStats);
+router.get("/instructor/course/:id/users", isAuth, getCourseUserStats);
 
 // More specific routes first
 router.post("/course/checkout/:id", isAuth, checkout);

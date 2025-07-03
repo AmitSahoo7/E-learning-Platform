@@ -46,15 +46,21 @@ const Account = ({ user }) => {
             {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
           </div>
           <div className="profile-actions">
-            {user.role === "admin" ? (
+            {user.role === "admin" || user.role === "superadmin" ? (
               <>
                 <div className="admin-actions-divider">Admin Actions</div>
-              <button
-                onClick={() => navigate(`/admin/dashboard`)}
+                <button
+                  onClick={() => navigate(`/admin/dashboard`)}
                   className="common-btn profile-btn"
-              >
+                >
                   <MdDashboard style={{ marginRight: 8 }} /> Admin Dashboard
-              </button>
+                </button>
+                <button
+                  onClick={() => navigate(`/instructor/dashboard`)}
+                  className="common-btn profile-btn"
+                >
+                  <MdDashboard style={{ marginRight: 8 }} /> Instructor Dashboard
+                </button>
               </>
             ) : (
               <button

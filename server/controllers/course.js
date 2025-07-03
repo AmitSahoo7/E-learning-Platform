@@ -153,6 +153,7 @@ export const addLecture = TryCatch(async (req, res) => {
     title,
     description,
     course: course._id,
+    uploadedBy: req.user._id,
   };
 
   if (file) {
@@ -307,4 +308,72 @@ export const getYourProgress = TryCatch(async (req, res) => {
     allLectures,
     progress,
   });
+});
+
+export const getInstructorCourses = TryCatch(async (req, res) => {
+  // Find courses where user is creator or uploaded at least one lecture
+  const createdCourses = await Courses.find({ createdBy: req.user._id });
+  const lectureCourses = await Lecture.find({ uploadedBy: req.user._id }).distinct('course');
+  const lectureCourseDocs = await Courses.find({ _id: { $in: lectureCourses } });
+  // Merge and remove duplicates
+  const allCourses = [...createdCourses, ...lectureCourseDocs].filter((course, index, self) =>
+    index === self.findIndex((c) => c._id.toString() === course._id.toString())
+  );
+  res.json({ courses: allCourses });
+});
+
+export const getInstructorCourseStats = TryCatch(async (req, res) => {
+  // Find courses where user is creator or uploaded at least one lecture
+  const createdCourses = await Courses.find({ createdBy: req.user._id });
+  const lectureCourses = await Lecture.find({ uploadedBy: req.user._id }).distinct('course');
+  const lectureCourseDocs = await Courses.find({ _id: { $in: lectureCourses } });
+  // Merge and remove duplicates
+  const allCourses = [...createdCourses, ...lectureCourseDocs].filter((course, index, self) =>
+    index === self.findIndex((c) => c._id.toString() === course._id.toString())
+  );
+
+  console.log("Instructor ID:", req.user._id);
+  console.log("Created courses:", createdCourses.map(c => c._id));
+  console.log("Lecture courses:", lectureCourses);
+  console.log("All courses:", allCourses.map(c => c._id));
+
+  const courseStats = await Promise.all(
+    allCourses.map(async (course) => {
+      // Count enrolled users (users who have this course in their subscription)
+      const enrolledUsers = await User.countDocuments({
+        subscription: course._id
+      });
+      // Get total watch time from progress records
+      const progressRecords = await Progress.find({ course: course._id });
+      const totalWatchTime = progressRecords.reduce(
+        (sum, record) => sum + (record.completedLectures ? record.completedLectures.length : 0),
+        0
+      );
+      return {
+        _id: course._id,
+        title: course.title,
+        enrolledUsers,
+        totalWatchTime,
+        totalLectures: await Lecture.countDocuments({ course: course._id })
+      };
+    })
+  );
+  res.json({ courseStats });
+});
+
+export const getCourseUserStats = TryCatch(async (req, res) => {
+  const courseId = req.params.id;
+  // Find all users enrolled in this course
+  const users = await User.find({ subscription: courseId });
+  // For each user, get their progress for this course
+  const userStats = await Promise.all(users.map(async (user) => {
+    const progress = await Progress.findOne({ user: user._id, course: courseId });
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      watchTime: progress && progress.completedLectures ? progress.completedLectures.length : 0,
+    };
+  }));
+  res.json({ userStats });
 });

@@ -30,7 +30,7 @@ export const createCourse = TryCatch(async (req, res) => {
   const instructorAvatar = req.files?.instructorAvatar?.[0];
   const previewVideo = req.files?.previewVideo?.[0];
 
-  await Courses.create({
+  const course = await Courses.create({
     title,
     description,
     category,
@@ -49,6 +49,13 @@ export const createCourse = TryCatch(async (req, res) => {
     instructorAvatar: instructorAvatar?.path,
     previewVideo: previewVideo?.path,
   });
+
+  // Auto-enroll the creator as a student in their own course
+  const user = await User.findById(createdBy);
+  if (user && !user.subscription.includes(course._id)) {
+    user.subscription.push(course._id);
+    await user.save();
+  }
 
   res.status(201).json({
     message: "Course Created Successfully",
@@ -178,6 +185,15 @@ export const updateRole = TryCatch(async (req, res) => {
   }
 
   if (user.role === "admin") {
+    user.role = "superadmin";
+    await user.save();
+
+    return res.status(200).json({
+      message: "Role updated to superadmin",
+    });
+  }
+
+  if (user.role === "superadmin") {
     user.role = "user";
     await user.save();
 

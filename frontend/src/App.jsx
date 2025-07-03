@@ -23,6 +23,7 @@ import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
 import Leaderboard from "./pages/leaderboard/Leaderboard";
+import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import axios from "axios";
 import { server } from "./main";
 
@@ -165,6 +166,14 @@ const App = () => {
             <Route
               path="/leaderboard"
               element={<Leaderboard user={user} />}
+            />
+            <Route
+              path="/instructor/dashboard"
+              element={
+                isAuth && (user.role === "admin" || user.role === "superadmin")
+                  ? <InstructorDashboard />
+                  : <Home />
+              }
             />
           </Routes>
           <Footer />
