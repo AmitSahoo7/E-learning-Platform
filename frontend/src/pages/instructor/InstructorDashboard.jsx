@@ -79,8 +79,8 @@ const InstructorDashboard = () => {
   // Calculate chart width: 120px per bar, min 400px
   const chartWidth = Math.max(chartData.length * 120, 400);
 
-  const handleEditCourse = (courseId) => {
-    navigate('/admin/course');
+  const handleManageLecture = (courseId) => {
+    navigate(`/lectures/${courseId}`);
   };
 
   return (
@@ -146,8 +146,8 @@ const InstructorDashboard = () => {
                   <button className="instructor-btn" onClick={() => handleViewDetails(course._id, course.title)}>
                     View Details
                   </button>
-                  <button className="instructor-btn" onClick={() => handleEditCourse(course._id)}>
-                    Edit Course
+                  <button className="instructor-btn" onClick={() => handleManageLecture(course._id)}>
+                    Manage Lecture
                   </button>
                 </div>
               </div>
