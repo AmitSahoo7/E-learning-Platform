@@ -407,7 +407,13 @@ const Lecture = ({ user }) => {
                   <b>Description:</b>
                   <div style={{ marginTop: 4 }}>{lecture?.description}</div>
                 </div>
-                <button className="notes-btn-modern" onClick={() => setShowPdfModal(true)}>Notes</button>
+                <button className="notes-btn-modern" onClick={() => {
+                  if (lecture.pdf) {
+                    window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
+                  } else {
+                    window.alert('No notes available.');
+                  }
+                }}>Notes</button>
               </div>
             )}
 
@@ -492,19 +498,6 @@ const Lecture = ({ user }) => {
                   user={user}
                 />
               </div>
-            )}
-          </div>
-        </div>
-      )}
-      {/* PDF Modal */}
-      {showPdfModal && lecture && (
-        <div className="modal-overlay" onClick={() => setShowPdfModal(false)}>
-          <div className="modal-content" style={{ maxWidth: 800, width: '90%', height: '80vh', background: '#fff', borderRadius: 12, padding: 16, position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <button className="close-modal-btn" style={{ position: 'absolute', top: 8, right: 8 }} onClick={() => setShowPdfModal(false)}>Close</button>
-            {lecture.pdf ? (
-              <iframe src={`${server}/${lecture.pdf}`} title="Lecture Notes PDF" width="100%" height="100%" style={{ border: 'none', minHeight: 500 }}></iframe>
-            ) : (
-              <div style={{ textAlign: 'center', fontSize: '1.2rem', color: '#888', marginTop: '2em' }}>No notes available.</div>
             )}
           </div>
         </div>
