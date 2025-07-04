@@ -25,12 +25,8 @@ const Lecture = ({ user }) => {
   const [video, setvideo] = useState("");
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
-  const [toggle, setToggle] = useState("video"); // 'video' or 'pdf'
-  // PDF upload states
   const [pdf, setPdf] = useState("");
-  const [pdfTitle, setPdfTitle] = useState("");
-  const [pdfDescription, setPdfDescription] = useState("");
-  const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   const { fetchCourse, course } = CourseData();
 
@@ -91,11 +87,10 @@ const Lecture = ({ user }) => {
     setBtnLoading(true);
     e.preventDefault();
     const myForm = new FormData();
-
     myForm.append("title", title);
     myForm.append("description", description);
-    myForm.append("file", video);
-
+    if (video) myForm.append("file", video);
+    if (pdf) myForm.append("pdf", pdf);
     try {
       const { data } = await axios.post(
         `${server}/api/course/${params.id}`,
@@ -106,7 +101,6 @@ const Lecture = ({ user }) => {
           },
         }
       );
-
       toast.success(data.message);
       setBtnLoading(false);
       setShow(false);
@@ -115,6 +109,7 @@ const Lecture = ({ user }) => {
       setDescription("");
       setvideo("");
       setVideoPrev("");
+      setPdf("");
     } catch (error) {
       toast.error(error.response.data.message);
       setBtnLoading(false);
@@ -218,45 +213,6 @@ const Lecture = ({ user }) => {
   };
 }, []);
 
-
-
-  // PDF upload handler
-  const submitPdfHandler = async (e) => {
-    setPdfBtnLoading(true);
-    e.preventDefault();
-    const myForm = new FormData();
-    myForm.append("title", pdfTitle);
-    myForm.append("description", pdfDescription);
-    if (pdf) myForm.append("file", pdf);
-    try {
-      const { data } = await axios.post(
-        `${server}/api/course/${params.id}`,
-        myForm,
-        {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        }
-      );
-      toast.success(data.message);
-      setPdfBtnLoading(false);
-      setShow(false);
-      fetchLectures();
-      setPdf("");
-      setPdfTitle("");
-      setPdfDescription("");
-    } catch (error) {
-      toast.error(error.response.data.message);
-      setPdfBtnLoading(false);
-    }
-  };
-
-  // --- Progress bar safety logic ---
-  const safeLectLength = lectLength > 0 ? lectLength : 1; // avoid division by zero
-  const safeCompletedLec = Math.min(completedLec, safeLectLength);
-  const percent = Math.round((safeCompletedLec / safeLectLength) * 100);
-  const safeCompleted = Math.min(percent, 100);
-
   return (
     <>
       {loading ? (
@@ -358,7 +314,7 @@ const Lecture = ({ user }) => {
                     textAlign: "center",
                   }}
                 >
-                  Course Progress - {safeCompletedLec} out of {safeLectLength}
+                  Course Progress - {completedLec} out of {lectLength}
                 </div>
                 <div
                   className="lecture-progress-bar-track"
@@ -366,7 +322,7 @@ const Lecture = ({ user }) => {
                 >
                   <div
                     className="lecture-progress-bar-fill"
-                    style={{ width: `${safeCompleted}%` }}
+                    style={{ width: `${completedLec / lectLength * 100}%` }}
                   ></div>
                 </div>
                 <span
@@ -378,7 +334,7 @@ const Lecture = ({ user }) => {
                     marginTop: 12,
                   }}
                 >
-                  {safeCompleted}%
+                  {completedLec / lectLength * 100}%
                 </span>
               </div>
             )
@@ -397,106 +353,17 @@ const Lecture = ({ user }) => {
           {show && user && user.role === "admin" && (
             <div className="lecture-form-box">
               <div className="lecture-form">
-                <div className="toggle-upload">
-                  <button
-                    className={
-                      toggle === "video" ? "common-btn active" : "common-btn"
-                    }
-                    onClick={() => setToggle("video")}
-                    type="button"
-                  >
-                    Video
-                  </button>
-                  <button
-                    className={
-                      toggle === "pdf" ? "common-btn active" : "common-btn"
-                    }
-                    onClick={() => setToggle("pdf")}
-                    type="button"
-                  >
-                    PDF
-                  </button>
-                </div>
-                {toggle === "video" ? (
-                  <div className="lecture-form-box">
-                    <h2>Add Lecture</h2>
-                    <form onSubmit={submitHandler}>
-                      <label htmlFor="lecture-title">Title</label>
-                      <input
-                        id="lecture-title"
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                      />
-                      <label htmlFor="lecture-description">Description</label>
-                      <input
-                        id="lecture-description"
-                        type="text"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                      />
-                      <input
-                        type="file"
-                        placeholder="choose video"
-                        onChange={changeVideoHandler}
-                        required
-                        accept="video/mp4"
-                      />
-                      {videoPrev && (
-                        <video
-                          src={videoPrev}
-                          alt=""
-                          width={300}
-                          controls
-                        ></video>
-                      )}
-                      <button
-                        disabled={btnLoading}
-                        type="submit"
-                        className="common-btn"
-                      >
-                        {btnLoading ? "Please Wait..." : "Add"}
-                      </button>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="lecture-form-box">
-                    <h2>Add Lecture PDF</h2>
-                    <form onSubmit={submitPdfHandler}>
-                      <label htmlFor="pdf-title">Title</label>
-                      <input
-                        id="pdf-title"
-                        type="text"
-                        value={pdfTitle}
-                        onChange={(e) => setPdfTitle(e.target.value)}
-                        required
-                      />
-                      <label htmlFor="pdf-description">Description</label>
-                      <input
-                        id="pdf-description"
-                        type="text"
-                        value={pdfDescription}
-                        onChange={(e) => setPdfDescription(e.target.value)}
-                        required
-                      />
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) => setPdf(e.target.files[0])}
-                        required
-                      />
-                      <button
-                        disabled={pdfBtnLoading}
-                        type="submit"
-                        className="common-btn"
-                      >
-                        {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
-                      </button>
-                    </form>
-                  </div>
-                )}
+                <form onSubmit={submitHandler}>
+                  <label>Title</label>
+                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                  <label>Description</label>
+                  <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
+                  <label>Video File</label>
+                  <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
+                  <label>PDF File (optional)</label>
+                  <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
+                  <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
+                </form>
               </div>
             </div>
           )}
@@ -540,7 +407,13 @@ const Lecture = ({ user }) => {
                   <b>Description:</b>
                   <div style={{ marginTop: 4 }}>{lecture?.description}</div>
                 </div>
-                <button className="notes-btn-modern">Notes</button>
+                <button className="notes-btn-modern" onClick={() => {
+                  if (lecture.pdf) {
+                    window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
+                  } else {
+                    window.alert('No notes available.');
+                  }
+                }}>Notes</button>
               </div>
             )}
 

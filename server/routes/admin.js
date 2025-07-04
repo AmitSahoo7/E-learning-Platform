@@ -1,5 +1,5 @@
 import express from "express";
-import { isAdmin, isAuth } from "../middlewares/isAuth.js";
+import { isAdmin, isAuth, isSuperAdmin } from "../middlewares/isAuth.js";
 import {
   addLectures,
   createCourse,
