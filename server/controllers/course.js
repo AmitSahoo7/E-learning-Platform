@@ -147,8 +147,8 @@ export const addLecture = TryCatch(async (req, res) => {
     });
 
   const { title, description } = req.body;
-  const file = req.file;
-
+  // Support both video and pdf fields
+  const files = req.files || {};
   let lectureData = {
     title,
     description,
@@ -156,12 +156,15 @@ export const addLecture = TryCatch(async (req, res) => {
     uploadedBy: req.user._id,
   };
 
-  if (file) {
-    if (file.mimetype === "application/pdf") {
-      lectureData.pdf = file.path;
-    } else if (file.mimetype === "video/mp4") {
-      lectureData.video = file.path;
+  if (files.file && files.file[0]) {
+    if (files.file[0].mimetype === "video/mp4") {
+      lectureData.video = files.file[0].path;
+    } else if (files.file[0].mimetype === "application/pdf") {
+      lectureData.pdf = files.file[0].path;
     }
+  }
+  if (files.pdf && files.pdf[0]) {
+    lectureData.pdf = files.pdf[0].path;
   }
 
   const lecture = await Lecture.create(lectureData);

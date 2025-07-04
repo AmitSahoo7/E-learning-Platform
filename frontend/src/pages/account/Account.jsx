@@ -42,7 +42,7 @@ const Account = ({ user }) => {
               <strong>{user.email}</strong>
             </p>
             <p className="profile-role">Role: <span>{user.role}</span></p>
-            <p className="profile-points">Total Points: <span className="points-value">🏆 {user.totalPoints || 0}</span></p>
+            <p className="profile-points">Total Points: <span className="points-value">🏆 {(user.role === 'admin' || user.role === 'instructor') ? 'Not Applicable' : (user.totalPoints || 0)}</span></p>
             {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
           </div>
           <div className="profile-actions">
