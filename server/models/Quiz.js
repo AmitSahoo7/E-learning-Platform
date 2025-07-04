@@ -4,6 +4,7 @@ const questionSchema = new mongoose.Schema({
   question: { type: String, required: true },
   options: [{ type: String, required: true }],
   correctAnswers: [{ type: Number, required: true }], // supports multi-correct
+  questionType: { type: String, enum: ['single', 'multiple'], default: 'single' },
 });
 
 const quizSchema = new mongoose.Schema({
@@ -12,4 +13,4 @@ const quizSchema = new mongoose.Schema({
   questions: [questionSchema],
 });
 
-export default mongoose.model('Quiz', quizSchema);
+export default mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);

@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../Utils/Layout";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { server } from "../../main";
+import { useLocation } from "react-router-dom";
 
 const AddQuiz = ({ courseId }) => {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const quizId = searchParams.get("quizId");
+
   const [quizTitle, setQuizTitle] = useState("");
   const [questions, setQuestions] = useState([
     {
@@ -16,6 +21,34 @@ const AddQuiz = ({ courseId }) => {
   ]);
 
   const [loading, setLoading] = useState(false);
+
+  // Fetch quiz data if editing
+  useEffect(() => {
+    if (quizId) {
+      setLoading(true);
+      axios.get(`${server}/api/quiz/${courseId}`, {
+        headers: { token: localStorage.getItem("token") },
+      })
+        .then(({ data }) => {
+          const quiz = Array.isArray(data) ? data.find(q => q._id === quizId) : null;
+          if (quiz) {
+            setQuizTitle(quiz.title || "");
+            setQuestions(
+              quiz.questions.map(q => ({
+                questionText: q.question,
+                options: q.options,
+                correctAnswers: q.correctAnswers,
+                questionType: q.questionType || "single",
+              }))
+            );
+          }
+        })
+        .catch(() => {
+          toast.error("Failed to load quiz for editing");
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [quizId, courseId]);
 
   const handleAddQuestion = () => {
     setQuestions([
@@ -65,43 +98,47 @@ const AddQuiz = ({ courseId }) => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    const formattedQuestions = questions.map((q) => ({
-      question: q.questionText, // rename to match backend
-      options: q.options,
-      correctAnswers: q.correctAnswers || [], // for multiple-correct
-      questionType: q.questionType || "single", // default to single
-    }));
-
-    const payload = {
-      title: quizTitle,       // make sure this is in state
-      courseId,
-      questions: formattedQuestions,
-    };
-
-    const { data } = await axios.post(`${server}/api/quiz/create`, payload, {
-      headers: { token: localStorage.getItem("token") },
-    });
-
-    toast.success(data.message || "Quiz Created!");
-    setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswers: [], questionType: "single" }]);
-    setQuizTitle(""); // reset title
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    toast.error(err.response?.data?.message || "Quiz creation failed");
-  }
-  setLoading(false);
-};
-
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formattedQuestions = questions.map((q) => ({
+        question: q.questionText,
+        options: q.options,
+        correctAnswers: q.correctAnswers || [],
+        questionType: q.questionType || "single",
+      }));
+      const payload = {
+        title: quizTitle,
+        courseId,
+        questions: formattedQuestions,
+      };
+      if (quizId) {
+        // Edit existing quiz
+        await axios.put(`${server}/api/quiz/${quizId}`, payload, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        toast.success("Quiz updated!");
+      } else {
+        // Create new quiz
+        await axios.post(`${server}/api/quiz/create`, payload, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        toast.success("Quiz Created!");
+      }
+      setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswers: [], questionType: "single" }]);
+      setQuizTitle("");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Quiz save failed");
+    }
+    setLoading(false);
+  };
 
   return (
     <Layout>
       <div className="add-course-page">
         <div className="cd-card add-course-form-card">
           <h2 className="cd-title" style={{ fontSize: "1.5rem", color: "#007aff", marginBottom: "1.2rem" }}>
-            Create Quiz for Course
+            {quizId ? "Edit Quiz" : "Create Quiz for Course"}
           </h2>
 
           <form onSubmit={handleSubmit}>
@@ -185,7 +222,7 @@ const AddQuiz = ({ courseId }) => {
               disabled={loading}
               style={{ width: "100%", marginTop: "1rem" }}
             >
-              {loading ? "Submitting..." : "Submit Quiz"}
+              {loading ? (quizId ? "Saving..." : "Submitting...") : (quizId ? "Save Changes" : "Submit Quiz")}
             </button>
           </form>
         </div>

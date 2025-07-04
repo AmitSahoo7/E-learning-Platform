@@ -12,10 +12,11 @@ const CourseStudy = ({ user }) => {
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
 
-  const [quiz, setQuiz] = useState();
+  const [quizCount, setQuizCount] = useState(0);
 
   // Fetch quiz data when component mounts or when course ID changes
   useEffect(() => {
+    if (!course || !course._id) return;
     const fetchQuiz = async () => {
       try {
         const { data } = await axios.get(`${server}/api/quiz/${course._id}`, {
@@ -23,15 +24,15 @@ const CourseStudy = ({ user }) => {
             token: localStorage.getItem("token"),
           },
         });
-        setQuiz(data); // Set quiz if available
-      } catch (err) {
+        setQuizCount(Array.isArray(data) ? data.length : 0);
+      } catch {
         console.log("No quiz or user not enrolled");
-        setQuiz(null);
+        setQuizCount(0);
       }
     };
 
     fetchQuiz();
-  }, [course._id]);
+  }, [course, course?._id]);
 
   // Placeholder data for demo
   const prerequisites = [
@@ -82,7 +83,7 @@ const CourseStudy = ({ user }) => {
         setCompleted(percent);
         setCompletedLec(safeCompletedLec);
         setLectLength(safeLectLength);
-      } catch (err) {
+      } catch {
         setCompleted(0);
         setCompletedLec(0);
         setLectLength(1);
@@ -219,6 +220,14 @@ const CourseStudy = ({ user }) => {
               )
             ) : null}
 
+            {/* Show total lectures and quizzes count above the buttons */}
+            {lectLength > 0 && (
+              <div style={{ fontWeight: 500, color: '#007aff', margin: '10px 0 2px 0', textAlign: 'center' }}>
+                Total Lectures: {lectLength}
+              </div>
+            )}
+            
+
             {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
@@ -235,6 +244,11 @@ const CourseStudy = ({ user }) => {
               >
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
+            )}
+            {quizCount > 0 && (
+              <div style={{ fontWeight: 500, color: '#007aff', margin: '2px 0 14px 0', textAlign: 'center' }}>
+                Total Quizzes: {quizCount}
+              </div>
             )}
             {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
               <button
@@ -264,38 +278,6 @@ const CourseStudy = ({ user }) => {
           </div>
         </div>
       </div>
-
-      {/* Quiz Section Button */}
-<div className="quiz-section">
-  <h3 style={{ marginTop: "2rem", color: "#007aff" }}>📋 Quiz Section</h3>
-
-  {quiz ? (
-    <>
-      <p>This course contains a quiz with {quiz.questions.length} questions.</p>
-      {!isAdmin && user && Array.isArray(user.subscription) && user.subscription.includes(course._id) && (
-        <button onClick={() => navigate(`/quiz/${course._id}`)}>Take Quiz</button>
-      )}
-    </>
-  ) : (
-    <>
-      {isAdmin ? (
-        <>
-          <p>No quiz has been added yet.</p>
-          <div className="quiz-section">
-                    <h3>Add Quiz for: {course.title}</h3>
-                    <AddQuiz courseId={course._id} />
-                  </div>
-          
-        </>
-      ) : (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
-        <p>No quiz available yet. Stay tuned!</p>
-      ) : (
-        <p>Login to access quizzes.</p>
-      )}
-    </>
-  )}
-</div>
-
 
       <div className="cd-instructor-card" data-aos="fade-up">
         <img

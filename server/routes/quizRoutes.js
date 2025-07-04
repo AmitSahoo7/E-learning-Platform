@@ -1,6 +1,7 @@
 import express from 'express';
-import { createQuiz, getQuizByCourse, submitQuiz } from '../controllers/quizController.js';
+import { createQuiz, getQuizzesByCourse, submitQuiz } from '../controllers/quizController.js';
 import { isAuth, isAdmin } from '../middlewares/isAuth.js';
+import Quiz from '../models/Quiz.js';
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 router.post('/create', isAuth, isAdmin, createQuiz);
 
 // Get quiz by course for a student (after purchase)
-router.get('/:courseId', isAuth, getQuizByCourse);
+router.get('/:courseId', isAuth, getQuizzesByCourse);
 
 // Submit answers and get score
 router.post('/submit/:quizId', isAuth, submitQuiz);
@@ -25,6 +26,32 @@ router.delete("/:quizId/question/:questionIndex", async (req, res) => {
   res.json({ message: "Question deleted", quiz });
 });
 
+// Delete a quiz by ID (admin only)
+router.delete('/:quizId', isAuth, isAdmin, async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    await Quiz.findByIdAndDelete(quizId);
+    res.json({ message: 'Quiz deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update a quiz by ID (admin only)
+router.put('/:quizId', isAuth, isAdmin, async (req, res) => {
+  try {
+    const quizId = req.params.quizId;
+    const { title, questions } = req.body;
+    const updatedQuiz = await Quiz.findByIdAndUpdate(
+      quizId,
+      { title, questions },
+      { new: true }
+    );
+    res.json({ message: 'Quiz updated successfully', quiz: updatedQuiz });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 export default router;
 // This code defines the routes for quiz-related operations in an Express application.

@@ -20,21 +20,21 @@ export const createQuiz = async (req, res) => {
   }
 };
 
-// Fetch Quiz for a course (if enrolled)
-export const getQuizByCourse = async (req, res) => {
+// Fetch ALL Quizzes for a course (if enrolled)
+export const getQuizzesByCourse = async (req, res) => {
   try {
     const courseId = req.params.courseId;
     const user = req.user;
 
-    // Enrollment check: user.subscription should include courseId
-    if (!user || !Array.isArray(user.subscription) || !user.subscription.includes(courseId)) {
-      return res.status(403).json({ message: "You must enroll in this course to take the quiz" });
+    // Allow admins to view all quizzes without enrollment
+    if (!user || (user.role !== 'admin' && (!Array.isArray(user.subscription) || !user.subscription.includes(courseId)))) {
+      return res.status(403).json({ message: "You must enroll in this course to take the quizzes" });
     }
 
-    const quiz = await Quiz.findOne({ courseId });
-    if (!quiz) return res.status(404).json({ message: "No quiz found for this course" });
+    const quizzes = await Quiz.find({ courseId });
+    if (!quizzes || quizzes.length === 0) return res.status(404).json({ message: "No quizzes found for this course" });
 
-    res.status(200).json(quiz);
+    res.status(200).json(quizzes);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

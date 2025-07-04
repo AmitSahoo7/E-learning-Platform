@@ -51,7 +51,7 @@
 
 .quiz-option.selected {
   background-color: #e0f0ff;
-  border-color: #007aff;
+  border-color: #0db133;
 }
 
 .quiz-option.correct {
@@ -88,4 +88,83 @@
   color: red;
   font-weight: bold;
   text-align: center;
+}
+
+.quiz-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 400px;
+}
+
+.quiz-list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+  background: #f5faff;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.quiz-select-btn {
+  background: #fff;
+  border: 1px solid #34c759;
+  color: #000000;
+  border-radius: 5px;
+  padding: 0.4rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.quiz-select-btn:hover {
+  background: #34c759;
+  color: #fff;
+}
+
+.quiz-edit-btn {
+  background: #1cc524;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.quiz-edit-btn:hover {
+  background: #005921;
+}
+
+.quiz-delete-btn {
+  background: #1cc524;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.quiz-delete-btn:hover {
+  background: #006718;
+}
+
+.quiz-back-btn {
+  background: #fff;
+  color: #000000;
+  border: 1px solid #34c759;
+  border-radius: 5px;
+  padding: 0.4rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  margin-left: 1rem;
+}
+.quiz-back-btn:hover {
+  background: #34c759;
+  color: #fff;
 }
