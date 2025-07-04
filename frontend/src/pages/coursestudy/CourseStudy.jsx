@@ -49,7 +49,7 @@ const CourseStudy = ({ user }) => {
 
   useEffect(() => {
     fetchCourse(params.id);
-    // Fetch course progress
+    // Fetch course progress only for non-admin users who are enrolled
     async function fetchProgress() {
       try {
         const { data } = await axios.get(
@@ -77,8 +77,14 @@ const CourseStudy = ({ user }) => {
         setLectLength(1);
       }
     }
-    if (user && course && user.subscription.includes(course._id))
+    if (
+      user &&
+      user.role !== "admin" &&
+      course &&
+      user.subscription.includes(course._id)
+    ) {
       fetchProgress();
+    }
     // eslint-disable-next-line
   }, [params.id, user, course]);
 

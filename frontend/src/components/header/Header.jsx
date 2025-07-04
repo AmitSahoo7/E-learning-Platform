@@ -57,7 +57,7 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
   };
   return (
     <header className="modern-header glassy-header">
-      <div className="header-logo">Skill Nest</div>
+      <div className="header-logo">SkillNest</div>
       <nav className="header-nav">
         {navLinks.map((link) => (
           <Link

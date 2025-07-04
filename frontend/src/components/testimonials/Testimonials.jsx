@@ -55,18 +55,39 @@ const AUTO_SLIDE_INTERVAL = 4000;
 
 const Testimonials = () => {
   const [current, setCurrent] = useState(0);
+  const [slideDirection, setSlideDirection] = useState('');
   const timeoutRef = useRef(null);
+  const animationTimeoutRef = useRef(null);
 
   useEffect(() => {
     timeoutRef.current = setTimeout(() => {
-      setCurrent((prev) => (prev + 1) % testimonialsData.length);
+      handleNext('right');
     }, AUTO_SLIDE_INTERVAL);
     return () => clearTimeout(timeoutRef.current);
   }, [current]);
 
-  const goTo = (idx) => setCurrent(idx);
-  const prev = () => setCurrent((prev) => (prev - 1 + testimonialsData.length) % testimonialsData.length);
-  const next = () => setCurrent((prev) => (prev + 1) % testimonialsData.length);
+  // Clean up animation class after animation
+  useEffect(() => {
+    if (slideDirection) {
+      animationTimeoutRef.current = setTimeout(() => {
+        setSlideDirection('');
+      }, 400); // match CSS animation duration
+    }
+    return () => clearTimeout(animationTimeoutRef.current);
+  }, [slideDirection]);
+
+  const goTo = (idx) => {
+    setSlideDirection(idx > current ? 'slide-right' : 'slide-left');
+    setCurrent(idx);
+  };
+  const handlePrev = () => {
+    setSlideDirection('slide-left');
+    setCurrent((prev) => (prev - 1 + testimonialsData.length) % testimonialsData.length);
+  };
+  const handleNext = (dir = 'right') => {
+    setSlideDirection(dir === 'left' ? 'slide-left' : 'slide-right');
+    setCurrent((prev) => (prev + 1) % testimonialsData.length);
+  };
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }).map((_, i) => (
@@ -77,29 +98,87 @@ const Testimonials = () => {
   return (
     <section className="testimonials-carousel speech-bubble-bg">
       <div className="testimonial-carousel-header">
-        <span className="testimonial-client-script">Client</span>
+        {/* <span className="testimonial-client-script">Client</span> */}
         <h2 className="testimonial-main-heading">TESTIMONIAL</h2>
       </div>
       <div className="testimonial-carousel-container">
-        <button className="testimonial-arrow left" onClick={prev} aria-label="Previous testimonial"><ChevronLeft /></button>
-        <div className="testimonial-carousel-card speech-bubble-card fade-in">
-          <div className="testimonial-avatar-overlap">
-            <img src={testimonialsData[current].image} alt={testimonialsData[current].name} />
+        <button className="testimonial-arrow left" onClick={handlePrev} aria-label="Previous testimonial"><ChevronLeft /></button>
+        {/* Peek carousel: previous, current, next */}
+        <div className="testimonial-peek-carousel">
+          {/* Previous card */}
+          <div
+            className="testimonial-carousel-card speech-bubble-card testimonial-peek-card testimonial-peek-left"
+            aria-hidden="true"
+            style={{
+              zIndex: 1,
+              pointerEvents: 'none',
+              opacity: 0.5,
+              transform: 'scale(0.85) translateX(-60%)',
+              display: window.innerWidth < 700 ? 'none' : 'block',
+            }}
+          >
+            <div className="testimonial-avatar-overlap">
+              <img src={testimonialsData[(current - 1 + testimonialsData.length) % testimonialsData.length].image} alt={testimonialsData[(current - 1 + testimonialsData.length) % testimonialsData.length].name} />
+            </div>
+            <div className="testimonial-card-content">
+              <div className="testimonial-card-header">
+                <span className="testimonial-card-name">{testimonialsData[(current - 1 + testimonialsData.length) % testimonialsData.length].name}</span>
+                <span className="testimonial-card-tagline">{testimonialsData[(current - 1 + testimonialsData.length) % testimonialsData.length].tagline}</span>
+                <div className="testimonial-card-stars">{renderStars(testimonialsData[(current - 1 + testimonialsData.length) % testimonialsData.length].rating)}</div>
+              </div>
+              <div className="testimonial-card-quote-row">
+                <span className="testimonial-quote-icon">“</span>
+                <span className="testimonial-carousel-message">{testimonialsData[(current - 1 + testimonialsData.length) % testimonialsData.length].message}</span>
+              </div>
+            </div>
           </div>
-          <div className="testimonial-card-content">
-            <div className="testimonial-card-header">
-              <span className="testimonial-card-name">{testimonialsData[current].name}</span>
-              <span className="testimonial-card-tagline">{testimonialsData[current].tagline}</span>
-              <div className="testimonial-card-stars">{renderStars(testimonialsData[current].rating)}</div>
+          {/* Main card */}
+          <div className={`testimonial-carousel-card speech-bubble-card testimonial-peek-main ${slideDirection}`}>
+            <div className="testimonial-avatar-overlap">
+              <img src={testimonialsData[current].image} alt={testimonialsData[current].name} />
             </div>
-            <div className="testimonial-card-quote-row">
-              <span className="testimonial-quote-icon">“</span>
-              <span className="testimonial-carousel-message">{testimonialsData[current].message}</span>
+            <div className="testimonial-card-content">
+              <div className="testimonial-card-header">
+                <span className="testimonial-card-name">{testimonialsData[current].name}</span>
+                <span className="testimonial-card-tagline">{testimonialsData[current].tagline}</span>
+                <div className="testimonial-card-stars">{renderStars(testimonialsData[current].rating)}</div>
+              </div>
+              <div className="testimonial-card-quote-row">
+                <span className="testimonial-quote-icon">“</span>
+                <span className="testimonial-carousel-message">{testimonialsData[current].message}</span>
+              </div>
+              <button className="testimonial-learn-btn">Learn More</button>
             </div>
-            <button className="testimonial-learn-btn">Learn More</button>
+          </div>
+          {/* Next card */}
+          <div
+            className="testimonial-carousel-card speech-bubble-card testimonial-peek-card testimonial-peek-right"
+            aria-hidden="true"
+            style={{
+              zIndex: 1,
+              pointerEvents: 'none',
+              opacity: 0.5,
+              transform: 'scale(0.85) translateX(60%)',
+              display: window.innerWidth < 700 ? 'none' : 'block',
+            }}
+          >
+            <div className="testimonial-avatar-overlap">
+              <img src={testimonialsData[(current + 1) % testimonialsData.length].image} alt={testimonialsData[(current + 1) % testimonialsData.length].name} />
+            </div>
+            <div className="testimonial-card-content">
+              <div className="testimonial-card-header">
+                <span className="testimonial-card-name">{testimonialsData[(current + 1) % testimonialsData.length].name}</span>
+                <span className="testimonial-card-tagline">{testimonialsData[(current + 1) % testimonialsData.length].tagline}</span>
+                <div className="testimonial-card-stars">{renderStars(testimonialsData[(current + 1) % testimonialsData.length].rating)}</div>
+              </div>
+              <div className="testimonial-card-quote-row">
+                <span className="testimonial-quote-icon">“</span>
+                <span className="testimonial-carousel-message">{testimonialsData[(current + 1) % testimonialsData.length].message}</span>
+              </div>
+            </div>
           </div>
         </div>
-        <button className="testimonial-arrow right" onClick={next} aria-label="Next testimonial"><ChevronRight /></button>
+        <button className="testimonial-arrow right" onClick={handleNext} aria-label="Next testimonial"><ChevronRight /></button>
       </div>
       <div className="testimonial-carousel-dots">
         {testimonialsData.map((_, idx) => (

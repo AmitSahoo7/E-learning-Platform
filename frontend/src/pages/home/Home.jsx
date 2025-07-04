@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Play,
   CheckCircle,
@@ -16,79 +16,15 @@ import Testimonials from "../../components/testimonials/Testimonials";
 import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/Header";
 import TiltedCard from "../../components/TiltedCard";
+import { CourseData } from "../../context/CourseContext";
+import { server } from "../../main";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { courses } = CourseData();
+  const featuredCourses = courses.slice(0, 6);
 
   const partnerLogos = ["HubSpot", "Loom", "GitLab", "LiveChat", "monday.com"];
-  const featuredCourses = [
-    {
-      title: "Web Development",
-      img: image,
-      subtitle: "Amit Kumar",
-      description: "Learn to build modern, responsive websites and web apps using HTML, CSS, JavaScript, and React.",
-      rating: 4.7,
-      ratingCount: 25145,
-      price: "₹1299",
-      oldPrice: "₹3999",
-      badge: "Bestseller"
-    },
-    {
-      title: "Data Structure",
-      img: image,
-      subtitle: "Subham Kiran",
-      description: "Master data structures for coding interviews and real-world software engineering.",
-      rating: 4.5,
-      ratingCount: 16741,
-      price: "₹1199",
-      oldPrice: "₹2999",
-      badge: ""
-    },
-    {
-      title: "UI UX Design",
-      img: image,
-      subtitle: "Jane Smith",
-      description: "Design beautiful, user-friendly interfaces and experiences with Figma and modern tools.",
-      rating: 4.8,
-      ratingCount: 146,
-      price: "₹1499",
-      oldPrice: "₹2499",
-      badge: "Bestseller"
-    },
-    {
-      title: "AI & ML",
-      img: image,
-      subtitle: "John Doe",
-      description: "Dive into Artificial Intelligence and Machine Learning with hands-on projects.",
-      rating: 4.6,
-      ratingCount: 1146,
-      price: "₹1799",
-      oldPrice: "₹3999",
-      badge: ""
-    },
-    {
-      title: "Cloud Computing",
-      img: image,
-      subtitle: "Priya Singh",
-      description: "Understand cloud platforms, deployment, and DevOps essentials.",
-      rating: 4.4,
-      ratingCount: 856,
-      price: "₹1399",
-      oldPrice: "₹2999",
-      badge: ""
-    },
-    {
-      title: "Cyber Security",
-      img: image,
-      subtitle: "Ravi Patel",
-      description: "Protect systems and data with practical cyber security skills.",
-      rating: 4.3,
-      ratingCount: 642,
-      price: "₹1599",
-      oldPrice: "₹2999",
-      badge: ""
-    },
-  ];
   const categories = [
     { name: "Digital Marketing", icon: <Code />, count: 25 },
     { name: "Graphic Design", icon: <Code />, count: 86 },
@@ -168,23 +104,42 @@ const Home = () => {
 
         {/* Featured Courses */}
         <section className="featured-courses-section">
-          <h2 className="section-title" >Featured Courses</h2>
+          <h2 className="section-title">Featured Courses</h2>
           <div className="featured-courses-grid">
-            {featuredCourses.map((course, idx) => (
-              <TiltedCard
-                key={idx}
-                imageSrc={course.img}
-                altText={course.title}
-                title={course.title}
-                subtitle={course.subtitle}
-                description={course.description}
-                rating={course.rating}
-                ratingCount={course.ratingCount}
-                price={course.price}
-                oldPrice={course.oldPrice}
-                badge={course.badge}
-              />
-            ))}
+            {featuredCourses.length === 0 ? (
+              <div style={{ color: '#888', fontSize: '1.2rem', padding: '2rem' }}>No featured courses yet.</div>
+            ) : (
+              featuredCourses.map((course) => {
+                // Use tagline if available, else trim description
+                let summary = course.tagline && course.tagline.trim()
+                  ? course.tagline.trim()
+                  : (course.description ? course.description.split(" ").slice(0, 16).join(" ") + (course.description.split(" ").length > 16 ? "..." : "") : "");
+                return (
+                  <Link
+                    to={`/course/${course._id}`}
+                    key={course._id}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <TiltedCard
+                      imageSrc={
+                        course.image
+                          ? `${server}/${course.image.replace(/\\/g, "/")}`
+                          : "/default-course.png"
+                      }
+                      altText={course.title}
+                      title={course.title}
+                      subtitle={course.instructorName || course.createdBy || "Instructor"}
+                      description={summary}
+                      rating={course.rating || 0}
+                      ratingCount={course.ratingCount || 0}
+                      price={`₹${course.price}`}
+                      oldPrice={course.price ? `₹${course.price + 100}` : ""}
+                      badge={course.difficulty || ""}
+                    />
+                  </Link>
+                );
+              })
+            )}
           </div>
         </section>
 

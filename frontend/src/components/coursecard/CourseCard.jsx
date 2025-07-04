@@ -11,7 +11,7 @@ import { FaLayerGroup, FaUserCircle } from "react-icons/fa";
 
 //const server = "http://localhost:5000";
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ course, hideDescription = false }) => {
   const navigate = useNavigate();
   const { user } = UserData();
   const { fetchCourses } = CourseData();
@@ -65,8 +65,9 @@ const CourseCard = ({ course }) => {
         </div>
 
         <h3 className="course-title-new">{course.title}</h3>
-        <p className="course-description-new">{course.description}</p>
-
+        {!hideDescription && (
+          <p className="course-description-new">{course.description}</p>
+        )}
         <div className="course-instructor-price">
           <div className="instructor-info">
             <FaUserCircle className="instructor-avatar" />
