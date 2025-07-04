@@ -1,5 +1,6 @@
 import Quiz from '../models/quiz.js';
 import { Courses } from '../models/Courses.js';
+import { Progress } from '../models/Progress.js';
 
 // Create Quiz with title, support for single/multiple correct MCQs
 export const createQuiz = async (req, res) => {
@@ -45,6 +46,8 @@ export const submitQuiz = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.quizId);
     const { answers } = req.body; // answers: array of arrays (for multiple correct)
+    const userId = req.user._id;
+    const courseId = quiz.courseId;
 
     let score = 0;
     quiz.questions.forEach((q, i) => {
@@ -52,6 +55,30 @@ export const submitQuiz = async (req, res) => {
       const submitted = Array.isArray(answers[i]) ? answers[i].sort().toString() : [].toString();
       if (correct === submitted) score++;
     });
+
+    // Mark quiz as completed for this user and course
+    let progress = await Progress.findOne({ user: userId, course: courseId });
+    if (!progress) {
+      progress = await Progress.create({
+        user: userId,
+        course: courseId,
+        completedLectures: [],
+        completedQuizzes: [quiz._id],
+        quizScores: [{ quiz: quiz._id, bestScore: score }],
+      });
+    } else {
+      if (!progress.completedQuizzes.includes(quiz._id)) {
+        progress.completedQuizzes.push(quiz._id);
+      }
+      // Update best score for this quiz
+      const scoreEntry = progress.quizScores.find(qs => qs.quiz.toString() === quiz._id.toString());
+      if (!scoreEntry) {
+        progress.quizScores.push({ quiz: quiz._id, bestScore: score });
+      } else if (score > scoreEntry.bestScore) {
+        scoreEntry.bestScore = score;
+      }
+      await progress.save();
+    }
 
     res.status(200).json({ score, total: quiz.questions.length });
   } catch (error) {

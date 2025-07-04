@@ -58,6 +58,11 @@ const CourseStudy = ({ user }) => {
   const [lectLength, setLectLength] = useState(1);
   const [enrolling, setEnrolling] = useState(false);
 
+  // Add quiz progress state
+  const [quizProgress, setQuizProgress] = useState(0);
+  const [completedQuizCount, setCompletedQuizCount] = useState(0);
+  const [totalQuizCount, setTotalQuizCount] = useState(0);
+
   const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
 
@@ -83,10 +88,21 @@ const CourseStudy = ({ user }) => {
         setCompleted(percent);
         setCompletedLec(safeCompletedLec);
         setLectLength(safeLectLength);
+        // Quiz progress
+        const safeQuizCount = data.allQuizzes || 0;
+        const safeCompletedQuiz = Math.min(data.completedQuizzes || 0, safeQuizCount);
+        let quizPercent = safeQuizCount > 0 ? Math.round((safeCompletedQuiz / safeQuizCount) * 100) : 0;
+        quizPercent = Math.min(quizPercent, 100);
+        setQuizProgress(quizPercent);
+        setCompletedQuizCount(safeCompletedQuiz);
+        setTotalQuizCount(safeQuizCount);
       } catch {
         setCompleted(0);
         setCompletedLec(0);
         setLectLength(1);
+        setQuizProgress(0);
+        setCompletedQuizCount(0);
+        setTotalQuizCount(0);
       }
     }
 
@@ -196,30 +212,67 @@ const CourseStudy = ({ user }) => {
               ) : completed === 0 ? (
                 <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                    Course Progress: 0% (No lectures completed yet)
+                    Lecture Progress: 0% (No lectures completed yet)
                   </div>
                   <div className="lecture-progress-bar-track">
-                    <div className="lecture-progress-bar-fill" style={{ width: `0%` }}></div>
+                    <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
                   </div>
-                  <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem" }}>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
                     Start your first lecture!
                   </span>
                 </div>
               ) : (
                 <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                    Course Progress - {completedLec} out of {lectLength}
+                    Lecture Progress - {completedLec} out of {lectLength}
                   </div>
                   <div className="lecture-progress-bar-track">
-                    <div className="lecture-progress-bar-fill" style={{ width: `${completed}%` }}></div>
+                    <div className="lecture-progress-bar-fill" style={{ width: `${completed}%`, background: '#1cc524' }}></div>
                   </div>
-                  <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem" }}>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
                     {completed}%
                   </span>
                 </div>
               )
             ) : null}
 
+            {/* Add spacing between lecture and quiz progress */}
+            <div style={{ height: 24 }} />
+
+            {isAdmin ? null : isEnrolled ? (
+              totalQuizCount === 0 ? (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                    No quizzes available yet.
+                  </div>
+                </div>
+              ) : quizProgress === 0 ? (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
+                    Quiz Progress: 0% (No quizzes attempted yet)
+                  </div>
+                  <div className="lecture-progress-bar-track">
+                    <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
+                  </div>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                    Start your first quiz!
+                  </span>
+                </div>
+              ) : (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
+                    Quiz Progress - {completedQuizCount} out of {totalQuizCount}
+                  </div>
+                  <div className="lecture-progress-bar-track">
+                    <div className="lecture-progress-bar-fill" style={{ width: `${quizProgress}%`, background: '#1cc524' }}></div>
+                  </div>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                    {quizProgress}%
+                  </span>
+                </div>
+              )
+            ) : null}
+            
             {/* Show total lectures and quizzes count above the buttons */}
             {lectLength > 0 && (
               <div style={{ fontWeight: 500, color: '#007aff', margin: '10px 0 2px 0', textAlign: 'center' }}>
@@ -245,6 +298,7 @@ const CourseStudy = ({ user }) => {
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
             )}
+            
             {quizCount > 0 && (
               <div style={{ fontWeight: 500, color: '#007aff', margin: '2px 0 14px 0', textAlign: 'center' }}>
                 Total Quizzes: {quizCount}
@@ -275,6 +329,8 @@ const CourseStudy = ({ user }) => {
                 Your browser does not support the video tag.
               </video>
             </div>
+
+            
           </div>
         </div>
       </div>
