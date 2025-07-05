@@ -52,23 +52,7 @@ const CourseStudy = ({ user }) => {
     fetchQuiz();
   }, [course, course?._id]);
 
-  // Placeholder data for demo
-  const prerequisites = [
-    "Basic math skills",
-    "Logical thinking",
-    "No prior coding experience required"
-  ];
-  const whatYouLearn = [
-    "Software development fundamentals",
-    "Algorithms and data structures",
-    "Artificial intelligence basics",
-    "Computer networks overview"
-  ];
-  const courseOutcome = [
-    "Be job-ready for software engineering roles",
-    "Understand core CS concepts",
-    "Build real-world projects"
-  ];
+  
 
   // Helper function to convert string to array (for prerequisites, whatYouLearn, courseOutcomes)
   const stringToArray = (str) => {
@@ -306,8 +290,8 @@ const CourseStudy = ({ user }) => {
             {isAdmin ? null : isEnrolled ? (
               totalQuizCount === 0 ? (
                 <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
-                  <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                    No quizzes available yet.
+                  <div style={{ fontWeight: 600, marginBottom: 8, color: '#000' }}>
+                    Quiz Progress: 0%
                   </div>
                 </div>
               ) : quizProgress === 0 ? (
@@ -335,6 +319,12 @@ const CourseStudy = ({ user }) => {
                   </span>
                 </div>
               )
+            ) : quizCount > 0 ? (
+              <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                <div style={{ fontWeight: 600, marginBottom: 8, color: '#000' }}>
+                  Quiz Progress: 0%
+                </div>
+              </div>
             ) : null}
             
             {/* Show total lectures and quizzes count above the buttons */}

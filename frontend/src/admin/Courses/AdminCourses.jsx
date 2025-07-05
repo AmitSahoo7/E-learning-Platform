@@ -10,7 +10,6 @@ import "./admincourses.css";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { server } from "../../main";
-import AddQuiz from "./AddQuiz"; 
 
 const categories = [
   "Web Development",
@@ -143,29 +142,17 @@ const AdminCourses = ({ user }) => {
           <h1>All Courses</h1>
           <div className="dashboard-content">
             {courses && courses.length > 0 ? (
-
               courses.map((course) => (
-                <div key={course._id} className="admin-course-wrapper">
-                  <CourseCard course={course} />
-                  
-                  {/* ✅ Add Quiz Form For Each Course */}
-                  <div className="quiz-section">
-                    <h3>Add Quiz for: {course.title}</h3>
-                    <AddQuiz courseId={course._id} />
-                  </div>
-
-              courses.map((e) => (
-                <div key={e._id} style={{ position: 'relative' }}>
+                <div key={course._id} style={{ position: 'relative' }}>
                   {/* Floating Edit Button */}
                   <button
                     className="edit-fab-btn"
                     title="Edit Course"
-                    onClick={() => setEditCourse(e)}
+                    onClick={() => setEditCourse(course)}
                   >
                     <FaPencilAlt size={16} />
                   </button>
-                  <CourseCard course={e} />
-
+                  <CourseCard course={course} />
                 </div>
               ))
             ) : (

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import "./quiz.css";
+import AddQuiz from '../../admin/Courses/AddQuiz.jsx';
 
 const Quiz = ({ user }) => {
   const { courseId } = useParams();
@@ -19,22 +20,60 @@ const Quiz = ({ user }) => {
   const [quizProgress, setQuizProgress] = useState({ completed: [], scores: {} });
   const [showReattemptConfirm, setShowReattemptConfirm] = useState(false);
   const [pendingQuiz, setPendingQuiz] = useState(null);
+  const [showAddQuiz, setShowAddQuiz] = useState(false);
+  const [editQuizId, setEditQuizId] = useState(null);
 
-  useEffect(() => {
-    const fetchQuizzes = async () => {
-      try {
-        const { data } = await axios.get(`${server}/api/quiz/${courseId}`, {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        });
-        setQuizzes(data);
-      } catch (err) {
+  // Move fetchQuizzes out of useEffect for reuse
+  const fetchQuizzes = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${server}/api/quiz/${courseId}`, {
+        headers: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      setQuizzes(data);
+      setError(null);
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        setQuizzes([]);
+        setError(null);
+      } else {
         setError(err.response?.data?.message || "Failed to load quizzes");
       }
-      setLoading(false);
-    };
+    }
+    setLoading(false);
+  };
+
+  // Update fetchQuizProgress to handle 404
+  const fetchQuizProgress = async () => {
+    try {
+      const { data } = await axios.get(`${server}/api/user/progress?course=${courseId}`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      // Map quizId to bestScore
+      const scores = {};
+      if (Array.isArray(data.quizScores)) {
+        data.quizScores.forEach(qs => {
+          if (qs.quiz) scores[qs.quiz] = qs.bestScore;
+        });
+      }
+      setQuizProgress({
+        completed: Array.isArray(data.completedQuizzes) ? data.completedQuizzes.map(id => id.toString()) : [],
+        scores,
+      });
+    } catch (err) {
+      if (err.response && err.response.status === 404) {
+        setQuizProgress({ completed: [], scores: {} });
+      } else {
+        setQuizProgress({ completed: [], scores: {} });
+      }
+    }
+  };
+
+  useEffect(() => {
     fetchQuizzes();
+    fetchQuizProgress();
   }, [courseId]);
 
   useEffect(() => {
@@ -44,30 +83,6 @@ const Quiz = ({ user }) => {
       setScore(null);
     }
   }, [selectedQuiz]);
-
-  useEffect(() => {
-    const fetchQuizProgress = async () => {
-      try {
-        const { data } = await axios.get(`${server}/api/user/progress?course=${courseId}`, {
-          headers: { token: localStorage.getItem("token") },
-        });
-        // Map quizId to bestScore
-        const scores = {};
-        if (Array.isArray(data.quizScores)) {
-          data.quizScores.forEach(qs => {
-            if (qs.quiz) scores[qs.quiz] = qs.bestScore;
-          });
-        }
-        setQuizProgress({
-          completed: Array.isArray(data.completedQuizzes) ? data.completedQuizzes.map(id => id.toString()) : [],
-          scores,
-        });
-      } catch {
-        setQuizProgress({ completed: [], scores: {} });
-      }
-    };
-    fetchQuizProgress();
-  }, [courseId]);
 
   const handleOptionToggle = (qIndex, optIndex) => {
     setAnswers((prev) => {
@@ -107,84 +122,125 @@ const Quiz = ({ user }) => {
     }
   };
 
+  // Handler for edit
+  const handleEditQuiz = (quizId) => {
+    setEditQuizId(quizId);
+    setShowAddQuiz(true);
+  };
+  // Handler for create
+  const handleCreateQuiz = () => {
+    setEditQuizId(null);
+    setShowAddQuiz(true);
+  };
+  // Handler for close
+  const handleCloseAddQuiz = () => {
+    setEditQuizId(null);
+    setShowAddQuiz(false);
+  };
+  // Handler for successful quiz creation/edit
+  const handleQuizSaved = () => {
+    setEditQuizId(null);
+    setShowAddQuiz(false);
+    // Refresh quiz list
+    fetchQuizzes();
+  };
+
   if (loading) return <div className="quiz-container">Loading quizzes...</div>;
   if (error) return <div className="quiz-container error">{error}</div>;
-  if (!quizzes || quizzes.length === 0) return <div className="quiz-container">No quizzes available.</div>;
 
   return (
     <div className="quiz-container">
+      {user?.role === 'admin' && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          <button className="quiz-create-btn" onClick={handleCreateQuiz}>
+            ➕ Create Quiz
+          </button>
+          {showAddQuiz && (
+            <div style={{ marginTop: '1.5rem' }}>
+              <AddQuiz courseId={courseId} quizId={editQuizId} onSuccess={handleQuizSaved} />
+              <button className="quiz-create-btn" style={{ background: '#ff3b30', marginTop: 8 }} onClick={handleCloseAddQuiz}>
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       {!selectedQuiz ? (
         <>
           <div className="quiz-header">
             <h2>Select a Quiz</h2>
-            {user?.role === "admin" && (
-              <button
-                className="quiz-create-btn"
-                onClick={() => navigate(`/addquiz/${courseId}`)}
-              >
-                ➕ Create / Edit Quiz
-              </button>
-            )}
           </div>
           <ul className="quiz-list">
-            {quizzes.map((quiz) => {
-              const isCompleted = quizProgress.completed.includes(quiz._id);
-              const bestScore = quizProgress.scores[quiz._id];
-              return (
-                <li key={quiz._id} className="quiz-list-item">
-                  <button
-                    onClick={() => {
-                      if (isCompleted) {
-                        setPendingQuiz(quiz);
-                        setShowReattemptConfirm(true);
-                      } else {
-                        setSelectedQuiz(quiz);
-                      }
-                    }}
-                    className={`quiz-select-btn${isCompleted ? ' completed' : ''}`}
-                  >
-                    <span className="quiz-title">
-                      {quiz.title || "Untitled Quiz"}
-                    </span>
-                    <span className="quiz-best-score">
-                      Best: {typeof bestScore === 'number' ? bestScore : 0} / {quiz.questions.length}
-                    </span>
-                    {isCompleted && (
-                      <span className="quiz-tick">✔</span>
-                    )}
-                  </button>
-                  {user?.role === 'admin' && (
-                    <>
-                      <button
-                        className="quiz-edit-btn"
-                        style={{ background: '#007aff', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8 }}
-                        onClick={() => navigate(`/addquiz/${courseId}?quizId=${quiz._id}`)}
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        className="quiz-delete-btn"
-                        style={{ background: '#ff3b30', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8, marginLeft: 8 }}
-                        onClick={async () => {
-                          if (window.confirm('Are you sure you want to delete this quiz?')) {
-                            try {
-                              await axios.delete(`${server}/api/quiz/${quiz._id}`, {
-                                headers: { token: localStorage.getItem('token') },
-                              });
-                              setQuizzes(quizzes.filter(q => q._id !== quiz._id));
-                            } catch {
-                              alert('Failed to delete quiz');
+            {quizzes && quizzes.length > 0 ? (
+              quizzes.map((quiz) => {
+                const isCompleted = quizProgress.completed.includes(quiz._id);
+                const bestScore = quizProgress.scores[quiz._id];
+                return (
+                  <li key={quiz._id} className="quiz-list-item">
+                    <button
+                      onClick={() => {
+                        if (isCompleted) {
+                          setPendingQuiz(quiz);
+                          setShowReattemptConfirm(true);
+                        } else {
+                          setSelectedQuiz(quiz);
+                        }
+                      }}
+                      className={`quiz-select-btn${isCompleted ? ' completed' : ''}`}
+                    >
+                      <span className="quiz-title">
+                        {quiz.title || "Untitled Quiz"}
+                      </span>
+                      <span className="quiz-best-score">
+                        Best: {typeof bestScore === 'number' ? bestScore : 0} / {quiz.questions.length}
+                      </span>
+                      {isCompleted && (
+                        <span className="quiz-tick">✔</span>
+                      )}
+                    </button>
+                    {user?.role === 'admin' && (
+                      <>
+                        <button
+                          className="quiz-edit-btn"
+                          style={{ background: '#007aff', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8 }}
+                          onClick={() => handleEditQuiz(quiz._id)}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          className="quiz-delete-btn"
+                          style={{ background: '#ff3b30', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8, marginLeft: 8 }}
+                          onClick={async () => {
+                            if (window.confirm('Are you sure you want to delete this quiz?')) {
+                              try {
+                                await axios.delete(`${server}/api/quiz/${quiz._id}`, {
+                                  headers: { token: localStorage.getItem('token') },
+                                });
+                                fetchQuizzes();
+                              } catch {
+                                alert('Failed to delete quiz');
+                              }
                             }
-                          }
-                        }}
-                      >
-                        🗑️ Delete
-                      </button>
-                    </>
-                  )}
-                </li>
-              );
-            })}
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </>
+                    )}
+                  </li>
+                );
+              })
+            ) : (
+              user?.role === 'admin' ? (
+                <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
+                  No quizzes found for this course. Create one above!
+                </div>
+              ) : (
+                <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
+                  No quizzes available.
+                </div>
+              )
+            )}
           </ul>
           <div className="quiz-card-grid-spacer"></div>
           {/* Info message about attempts */}

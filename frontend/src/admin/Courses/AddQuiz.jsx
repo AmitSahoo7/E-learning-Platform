@@ -5,10 +5,11 @@ import axios from "axios";
 import { server } from "../../main";
 import { useLocation } from "react-router-dom";
 
-const AddQuiz = ({ courseId }) => {
+const AddQuiz = ({ courseId, quizId: propQuizId, onSuccess }) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const quizId = searchParams.get("quizId");
+  const urlQuizId = searchParams.get("quizId");
+  const quizId = propQuizId || urlQuizId;
 
   const [quizTitle, setQuizTitle] = useState("");
   const [questions, setQuestions] = useState([
@@ -127,6 +128,9 @@ const AddQuiz = ({ courseId }) => {
       }
       setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswers: [], questionType: "single" }]);
       setQuizTitle("");
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Quiz save failed");
     }

@@ -56,20 +56,19 @@ export const submitQuiz = async (req, res) => {
       if (correct === submitted) score++;
     });
 
-    // Mark quiz as completed for this user and course
+    const percent = quiz.questions.length > 0 ? (score / quiz.questions.length) : 0;
+
+    // Mark quiz as completed for this user and course ONLY if >=75%
     let progress = await Progress.findOne({ user: userId, course: courseId });
     if (!progress) {
       progress = await Progress.create({
         user: userId,
         course: courseId,
         completedLectures: [],
-        completedQuizzes: [quiz._id],
+        completedQuizzes: percent >= 0.75 ? [quiz._id] : [],
         quizScores: [{ quiz: quiz._id, bestScore: score }],
       });
     } else {
-      if (!progress.completedQuizzes.includes(quiz._id)) {
-        progress.completedQuizzes.push(quiz._id);
-      }
       // Update best score for this quiz
       const scoreEntry = progress.quizScores.find(qs => qs.quiz.toString() === quiz._id.toString());
       if (!scoreEntry) {
@@ -77,6 +76,11 @@ export const submitQuiz = async (req, res) => {
       } else if (score > scoreEntry.bestScore) {
         scoreEntry.bestScore = score;
       }
+      // Only add to completedQuizzes if >=75% and not already present
+      if (percent >= 0.75 && !progress.completedQuizzes.includes(quiz._id)) {
+        progress.completedQuizzes.push(quiz._id);
+      }
+      // If score drops below 75% on a later attempt, do NOT remove from completedQuizzes (keeps best attempt logic)
       await progress.save();
     }
 
