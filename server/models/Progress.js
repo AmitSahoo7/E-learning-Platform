@@ -16,6 +16,18 @@ const schema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    completedQuizzes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quiz",
+      },
+    ],
+    quizScores: [
+      {
+        quiz: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz" },
+        bestScore: { type: Number, default: 0 },
+      },
+    ],
   },
   {
     timestamps: true,

@@ -16,7 +16,10 @@ const storage = multer.diskStorage({
   },
 });
 
-export const uploadFiles = multer({ storage }).single("file");
+export const uploadFiles = multer({ storage }).fields([
+  { name: "file", maxCount: 1 },
+  { name: "pdf", maxCount: 1 }
+]);
 
 // For course creation: accept image, pdf, instructor avatar, and preview video fields
 export const uploadCourseFiles = multer({ storage }).fields([

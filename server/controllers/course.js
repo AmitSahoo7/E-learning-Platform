@@ -7,6 +7,7 @@ import { User } from "../models/User.js";
 import { Progress } from "../models/Progress.js";
 import { Reward } from "../models/Reward.js";
 import crypto from 'crypto';
+import Quiz from '../models/quiz.js';
 // import { deleteLecture } from "../controllers/course.js";
 
 export const getAllCourses = TryCatch(async (req, res) => {
@@ -147,20 +148,24 @@ export const addLecture = TryCatch(async (req, res) => {
     });
 
   const { title, description } = req.body;
-  const file = req.file;
-
+  // Support both video and pdf fields
+  const files = req.files || {};
   let lectureData = {
     title,
     description,
     course: course._id,
+    uploadedBy: req.user._id,
   };
 
-  if (file) {
-    if (file.mimetype === "application/pdf") {
-      lectureData.pdf = file.path;
-    } else if (file.mimetype === "video/mp4") {
-      lectureData.video = file.path;
+  if (files.file && files.file[0]) {
+    if (files.file[0].mimetype === "video/mp4") {
+      lectureData.video = files.file[0].path;
+    } else if (files.file[0].mimetype === "application/pdf") {
+      lectureData.pdf = files.file[0].path;
     }
+  }
+  if (files.pdf && files.pdf[0]) {
+    lectureData.pdf = files.pdf[0].path;
   }
 
   const lecture = await Lecture.create(lectureData);
@@ -287,24 +292,103 @@ export const getYourProgress = TryCatch(async (req, res) => {
 }
 
   const allLectures = (await Lecture.find({ course: req.query.course })).length;
+  const allQuizzes = (await Quiz.find({ courseId: req.query.course })).length;
 
   if (!progress || progress.length === 0) {
     return res.json({
       courseProgressPercentage: 0,
       completedLectures: 0,
       allLectures,
+      quizProgressPercentage: 0,
+      completedQuizzes: 0,
+      allQuizzes,
       progress: [],
     });
   }
 
 
   const completedLectures = progress[0].completedLectures.length;
-  const courseProgressPercentage = (completedLectures * 100) / allLectures;
+  const courseProgressPercentage = (completedLectures * 100) / (allLectures || 1);
+  const completedQuizzes = Array.isArray(progress[0].completedQuizzes) ? progress[0].completedQuizzes.length : 0;
+  const quizProgressPercentage = (completedQuizzes * 100) / (allQuizzes || 1);
+
 
   res.json({
     courseProgressPercentage,
     completedLectures,
     allLectures,
+    quizProgressPercentage,
+    completedQuizzes,
+    allQuizzes,
+    quizScores: progress[0].quizScores || [],
     progress,
   });
+});
+
+export const getInstructorCourses = TryCatch(async (req, res) => {
+  // Find courses where user is creator or uploaded at least one lecture
+  const createdCourses = await Courses.find({ createdBy: req.user._id });
+  const lectureCourses = await Lecture.find({ uploadedBy: req.user._id }).distinct('course');
+  const lectureCourseDocs = await Courses.find({ _id: { $in: lectureCourses } });
+  // Merge and remove duplicates
+  const allCourses = [...createdCourses, ...lectureCourseDocs].filter((course, index, self) =>
+    index === self.findIndex((c) => c._id.toString() === course._id.toString())
+  );
+  res.json({ courses: allCourses });
+});
+
+export const getInstructorCourseStats = TryCatch(async (req, res) => {
+  // Find courses where user is creator or uploaded at least one lecture
+  const createdCourses = await Courses.find({ createdBy: req.user._id });
+  const lectureCourses = await Lecture.find({ uploadedBy: req.user._id }).distinct('course');
+  const lectureCourseDocs = await Courses.find({ _id: { $in: lectureCourses } });
+  // Merge and remove duplicates
+  const allCourses = [...createdCourses, ...lectureCourseDocs].filter((course, index, self) =>
+    index === self.findIndex((c) => c._id.toString() === course._id.toString())
+  );
+
+  console.log("Instructor ID:", req.user._id);
+  console.log("Created courses:", createdCourses.map(c => c._id));
+  console.log("Lecture courses:", lectureCourses);
+  console.log("All courses:", allCourses.map(c => c._id));
+
+  const courseStats = await Promise.all(
+    allCourses.map(async (course) => {
+      // Count enrolled users (users who have this course in their subscription)
+      const enrolledUsers = await User.countDocuments({
+        subscription: course._id
+      });
+      // Get total watch time from progress records
+      const progressRecords = await Progress.find({ course: course._id });
+      const totalWatchTime = progressRecords.reduce(
+        (sum, record) => sum + (record.completedLectures ? record.completedLectures.length : 0),
+        0
+      );
+      return {
+        _id: course._id,
+        title: course.title,
+        enrolledUsers,
+        totalWatchTime,
+        totalLectures: await Lecture.countDocuments({ course: course._id })
+      };
+    })
+  );
+  res.json({ courseStats });
+});
+
+export const getCourseUserStats = TryCatch(async (req, res) => {
+  const courseId = req.params.id;
+  // Find all users enrolled in this course
+  const users = await User.find({ subscription: courseId });
+  // For each user, get their progress for this course
+  const userStats = await Promise.all(users.map(async (user) => {
+    const progress = await Progress.findOne({ user: user._id, course: courseId });
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      watchTime: progress && progress.completedLectures ? progress.completedLectures.length : 0,
+    };
+  }));
+  res.json({ userStats });
 });

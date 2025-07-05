@@ -80,10 +80,16 @@
 
 .stat-item {
   text-align: center;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
   background: #e6fff2;
-  border-radius: 12px;
-  border: 1px solid #b2f2e5;
+  border-radius: 16px;
+  border: 1.5px solid #b2f2e5;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1rem;
 }
 
 .stat-label {
@@ -109,6 +115,17 @@
 .points-value {
   color: #43e97b;
   font-size: 1.5rem;
+}
+
+/* Style for Not Applicable state */
+.stat-value.na, .user-points.na {
+  color: #ff6f61;
+  background: #fff6f5;
+  border-radius: 8px;
+  padding: 0.2em 0.6em;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-top: 0.3em;
 }
 
 /* Leaderboard Section */

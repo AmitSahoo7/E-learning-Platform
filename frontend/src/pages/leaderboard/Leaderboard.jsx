@@ -60,6 +60,7 @@ const Leaderboard = ({ user }) => {
     if (rank === 1) return "🥇";
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
+    if (rank === 'Not Applicable' || rank === 'NA') return 'NA';
     return `#${rank}`;
   };
 
@@ -87,7 +88,7 @@ const Leaderboard = ({ user }) => {
 
       <div className="leaderboard-content">
         {/* User Stats Section */}
-        {user && userRanking && (
+        {user && userRanking && user.role !== 'admin' && user.role !== 'instructor' && (
           <div className="user-stats-section">
             <div className="user-stats-card">
               <div className="user-stats-header">
@@ -105,7 +106,7 @@ const Leaderboard = ({ user }) => {
                 </div>
                 <div className="stat-item">
                   <span className="stat-label">Total Points</span>
-                  <span className="stat-value points-value">
+                  <span className={`stat-value points-value`}>
                     {userRanking.totalPoints}
                   </span>
                 </div>
@@ -136,8 +137,8 @@ const Leaderboard = ({ user }) => {
                 </div>
                 <div className="user-info">
                   <div className="user-name">{user.name}</div>
-                  <div className="user-points">
-                    {user.totalPoints} points
+                  <div className={`user-points${(user.role === 'admin' || user.role === 'instructor') ? ' na' : ''}`}>
+                    {(user.role === 'admin' || user.role === 'instructor') ? 'NA' : user.totalPoints + ' points'}
                   </div>
                 </div>
               </div>
@@ -146,7 +147,7 @@ const Leaderboard = ({ user }) => {
         </div>
 
         {/* User Rewards History */}
-        {user && userRewards.length > 0 && (
+        {user && userRewards.length > 0 && user.role !== 'admin' && user.role !== 'instructor' && (
           <div className="rewards-section">
             <h2>Your Achievement History</h2>
             <div className="rewards-list">

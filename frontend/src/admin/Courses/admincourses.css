@@ -212,6 +212,26 @@
   letter-spacing: 0.02em;
 }
 
+
+.admin-course-wrapper {
+  margin-bottom: 3rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.quiz-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+.quiz-section h3 {
+  color: #34c759;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
 .edit-fab-btn {
   position: absolute;
   top: 14px;
@@ -237,3 +257,4 @@
   box-shadow: 0 8px 32px rgba(16, 185, 129, 0.28);
   transform: scale(1.08);
 }
+

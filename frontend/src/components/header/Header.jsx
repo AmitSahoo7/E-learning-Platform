@@ -36,9 +36,10 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
   const validAnnouncements = announcements.filter(a => a && typeof a === 'object' && typeof a.message === 'string');
   const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a.id)).length;
   const location = useLocation();
+
   const handleAnnouncementClick = (a) => {
     setModal(a);
-    if (markAnnouncementRead) markAnnouncementRead(a.id);
+    if (markAnnouncementRead) markAnnouncementRead(a._id);
   };
   const logoutHandler = () => {
     localStorage.clear();
@@ -95,8 +96,8 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
               ) : (
                 validAnnouncements.map((a, i) => (
                   <div
-                    className={`dropdown-announcement${readAnnouncements.includes(a.id) ? '' : ' unread'}`}
-                    key={a.id || a._id || i}
+                    className={`dropdown-announcement${readAnnouncements.includes(a._id) ? '' : ' unread'}`}
+                    key={a._id || i}
                     onClick={() => handleAnnouncementClick(a)}
                   >
                     <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
