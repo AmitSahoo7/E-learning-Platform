@@ -105,11 +105,7 @@ const CourseReviewBox = ({ courseId, user }) => {
           />
 
           <button onClick={handleSubmit}>Submit</button>
-          {userReviewId && (
-            <button onClick={handleDelete} className="delete-btn">
-              Clear
-            </button>
-          )}
+          
         </div>
       )}
 
@@ -129,20 +125,4 @@ const CourseReviewBox = ({ courseId, user }) => {
 };
 
 export default CourseReviewBox;
-// components/reviews/CourseReviewBox.jsx
-/*
-import React from "react";
 
-const CourseReviewBox = ({ courseId, user }) => {
-  console.log("✅ CourseReviewBox loaded", courseId);
-
-  return (
-    <div style={{ backgroundColor: 'yellow', padding: '20px' }}>
-      <h3>Review Box is Working</h3>
-    </div>
-  );
-};
-
-export default CourseReviewBox;
-
-*/

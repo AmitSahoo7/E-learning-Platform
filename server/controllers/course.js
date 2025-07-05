@@ -7,7 +7,7 @@ import { User } from "../models/User.js";
 import { Progress } from "../models/Progress.js";
 import { Reward } from "../models/Reward.js";
 import crypto from 'crypto';
-import Quiz from '../models/quiz.js';
+import Quiz from '../models/Quiz.js';
 // import { deleteLecture } from "../controllers/course.js";
 
 export const getAllCourses = TryCatch(async (req, res) => {

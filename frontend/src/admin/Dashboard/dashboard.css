@@ -79,7 +79,7 @@ body, html {
   transition: box-shadow 0.2s, background 0.2s, border 0.2s;
   border: 1.5px solid rgba(124,255,178,0.18);
   backdrop-filter: var(--glass-blur);
-  color: var(--text-light);
+  color: var(--primary-green);
   position: relative;
 }
 .admin-stat-card:hover {
@@ -97,7 +97,7 @@ body, html {
 .admin-stat-card p {
   font-size: 2.1rem;
   font-weight: 700;
-  color: var(--text-light);
+  color: var(--primary-green);
   text-shadow: 0 0 8px #34d39988;
 }
 
