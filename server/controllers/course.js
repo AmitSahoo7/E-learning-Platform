@@ -292,7 +292,19 @@ export const getYourProgress = TryCatch(async (req, res) => {
 }
 
   const allLectures = (await Lecture.find({ course: req.query.course })).length;
-  const allQuizzes = (await Quiz.find({ courseId: req.query.course })).length;
+  const allQuizzesArr = await Quiz.find({ courseId: req.query.course });
+  const allQuizzes = allQuizzesArr.length;
+
+  let completedQuizzes = 0;
+  if (progress[0] && Array.isArray(progress[0].quizScores)) {
+    // Only count quizzes where bestScore >= 75% of total questions
+    completedQuizzes = progress[0].quizScores.filter(qs => {
+      const quiz = allQuizzesArr.find(q => q._id.toString() === qs.quiz.toString());
+      if (!quiz) return false;
+      return quiz.questions && quiz.questions.length > 0 && (qs.bestScore / quiz.questions.length) >= 0.75;
+    }).length;
+  }
+  const quizProgressPercentage = (completedQuizzes * 100) / (allQuizzes || 1);
 
   if (!progress || progress.length === 0) {
     return res.json({
@@ -309,8 +321,6 @@ export const getYourProgress = TryCatch(async (req, res) => {
 
   const completedLectures = progress[0].completedLectures.length;
   const courseProgressPercentage = (completedLectures * 100) / (allLectures || 1);
-  const completedQuizzes = Array.isArray(progress[0].completedQuizzes) ? progress[0].completedQuizzes.length : 0;
-  const quizProgressPercentage = (completedQuizzes * 100) / (allQuizzes || 1);
 
 
   res.json({

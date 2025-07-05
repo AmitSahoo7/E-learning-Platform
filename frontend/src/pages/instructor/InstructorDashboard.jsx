@@ -142,12 +142,15 @@ const InstructorDashboard = () => {
                     </span>
                   </div>
                 </div>
-                <div className="instructor-course-actions">
+                <div className="instructor-course-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <button className="instructor-btn" onClick={() => handleViewDetails(course._id, course.title)}>
                     View Details
                   </button>
                   <button className="instructor-btn" onClick={() => handleManageLecture(course._id)}>
                     Manage Lecture
+                  </button>
+                  <button className="instructor-btn" onClick={() => navigate(`/quiz/${course._id}`)}>
+                    Manage Quizzes
                   </button>
                 </div>
               </div>
