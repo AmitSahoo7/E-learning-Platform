@@ -36,6 +36,27 @@ export const isAdmin = (req, res, next) => {
   }
 };
 
+export const isInstructorOrAdmin = (req, res, next) => {
+  try {
+    // Check if user is admin, superadmin, or instructor
+    const isAdminUser = req.user.role === "admin" || req.user.role === "superadmin";
+    const isInstructor = req.user.role === "instructor" || 
+                        (Array.isArray(req.user.roles) && req.user.roles.includes("instructor"));
+    
+    if (!isAdminUser && !isInstructor) {
+      return res.status(403).json({
+        message: "You need instructor or admin privileges",
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 export const isSuperAdmin = (req, res, next) => {
   try {
     if (req.user.role !== "superadmin")

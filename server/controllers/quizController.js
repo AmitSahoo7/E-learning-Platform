@@ -1,4 +1,4 @@
-import Quiz from '../models/quiz.js';
+import Quiz from '../models/Quiz.js';
 import { Courses } from '../models/Courses.js';
 import { Progress } from '../models/Progress.js';
 
@@ -27,8 +27,11 @@ export const getQuizzesByCourse = async (req, res) => {
     const courseId = req.params.courseId;
     const user = req.user;
 
-    // Allow admins to view all quizzes without enrollment
-    if (!user || (user.role !== 'admin' && (!Array.isArray(user.subscription) || !user.subscription.includes(courseId)))) {
+    // Allow admins and instructors to view all quizzes without enrollment
+    const isAdminUser = user.role === 'admin' || user.role === 'superadmin';
+    const isInstructor = user.role === 'instructor' || (Array.isArray(user.roles) && user.roles.includes('instructor'));
+    
+    if (!user || (!isAdminUser && !isInstructor && (!Array.isArray(user.subscription) || !user.subscription.includes(courseId)))) {
       return res.status(403).json({ message: "You must enroll in this course to take the quizzes" });
     }
 

@@ -138,8 +138,6 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
           <Link to="/admin/course" className="admin-feature-link">Manage Courses</Link>
           <Link to="/admin/users" className="admin-feature-link">Manage Users</Link>
         </nav>
-        {/* System Status */}
-        <div className={`system-status ${systemStatus === "Online" ? "online" : "offline"}`}>System Status: {systemStatus}</div>
         {/* Welcome Section */}
         <div className="admin-welcome">
           <h1>Welcome, {user?.name || "Admin"}!</h1>

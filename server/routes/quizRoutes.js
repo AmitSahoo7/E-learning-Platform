@@ -1,12 +1,12 @@
 import express from 'express';
 import { createQuiz, getQuizzesByCourse, submitQuiz } from '../controllers/quizController.js';
-import { isAuth, isAdmin } from '../middlewares/isAuth.js';
+import { isAuth, isInstructorOrAdmin } from '../middlewares/isAuth.js';
 import Quiz from '../models/Quiz.js';
 
 const router = express.Router();
 
-// Only admin can add quiz
-router.post('/create', isAuth, isAdmin, createQuiz);
+// Instructor or admin can add quiz
+router.post('/create', isAuth, isInstructorOrAdmin, createQuiz);
 
 // Get quiz by course for a student (after purchase)
 router.get('/:courseId', isAuth, getQuizzesByCourse);
@@ -26,8 +26,8 @@ router.delete("/:quizId/question/:questionIndex", async (req, res) => {
   res.json({ message: "Question deleted", quiz });
 });
 
-// Delete a quiz by ID (admin only)
-router.delete('/:quizId', isAuth, isAdmin, async (req, res) => {
+// Delete a quiz by ID (instructor or admin only)
+router.delete('/:quizId', isAuth, isInstructorOrAdmin, async (req, res) => {
   try {
     const quizId = req.params.quizId;
     await Quiz.findByIdAndDelete(quizId);
@@ -37,8 +37,8 @@ router.delete('/:quizId', isAuth, isAdmin, async (req, res) => {
   }
 });
 
-// Update a quiz by ID (admin only)
-router.put('/:quizId', isAuth, isAdmin, async (req, res) => {
+// Update a quiz by ID (instructor or admin only)
+router.put('/:quizId', isAuth, isInstructorOrAdmin, async (req, res) => {
   try {
     const quizId = req.params.quizId;
     const { title, questions } = req.body;
@@ -55,5 +55,5 @@ router.put('/:quizId', isAuth, isAdmin, async (req, res) => {
 
 export default router;
 // This code defines the routes for quiz-related operations in an Express application.
-// It includes routes for creating a quiz (admin only), retrieving a quiz by course ID (for students),
+// It includes routes for creating a quiz (instructor or admin only), retrieving a quiz by course ID (for students),
 // and submitting a quiz to get the score. The routes are protected by authentication and authorization middleware

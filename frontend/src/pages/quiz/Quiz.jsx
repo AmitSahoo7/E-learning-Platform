@@ -150,7 +150,7 @@ const Quiz = ({ user }) => {
 
   return (
     <div className="quiz-container">
-      {user?.role === 'admin' && (
+      {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
         <div style={{ marginBottom: '1.5rem' }}>
           <button className="quiz-create-btn" onClick={handleCreateQuiz}>
             ➕ Create Quiz
@@ -198,7 +198,7 @@ const Quiz = ({ user }) => {
                         <span className="quiz-tick">✔</span>
                       )}
                     </button>
-                    {user?.role === 'admin' && (
+                    {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
                       <>
                         <button
                           className="quiz-edit-btn"
@@ -231,7 +231,7 @@ const Quiz = ({ user }) => {
                 );
               })
             ) : (
-              user?.role === 'admin' ? (
+              (user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) ? (
                 <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
                   No quizzes found for this course. Create one above!
                 </div>
