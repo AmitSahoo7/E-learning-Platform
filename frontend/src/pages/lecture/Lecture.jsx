@@ -7,6 +7,10 @@ import Loading from "../../components/loading/Loading";
 import { toast } from "react-toastify";
 import { MdOutlineDone } from "react-icons/md";
 import { CourseData } from "../../context/CourseContext";
+import LectureCommentSection from "../../components/comment/LectureCommentSection";
+import { useRef } from "react";
+
+// Adjust path
 
 const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
@@ -21,17 +25,14 @@ const Lecture = ({ user }) => {
   const [video, setvideo] = useState("");
   const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
-  const [toggle, setToggle] = useState("video"); // 'video' or 'pdf'
-  // PDF upload states
   const [pdf, setPdf] = useState("");
-  const [pdfTitle, setPdfTitle] = useState("");
-  const [pdfDescription, setPdfDescription] = useState("");
-  const [pdfBtnLoading, setPdfBtnLoading] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   const { fetchCourse, course } = CourseData();
 
   useEffect(() => {
     if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
+
       navigate("/");
     }
   }, [user, params.id, navigate]);
@@ -83,11 +84,10 @@ const Lecture = ({ user }) => {
     setBtnLoading(true);
     e.preventDefault();
     const myForm = new FormData();
-
     myForm.append("title", title);
     myForm.append("description", description);
-    myForm.append("file", video);
-
+    if (video) myForm.append("file", video);
+    if (pdf) myForm.append("pdf", pdf);
     try {
       const { data } = await axios.post(
         `${server}/api/course/${params.id}`,
@@ -98,7 +98,6 @@ const Lecture = ({ user }) => {
           },
         }
       );
-
       toast.success(data.message);
       setBtnLoading(false);
       setShow(false);
@@ -107,6 +106,7 @@ const Lecture = ({ user }) => {
       setDescription("");
       setvideo("");
       setVideoPrev("");
+      setPdf("");
     } catch (error) {
       toast.error(error.response.data.message);
       setBtnLoading(false);
@@ -167,6 +167,12 @@ const Lecture = ({ user }) => {
         }
       );
       console.log(data.message);
+      
+      // Show points notification if it's a new completion
+      if (data.message === "New Progress added" || data.message === "Progress started") {
+        toast.success("🎉 +1 point earned for completing this video!");
+      }
+      
       fetchProgress();
     } catch (error) {
       console.log(error);
@@ -181,42 +187,28 @@ const Lecture = ({ user }) => {
     fetchCourse(params.id);
   }, []);
 
-  // PDF upload handler
-  const submitPdfHandler = async (e) => {
-    setPdfBtnLoading(true);
-    e.preventDefault();
-    const myForm = new FormData();
-    myForm.append("title", pdfTitle);
-    myForm.append("description", pdfDescription);
-    if (pdf) myForm.append("file", pdf);
-    try {
-      const { data } = await axios.post(
-        `${server}/api/course/${params.id}`,
-        myForm,
-        {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        }
-      );
-      toast.success(data.message);
-      setPdfBtnLoading(false);
-      setShow(false);
-      fetchLectures();
-      setPdf("");
-      setPdfTitle("");
-      setPdfDescription("");
-    } catch (error) {
-      toast.error(error.response.data.message);
-      setPdfBtnLoading(false);
-    }
+  //css for comment and desc
+  const infoRef = useRef(null);
+  const commentRef = useRef(null);
+  useEffect(() => {
+  if (!infoRef.current || !commentRef.current) return;
+
+  const setWidth = () => {
+    commentRef.current.style.width = `${infoRef.current.offsetWidth}px`;
   };
 
-  // --- Progress bar safety logic ---
-  const safeLectLength = lectLength > 0 ? lectLength : 1; // avoid division by zero
-  const safeCompletedLec = Math.min(completedLec, safeLectLength);
-  const percent = Math.round((safeCompletedLec / safeLectLength) * 100);
-  const safeCompleted = Math.min(percent, 100);
+  setWidth(); // Initial sync
+
+  const resizeObserver = new ResizeObserver(setWidth);
+  resizeObserver.observe(infoRef.current);
+
+  window.addEventListener("resize", setWidth); // Optional fallback
+
+  return () => {
+    resizeObserver.disconnect();
+    window.removeEventListener("resize", setWidth);
+  };
+}, []);
 
   return (
     <>
@@ -226,47 +218,131 @@ const Lecture = ({ user }) => {
         <div className="lecture-modern">
           {/* Course Progress */}
           {user && user.role === "admin" ? (
-            <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <div
+              className="lecture-progress-bar"
+              style={{
+                margin: "12px 0 auto 12px auto",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <div style={{ fontWeight: 600, marginBottom: 8 }}>
                 All lectures available for management
               </div>
             </div>
           ) : user && Array.isArray(user.subscription) && user.subscription.includes(params.id) ? (
             lectLength === 0 ? (
-              <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div
+                className="lecture-progress-bar"
+                style={{
+                  margin: "12px 0 auto 12px auto",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>
                   No lectures available yet.
                 </div>
               </div>
             ) : completedLec === 0 ? (
-              <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+              <div
+                className="lecture-progress-bar"
+                style={{
+                  margin: "12px 0 auto 12px auto",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8,
+                    textAlign: "center",
+                  }}
+                >
                   Course Progress: 0% (No lectures completed yet)
                 </div>
-                <div className="lecture-progress-bar-track" style={{ width: '100%', maxWidth: 400 }}>
-                  <div className="lecture-progress-bar-fill" style={{ width: `0%` }}></div>
+                <div
+                  className="lecture-progress-bar-track"
+                  style={{ width: "100%", maxWidth: 400 }}
+                >
+                  <div
+                    className="lecture-progress-bar-fill"
+                    style={{ width: `0%` }}
+                  ></div>
                 </div>
-                <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem", marginTop: 12 }}>
+                <span
+                  className="lecture-progress-bar-percent"
+                  style={{
+                    color: "#34c759",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                    marginTop: 12,
+                  }}
+                >
                   Start your first lecture!
                 </span>
               </div>
             ) : (
-              <div className="lecture-progress-bar" style={{ margin: "12px 0 auto 12px auto", textAlign: "center", display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                  Course Progress - {safeCompletedLec} out of {safeLectLength}
+              <div
+                className="lecture-progress-bar"
+                style={{
+                  margin: "12px 0 auto 12px auto",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 8,
+                    textAlign: "center",
+                  }}
+                >
+                  Course Progress - {completedLec} out of {lectLength}
                 </div>
-                <div className="lecture-progress-bar-track" style={{ width: '100%', maxWidth: 400 }}>
-                  <div className="lecture-progress-bar-fill" style={{ width: `${safeCompleted}%` }}></div>
+                <div
+                  className="lecture-progress-bar-track"
+                  style={{ width: "100%", maxWidth: 400 }}
+                >
+                  <div
+                    className="lecture-progress-bar-fill"
+                    style={{ width: `${completedLec / lectLength * 100}%` }}
+                  ></div>
                 </div>
-                <span className="lecture-progress-bar-percent" style={{ color: "#34c759", fontWeight: 700, fontSize: "1.1rem", marginTop: 12 }}>
-                  {safeCompleted}%
+                <span
+                  className="lecture-progress-bar-percent"
+                  style={{
+                    color: "#34c759",
+                    fontWeight: 700,
+                    fontSize: "1.1rem",
+                    marginTop: 12,
+                  }}
+                >
+                  {completedLec / lectLength * 100}%
                 </span>
               </div>
             )
           ) : null}
           {/* Admin Add Lecture Button */}
           {user && user.role === "admin" && (
-            <button className="common-btn" style={{ margin: '0 auto 16px auto', display: 'block' }} onClick={() => setShow(!show)}>
+            <button
+              className="common-btn"
+              style={{ margin: "0 auto 16px auto", display: "block" }}
+              onClick={() => setShow(!show)}
+            >
               {show ? "Close" : "Add Lecture +"}
             </button>
           )}
@@ -274,102 +350,17 @@ const Lecture = ({ user }) => {
           {show && user && user.role === "admin" && (
             <div className="lecture-form-box">
               <div className="lecture-form">
-                <div className="toggle-upload">
-                  <button
-                    className={toggle === "video" ? "common-btn active" : "common-btn"}
-                    onClick={() => setToggle("video")}
-                    type="button"
-                  >
-                    Video
-                  </button>
-                  <button
-                    className={toggle === "pdf" ? "common-btn active" : "common-btn"}
-                    onClick={() => setToggle("pdf")}
-                    type="button"
-                  >
-                    PDF
-                  </button>
-                </div>
-                {toggle === "video" ? (
-                  <div className="lecture-form-box">
-                    <h2>Add Lecture</h2>
-                    <form onSubmit={submitHandler}>
-                      <label htmlFor="lecture-title">Title</label>
-                      <input
-                        id="lecture-title"
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                      />
-                      <label htmlFor="lecture-description">Description</label>
-                      <input
-                        id="lecture-description"
-                        type="text"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                      />
-                      <input
-                        type="file"
-                        placeholder="choose video"
-                        onChange={changeVideoHandler}
-                        required
-                        accept="video/mp4"
-                      />
-                      {videoPrev && (
-                        <video
-                          src={videoPrev}
-                          alt=""
-                          width={300}
-                          controls
-                        ></video>
-                      )}
-                      <button
-                        disabled={btnLoading}
-                        type="submit"
-                        className="common-btn"
-                      >
-                        {btnLoading ? "Please Wait..." : "Add"}
-                      </button>
-                    </form>
-                  </div>
-                ) : (
-                  <div className="lecture-form-box">
-                    <h2>Add Lecture PDF</h2>
-                    <form onSubmit={submitPdfHandler}>
-                      <label htmlFor="pdf-title">Title</label>
-                      <input
-                        id="pdf-title"
-                        type="text"
-                        value={pdfTitle}
-                        onChange={(e) => setPdfTitle(e.target.value)}
-                        required
-                      />
-                      <label htmlFor="pdf-description">Description</label>
-                      <input
-                        id="pdf-description"
-                        type="text"
-                        value={pdfDescription}
-                        onChange={(e) => setPdfDescription(e.target.value)}
-                        required
-                      />
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={e => setPdf(e.target.files[0])}
-                        required
-                      />
-                      <button
-                        disabled={pdfBtnLoading}
-                        type="submit"
-                        className="common-btn"
-                      >
-                        {pdfBtnLoading ? "Please Wait..." : "Add PDF"}
-                      </button>
-                    </form>
-                  </div>
-                )}
+                <form onSubmit={submitHandler}>
+                  <label>Title</label>
+                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                  <label>Description</label>
+                  <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
+                  <label>Video File</label>
+                  <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
+                  <label>PDF File (optional)</label>
+                  <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
+                  <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
+                </form>
               </div>
             </div>
           )}
@@ -385,17 +376,26 @@ const Lecture = ({ user }) => {
                 disableRemotePlayback
                 autoPlay
                 onEnded={() => addProgress(lecture._id)}
-                style={{ borderRadius: "16px", marginBottom: "1.5rem", marginTop: "2rem" }}
+                style={{
+                  borderRadius: "16px",
+                  marginBottom: "1.5rem",
+                  marginTop: "2rem",
+                }}
               ></video>
             </div>
           ) : (
-            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>Please Select a Lecture</h2>
+            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>
+              Please Select a Lecture
+            </h2>
           )}
           {/* Side by Side Layout for Info and List */}
-          <div className="lecture-main-flex">
+          <div className={lecture?._id ? "lecture-main-grid" : "lecture-main-flex"}>
             {lecture?.title && (
-              <div className="lecture-info-modern">
-                <h2>Lecture {lectures.findIndex(l => l._id === lecture._id) + 1}: {lecture?.title}</h2>
+              <div className="lecture-info-modern" ref={infoRef}>
+                <h2>
+                  Lecture {lectures.findIndex((l) => l._id === lecture._id) + 1}
+                  : {lecture?.title}
+                </h2>
                 <div style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
                   <span>Design</span>
                   <span style={{ marginLeft: 16 }}>3 Month</span>
@@ -404,26 +404,73 @@ const Lecture = ({ user }) => {
                   <b>Description:</b>
                   <div style={{ marginTop: 4 }}>{lecture?.description}</div>
                 </div>
-                <button className="notes-btn-modern">Notes</button>
+                <button className="notes-btn-modern" onClick={() => {
+                  if (lecture.pdf) {
+                    window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
+                  } else {
+                    window.alert('No notes available.');
+                  }
+                }}>Notes</button>
               </div>
             )}
+
             <div className="lecture-list-vertical-scroll">
               {lectures && lectures.length > 0 ? (
                 lectures.map((e, i) => (
-                  <div key={e._id} style={{ position: 'relative', display: 'inline-block' }}>
+                  <div
+                    key={e._id}
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
                     <button
-                      className={`lecture-list-btn-modern${lecture._id === e._id ? " active" : ""}`}
+                      className={`lecture-list-btn-modern${
+                        lecture._id === e._id ? " active" : ""
+                      }`}
                       onClick={() => fetchLecture(e._id)}
                     >
                       {i + 1}. {e.title}
+
+                      {/* +1 point badge for video lectures only */}
+                      {e.video && (
+                        <span style={{
+                          marginLeft: 10,
+                          background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)',
+                          color: '#155724',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          borderRadius: 8,
+                          padding: '2px 10px',
+                          boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)',
+                          verticalAlign: 'middle',
+                          display: 'inline-block',
+                          letterSpacing: 0.5,
+                          marginTop: -2
+                        }}>
+                          +1 point
+                        </span>
+                      )}
                       {progress[0] && progress[0].completedLectures.includes(e._id) && (
                         <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
                       )}
+
                     </button>
                     {user && user.role === "admin" && (
                       <button
                         className="delete-lecture-btn"
-                        style={{ position: 'absolute', top: 6, right: 6, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontWeight: 700, fontSize: 14, zIndex: 2 }}
+                        style={{
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          background: "red",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: 24,
+                          height: 24,
+                          cursor: "pointer",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          zIndex: 2,
+                        }}
                         onClick={() => deleteHandler(e._id)}
                         title={`Delete ${e.title}`}
                       >
@@ -436,6 +483,19 @@ const Lecture = ({ user }) => {
                 <p>No Lectures Yet!</p>
               )}
             </div>
+
+            {lecture?._id && (
+              <div className="lecture-comment" ref={commentRef}>
+                <LectureCommentSection
+                  lectureId={lecture._id}
+                  isPaidUser={
+                    user?.subscription?.includes(params.id) ||
+                    user?.role === "admin"
+                  }
+                  user={user}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

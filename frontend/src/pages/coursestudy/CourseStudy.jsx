@@ -6,11 +6,29 @@ import axios from "axios";
 import { server } from "../../main";
 import AddQuiz from "../../admin/Courses/AddQuiz.jsx";
 
+import CourseReviewBox from "../../components/reviews/CourseReviewBox";
+
+const placeholderAvatar =
+  "https://ui-avatars.com/api/?name=Instructor&background=6c63ff&color=fff&rounded=true&size=64";
+const placeholderIcon = (
+  <span
+    style={{
+      display: "inline-block",
+      width: 20,
+      height: 20,
+      background: "#ececec",
+      borderRadius: "5px",
+      marginRight: 6,
+      verticalAlign: "middle",
+    }}
+  ></span>
+);
 
 const CourseStudy = ({ user }) => {
   const params = useParams();
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
+
 
   const [quizCount, setQuizCount] = useState(0);
 
@@ -52,6 +70,18 @@ const CourseStudy = ({ user }) => {
     "Build real-world projects"
   ];
 
+  // Helper function to convert string to array (for prerequisites, whatYouLearn, courseOutcomes)
+  const stringToArray = (str) => {
+    if (!str) return [];
+    return str.split("\n").filter((item) => item.trim() !== "");
+  };
+
+  // Get dynamic data from course object
+  const prerequisites = stringToArray(course?.prerequisites);
+  const whatYouLearn = stringToArray(course?.whatYouLearn);
+  const courseOutcome = stringToArray(course?.courseOutcomes);
+
+
   // Progress state
   const [completed, setCompleted] = useState(0);
   const [completedLec, setCompletedLec] = useState(0);
@@ -82,7 +112,10 @@ const CourseStudy = ({ user }) => {
         );
         // Clamp values
         const safeLectLength = data.allLectures > 0 ? data.allLectures : 1;
-        const safeCompletedLec = Math.min(data.completedLectures || 0, safeLectLength);
+        const safeCompletedLec = Math.min(
+          data.completedLectures || 0,
+          safeLectLength
+        );
         let percent = Math.round((safeCompletedLec / safeLectLength) * 100);
         percent = Math.min(percent, 100);
         setCompleted(percent);
@@ -106,9 +139,11 @@ const CourseStudy = ({ user }) => {
       }
     }
 
-    if (user && course && isEnrolled) {
+
+    
+    if (user && course && user.subscription.includes(course._id))
       fetchProgress();
-    }
+
     // eslint-disable-next-line
   }, [params.id, user, course]);
 
@@ -135,10 +170,17 @@ const CourseStudy = ({ user }) => {
     <div className="cd-root">
       {/* Top: Course Image Banner with Overlay */}
       <div className="cd-image-banner">
-        <img src={`${server}/${course.image}`} alt={course.title} className="cd-banner-img" />
+        <img
+          src={`${server}/${course.image}`}
+          alt={course.title}
+          className="cd-banner-img"
+        />
         <div className="cd-banner-overlay">
           <h1 className="cd-title">{course.title}</h1>
-          <span className="cd-category-badge">Medium</span>
+          {course.tagline && <p className="cd-tagline">{course.tagline}</p>}
+          {course.difficulty && (
+            <span className="cd-category-badge">{course.difficulty}</span>
+          )}
         </div>
       </div>
 
@@ -147,6 +189,7 @@ const CourseStudy = ({ user }) => {
         {/* Left Side */}
         <div className="cd-main-left">
           <div className="cd-main-left-card" data-aos="fade-up">
+
             <div className="cd-section">
               <h3>Prerequisites</h3>
               <ul className="cd-list">
@@ -180,6 +223,7 @@ const CourseStudy = ({ user }) => {
                 ))}
               </ul>
             </div>
+
           </div>
         </div>
 
@@ -195,21 +239,35 @@ const CourseStudy = ({ user }) => {
               <span className="cd-info-value">{course.duration} weeks</span>
             </div>
 
+            {course.difficulty && (
+              <div className="cd-info-row">
+                <span className="cd-info-label">Difficulty:</span>
+                <span className="cd-info-value">{course.difficulty}</span>
+              </div>
+            )}
+
             {/* Progress tracker for admins and enrolled users */}
             {isAdmin ? (
-              <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+              <div
+                className="lecture-progress-bar"
+                style={{ margin: "12px 0", textAlign: "center" }}
+              >
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>
                   All lectures available for management
                 </div>
               </div>
             ) : isEnrolled ? (
               lectLength === 0 ? (
-                <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                <div
+                  className="lecture-progress-bar"
+                  style={{ margin: "12px 0", textAlign: "center" }}
+                >
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
                     No lectures available yet.
                   </div>
                 </div>
               ) : completed === 0 ? (
+
                 <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
                     Lecture Progress: 0% (No lectures completed yet)
@@ -218,10 +276,12 @@ const CourseStudy = ({ user }) => {
                     <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
                   </div>
                   <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+
                     Start your first lecture!
                   </span>
                 </div>
               ) : (
+
                 <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
                     Lecture Progress - {completedLec} out of {lectLength}
@@ -230,6 +290,7 @@ const CourseStudy = ({ user }) => {
                     <div className="lecture-progress-bar-fill" style={{ width: `${completed}%`, background: '#1cc524' }}></div>
                   </div>
                   <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+
                     {completed}%
                   </span>
                 </div>
@@ -298,6 +359,7 @@ const CourseStudy = ({ user }) => {
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
             )}
+
             
             {quizCount > 0 && (
               <div style={{ fontWeight: 500, color: '#007aff', margin: '2px 0 14px 0', textAlign: 'center' }}>
@@ -321,30 +383,51 @@ const CourseStudy = ({ user }) => {
                 {enrolling ? "Processing..." : "Enroll"}
               </button>
             )}
-
-            {/* Preview Video Placeholder */}
-            <div className="cd-preview-video">
-              <video width="100%" height="160" controls style={{ borderRadius: 12, marginTop: 12 }}>
-                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-
-            
+            {/* Preview Video */}
+            {course.previewVideo && (
+              <div className="cd-preview-video">
+                <video
+                  width="100%"
+                  height="160"
+                  controls
+                  style={{ borderRadius: 12, marginTop: 12 }}
+                >
+                  <source
+                    src={`${server}/${course.previewVideo}`}
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="cd-instructor-card" data-aos="fade-up">
         <img
-          src={"https://ui-avatars.com/api/?name=" + encodeURIComponent(course.createdBy || "Instructor") + "&background=34c759&color=fff&rounded=true&size=64"}
+          src={
+            course.instructorAvatar
+              ? `${server}/${course.instructorAvatar}`
+              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  course.instructorName || course.createdBy || "Instructor"
+                )}&background=34c759&color=fff&rounded=true&size=64`
+          }
           alt="Instructor"
           className="cd-instructor-avatar"
         />
         <div>
-          <div className="cd-instructor-name">{course.createdBy || "Instructor"}</div>
-          <div className="cd-instructor-bio">Experienced educator and subject matter expert.</div>
+          <div className="cd-instructor-name">
+            {course.instructorName || course.createdBy || "Instructor"}
+          </div>
+          <div className="cd-instructor-bio">
+            {course.instructorBio ||
+              "Experienced educator and subject matter expert."}
+          </div>
         </div>
+      </div>
+      <div className="cd-review-box-wrapper" data-aos="fade-up">
+        <CourseReviewBox courseId={course._id} user={user} />
       </div>
     </div>
   );

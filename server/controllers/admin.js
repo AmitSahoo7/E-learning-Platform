@@ -6,14 +6,31 @@ import { promisify } from "util";
 import fs from "fs";
 import { User } from "../models/User.js";
 import { Payment } from "../models/Payment.js";
+import Announcement from "../models/Announcement.js";
 
 export const createCourse = TryCatch(async (req, res) => {
-  const { title, description, category, createdBy, duration, price } = req.body;
+  const { 
+    title, 
+    description, 
+    category, 
+    createdBy, 
+    duration, 
+    price,
+    tagline,
+    difficulty,
+    prerequisites,
+    whatYouLearn,
+    courseOutcomes,
+    instructorName,
+    instructorBio
+  } = req.body;
 
   const image = req.files?.image?.[0] || req.file;
   const pdf = req.files?.pdf?.[0];
+  const instructorAvatar = req.files?.instructorAvatar?.[0];
+  const previewVideo = req.files?.previewVideo?.[0];
 
-  await Courses.create({
+  const course = await Courses.create({
     title,
     description,
     category,
@@ -22,7 +39,23 @@ export const createCourse = TryCatch(async (req, res) => {
     duration,
     price,
     pdf: pdf?.path,
+    tagline,
+    difficulty,
+    prerequisites,
+    whatYouLearn,
+    courseOutcomes,
+    instructorName,
+    instructorBio,
+    instructorAvatar: instructorAvatar?.path,
+    previewVideo: previewVideo?.path,
   });
+
+  // Auto-enroll the creator as a student in their own course
+  const user = await User.findById(createdBy);
+  if (user && !user.subscription.includes(course._id)) {
+    user.subscription.push(course._id);
+    await user.save();
+  }
 
   res.status(201).json({
     message: "Course Created Successfully",
@@ -152,6 +185,15 @@ export const updateRole = TryCatch(async (req, res) => {
   }
 
   if (user.role === "admin") {
+    user.role = "superadmin";
+    await user.save();
+
+    return res.status(200).json({
+      message: "Role updated to superadmin",
+    });
+  }
+
+  if (user.role === "superadmin") {
     user.role = "user";
     await user.save();
 
@@ -222,3 +264,73 @@ export const getFeedbacks = TryCatch(async (req, res) => {
   ];
   res.json({ feedbacks });
 });
+
+
+export const updateCourse = TryCatch(async (req, res) => {
+  const course = await Courses.findById(req.params.id);
+  if (!course) return res.status(404).json({ message: "Course not found" });
+
+  // Update text fields if provided
+  const fields = [
+    "title", "description", "category", "createdBy", "duration", "price",
+    "tagline", "difficulty", "prerequisites", "whatYouLearn", "courseOutcomes",
+    "instructorName", "instructorBio"
+  ];
+  fields.forEach(field => {
+    if (req.body[field] !== undefined) course[field] = req.body[field];
+  });
+
+  // Update files if new ones are uploaded
+  if (req.files?.image?.[0]) course.image = req.files.image[0].path;
+  if (req.files?.pdf?.[0]) course.pdf = req.files.pdf[0].path;
+  if (req.files?.instructorAvatar?.[0]) course.instructorAvatar = req.files.instructorAvatar[0].path;
+  if (req.files?.previewVideo?.[0]) course.previewVideo = req.files.previewVideo[0].path;
+
+  await course.save();
+  res.json({ message: "Course updated successfully", course });
+});
+
+// Create announcement (admin only)
+export const createAnnouncement = async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) return res.status(400).json({ message: "Message is required" });
+    const announcement = await Announcement.create({
+      message,
+      createdBy: req.user._id,
+    });
+    res.status(201).json({ message: "Announcement created", announcement });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get all announcements (latest first)
+export const getAnnouncements = async (req, res) => {
+  try {
+    const announcements = await Announcement.find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "name email role");
+    res.json({ announcements });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+
+//Adding comment part over here
+import { Comment } from "../models/Comment.js";
+
+export const getAllComments = async (req, res) => {
+  try {
+    const comments = await Comment.find({})
+      .populate("userId", "name")
+      .populate("lectureId", "title");
+
+    res.status(200).json({ success: true, comments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching comments" });
+  }
+};

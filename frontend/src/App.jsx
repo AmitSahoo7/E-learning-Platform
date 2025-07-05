@@ -23,7 +23,14 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
+
 import { useNavigate, useParams } from "react-router-dom";
+
+import Leaderboard from "./pages/leaderboard/Leaderboard";
+import InstructorDashboard from "./pages/instructor/InstructorDashboard";
+import axios from "axios";
+import { server } from "./main";
+
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
@@ -31,27 +38,53 @@ const App = () => {
   // Announcement state
   const [announcements, setAnnouncements] = useState([]);
   const [readAnnouncements, setReadAnnouncements] = useState([]);
+
+  // Fetch announcements from backend
   useEffect(() => {
-    const stored = localStorage.getItem("announcements");
-    if (stored) setAnnouncements(JSON.parse(stored));
+    if (!isAuth) return;
+    const fetchAnnouncements = async () => {
+      try {
+        const { data } = await axios.get(`${server}/api/admin/announcements`, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        setAnnouncements(data.announcements || []);
+      } catch (err) {
+        setAnnouncements([]);
+      }
+    };
+    fetchAnnouncements();
+    // Optionally, poll every 60s for new announcements
+    // const interval = setInterval(fetchAnnouncements, 60000);
+    // return () => clearInterval(interval);
+  }, [isAuth]);
+
+  // Mark announcement as read (local only)
+  useEffect(() => {
     const read = localStorage.getItem("readAnnouncements");
     if (read) setReadAnnouncements(JSON.parse(read));
   }, []);
-  const addAnnouncement = (msg) => {
-    const newAnnouncement = {
-      id: Date.now(),
-      message: msg,
-      timestamp: new Date().toISOString(),
-    };
-    const updated = [newAnnouncement, ...announcements];
-    setAnnouncements(updated);
-    localStorage.setItem("announcements", JSON.stringify(updated));
-  };
   const markAnnouncementRead = (id) => {
     if (!readAnnouncements.includes(id)) {
       const updated = [id, ...readAnnouncements];
       setReadAnnouncements(updated);
       localStorage.setItem("readAnnouncements", JSON.stringify(updated));
+    }
+  };
+
+  // Add announcement (admin only)
+  const addAnnouncement = async (msg) => {
+    if (!user || user.role !== "admin") return;
+    try {
+      const { data } = await axios.post(
+        `${server}/api/admin/announcement`,
+        { message: msg },
+        { headers: { token: localStorage.getItem("token") } }
+      );
+      // Prepend new announcement to state
+      setAnnouncements((prev) => [data.announcement, ...prev]);
+    } catch (err) {
+      // Optionally show error
+      // alert("Failed to send announcement");
     }
   };
 
@@ -90,7 +123,7 @@ const App = () => {
               element={isAuth ? <PaymentSuccess user={user} /> : <Login />}
             />
             <Route
-              path="/:id/dashboard"
+              path=":id/dashboard"
               element={isAuth ? <Dashboard user={user} /> : <Login />}
             />
             <Route
@@ -137,6 +170,18 @@ const App = () => {
                 ) : (
                   <Home />
                 )
+              }
+            />
+            <Route
+              path="/leaderboard"
+              element={<Leaderboard user={user} />}
+            />
+            <Route
+              path="/instructor/dashboard"
+              element={
+                isAuth && (user.role === "admin" || user.role === "superadmin")
+                  ? <InstructorDashboard />
+                  : <Home />
               }
             />
           </Routes>

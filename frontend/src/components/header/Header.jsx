@@ -22,10 +22,10 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
   const [modal, setModal] = useState(null); // { message, timestamp }
   // Filter out invalid announcements
   const validAnnouncements = announcements.filter(a => a && typeof a === 'object' && typeof a.message === 'string');
-  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a.id)).length;
+  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).length;
   const handleAnnouncementClick = (a) => {
     setModal(a);
-    if (markAnnouncementRead) markAnnouncementRead(a.id);
+    if (markAnnouncementRead) markAnnouncementRead(a._id);
   };
   return (
     <header className="hero-header-bar">
@@ -36,6 +36,7 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
         <Link to="/">Home</Link>
         <Link to="/courses">Courses</Link>
         <Link to="/about">About</Link>
+        <Link to="/leaderboard">🏆 Leaderboard</Link>
         {isAuth ? (
           <Link to="/account">Account</Link>
         ) : (
@@ -54,12 +55,12 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
               ) : (
                 validAnnouncements.map((a, i) => (
                   <div
-                    className={`dropdown-announcement${readAnnouncements.includes(a.id) ? '' : ' unread'}`}
-                    key={a.id || i}
+                    className={`dropdown-announcement${readAnnouncements.includes(a._id) ? '' : ' unread'}`}
+                    key={a._id || i}
                     onClick={() => handleAnnouncementClick(a)}
                   >
                     <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
-                    <div className="dropdown-announcement-time">{a.timestamp ? timeAgo(a.timestamp) : ''}</div>
+                    <div className="dropdown-announcement-time">{a.createdAt ? timeAgo(a.createdAt) : (a.timestamp ? timeAgo(a.timestamp) : '')}</div>
                   </div>
                 ))
               )}
@@ -72,7 +73,7 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
           <div className="announcement-modal-content" onClick={e => e.stopPropagation()}>
             <div className="announcement-modal-title">Announcement</div>
             <div className="announcement-modal-message">{modal.message}</div>
-            <div className="announcement-modal-time">{new Date(modal.timestamp).toLocaleString()}</div>
+            <div className="announcement-modal-time">{modal.createdAt ? new Date(modal.createdAt).toLocaleString() : (modal.timestamp ? new Date(modal.timestamp).toLocaleString() : '')}</div>
             <button className="announcement-modal-close" onClick={() => setModal(null)}>Close</button>
           </div>
         </div>

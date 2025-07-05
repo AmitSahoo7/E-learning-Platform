@@ -107,8 +107,8 @@ body, html {
 }
 
 .admin-main-widgets {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 2.5rem;
   margin-top: 1.5rem;
 }
@@ -206,9 +206,6 @@ body, html {
 }
 
 @media (max-width: 900px) {
-  .admin-main-widgets {
-    grid-template-columns: 1fr;
-  }
   .admin-stats-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -353,3 +350,54 @@ body, html {
   color: #fff;
   box-shadow: 0 4px 16px #10b98122;
 }
+
+
+.comment-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #f7f7fa;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  position: relative;
+}
+
+.comment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comment-user {
+  font-weight: 600;
+  color: #8a4baf;
+}
+
+.comment-text {
+  color: #333;
+}
+
+.comment-lecture {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.comment-delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
