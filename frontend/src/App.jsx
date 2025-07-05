@@ -25,6 +25,7 @@ import AddCourse from "./admin/Courses/AddCourse";
 import Leaderboard from "./pages/leaderboard/Leaderboard";
 import axios from "axios";
 import { server } from "./main";
+import Events from "./pages/events";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
@@ -166,6 +167,7 @@ const App = () => {
               path="/leaderboard"
               element={<Leaderboard user={user} />}
             />
+            <Route path="/events" element={<Events />} />
           </Routes>
           <Footer />
           <GeneralChatbot />

@@ -22,54 +22,47 @@ const About = () => {
   };
 
   return (
-    <div className="about">
-      <div className="about-container">
-        <div className="about-left">
-          <h2 className="about-title">About Us</h2>
-          <h3 className="about-subtitle">
-            <span className="highlight">E-learning</span> Providing The Best Opportunities To The Students Around The Globe.
-          </h3>
-          <p className="about-description">
-          We are dedicated to providing high quality online courses to help individuals learn and grow in their desired fields. Our experienced instruction ensure that each course is tailored for effective learning and practical application.
-          </p>
-
-          <button className="join-btn">
-            Join Us
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-
-          {/* Feedback Form - now inside left column */}
-          <div className="feedback-green-card">
-            <h3 className="feedback-title">We Value Your Feedback</h3>
-            <form onSubmit={handleFeedbackSubmit}>
-              <label htmlFor="feedback-textarea" className="feedback-label">Your Feedback</label>
+    <div className="about-main-wrapper">
+      <section className="about-section-glow-bg">
+        <div className="about-content-modern">
+          <div className="about-left">
+            <h2 className="about-title-gradient">About Us</h2>
+            <h3 className="about-subtitle">
+              <span className="highlight">E-learning</span> Providing The Best Opportunities To The Students Around The Globe.
+            </h3>
+            <p className="about-description">
+              We are dedicated to providing high quality online courses to help individuals learn and grow in their desired fields. Our experienced instruction ensure that each course is tailored for effective learning and practical application.
+            </p>
+            <button className="join-btn">
+              Join Us
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <form className="about-feedback-card" onSubmit={handleFeedbackSubmit}>
+              <label htmlFor="feedback">Your Feedback</label>
               <textarea
-                id="feedback-textarea"
+                id="feedback"
                 value={feedback}
-                onChange={e => setFeedback(e.target.value)}
+                onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Share your thoughts, suggestions, or issues..."
-                required
                 rows={4}
-                className="feedback-textarea"
+                required
               />
-              <button type="submit" className="feedback-btn-green">
-                Submit Feedback
-              </button>
+              <button type="submit" className="about-feedback-btn">Submit Feedback</button>
+              {feedbackStatus && (
+                <div className={feedbackStatus.includes("submitted") ? "feedback-success" : "feedback-error"}>
+                  {feedbackStatus}
+                </div>
+              )}
             </form>
-            {feedbackStatus && <div className={feedbackStatus.includes('submitted') ? 'feedback-success' : 'feedback-error'}>{feedbackStatus}</div>}
+          </div>
+          <div className="about-images">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Office" className="about-img" />
+            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80" alt="Teamwork" className="about-img" />
           </div>
         </div>
-        <div className="about-right">
-          <div className="image-container top-image">
-            <img src="https://t4.ftcdn.net/jpg/03/84/55/29/360_F_384552930_zPoe9zgmCF7qgt8fqSedcyJ6C6Ye3dFs.jpg" alt="Modern office space" />
-          </div>
-          <div className="image-container bottom-image">
-            <img src="https://img.freepik.com/free-photo/side-view-cropped-unrecognizable-business-people-working-common-desk_1098-20474.jpg?semt=ais_hybrid&w=740" alt="People working on laptops" />
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };

@@ -187,11 +187,11 @@ const Home = () => {
         {/* Learn More Section */}
         <section className="learn-more-section">
           <div className="learn-more-content">
-            <h2>The number one factor in relevance drives out resistance.</h2>
+            <h2>Don't Miss Our Next Free Webinar!</h2>
             <p>
-              Suas aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+              Stay ahead with the latest trends in e-learning. Sign up for our upcoming webinar and get exclusive tips from industry experts.
             </p>
-            <button className="cta-btn learn-more-btn">Learn More</button>
+            <button className="cta-btn learn-more-btn" onClick={() => navigate('/events')}>Register for Webinar</button>
           </div>
         </section>
       </div>
