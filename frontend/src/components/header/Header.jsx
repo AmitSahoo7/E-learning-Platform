@@ -52,6 +52,8 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
     setShowProfileModal(false);
     if (user?.role === "admin") {
       window.location.href = "/admin/dashboard";
+    } else if (user?.role === "instructor") {
+      window.location.href = "/instructor/dashboard";
     } else if (user?._id) {
       window.location.href = `/${user._id}/dashboard`;
     }

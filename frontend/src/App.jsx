@@ -182,9 +182,11 @@ const App = () => {
             <Route
               path="/instructor/dashboard"
               element={
-                isAuth && (user.role === "admin" || user.role === "superadmin")
-                  ? <InstructorDashboard />
-                  : <Home />
+                isAuth && (user.role === "instructor" || (Array.isArray(user.roles) && user.roles.includes("instructor"))) ? (
+                  <InstructorDashboard user={user} />
+                ) : (
+                  <Home />
+                )
               }
             />
           </Routes>

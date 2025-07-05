@@ -136,9 +136,9 @@ const InstructorDashboard = () => {
                     <span className="stat-value">{course.enrolledUsers}</span>
                   </div>
                   <div className="stat-item">
-                    <span className="stat-label">Total Watch Time:</span>
+                    <span className="stat-label">Total Lectures Viewed:</span>
                     <span className="stat-value">
-                      {course.totalWatchTime} <span style={{ fontWeight: 400 }}>lecture views</span>
+                      {course.totalWatchTime} <span style={{ fontWeight: 400 }}> views</span>
                     </span>
                   </div>
                 </div>

@@ -1,10 +1,26 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { MdDashboard } from "react-icons/md";
 import { IoMdLogOut } from "react-icons/io";
 import "../pages/account/account.css";
 
 const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard }) => {
   const modalRef = useRef();
+  const [dashboardType, setDashboardType] = useState("admin");
+
+  // Support both user.role (string) and user.roles (array)
+  const isAdmin = user && (user.role === "admin" || (Array.isArray(user.roles) && user.roles.includes("admin")));
+  const isInstructor = user && (user.role === "instructor" || (Array.isArray(user.roles) && user.roles.includes("instructor")));
+
+  useEffect(() => {
+    // Reset dashboardType when modal opens or user changes
+    if (user) {
+      if (isAdmin && !isInstructor) setDashboardType("admin");
+      else if (!isAdmin && isInstructor) setDashboardType("instructor");
+      else if (isAdmin && isInstructor) setDashboardType("admin");
+      else setDashboardType(null);
+    }
+    // eslint-disable-next-line
+  }, [user, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -25,6 +41,17 @@ const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard }) => 
     : "";
   const joined = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : null;
 
+  // Custom goToDashboard for switch
+  const handleDashboardClick = () => {
+    if (dashboardType === "admin") {
+      window.location.href = "/admin/dashboard";
+    } else if (dashboardType === "instructor") {
+      window.location.href = "/instructor/dashboard";
+    } else if (user?._id) {
+      window.location.href = `/${user._id}/dashboard`;
+    }
+  };
+
   return (
     <div className="profile-modal-bg">
       <div className="profile-modal-card" ref={modalRef}>
@@ -44,20 +71,51 @@ const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard }) => 
           <p>
             <strong>{user.email}</strong>
           </p>
-          <p className="profile-role">Role: <span>{user.role}</span></p>
+          <p className="profile-role">Role: <span>{user.role || (user.roles && user.roles.join(", "))}</span></p>
           <p className="profile-points">Total Points: <span className="points-value">🏆 {user.totalPoints || 0}</span></p>
           {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
         </div>
         <div className="profile-actions">
-          {user.role === "admin" ? (
+          {isAdmin && isInstructor ? (
+            <>
+              <div className="admin-actions-divider">Switch Dashboard</div>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', justifyContent: 'center' }}>
+                <button
+                  className={`common-btn profile-btn${dashboardType === "admin" ? " active" : ""}`}
+                  style={{ minWidth: 120, background: dashboardType === "admin" ? "#3ecf8e" : "#232a34", color: dashboardType === "admin" ? "#182848" : "#fff" }}
+                  onClick={() => setDashboardType("admin")}
+                >
+                  Admin
+                </button>
+                <button
+                  className={`common-btn profile-btn${dashboardType === "instructor" ? " active" : ""}`}
+                  style={{ minWidth: 120, background: dashboardType === "instructor" ? "#3ecf8e" : "#232a34", color: dashboardType === "instructor" ? "#182848" : "#fff" }}
+                  onClick={() => setDashboardType("instructor")}
+                >
+                  Instructor
+                </button>
+              </div>
+              <button onClick={handleDashboardClick} className="common-btn profile-btn">
+                <MdDashboard style={{ marginRight: 8 }} />
+                {dashboardType === "admin" ? "Admin Dashboard" : "Instructor Dashboard"}
+              </button>
+            </>
+          ) : isAdmin ? (
             <>
               <div className="admin-actions-divider">Admin Actions</div>
-              <button onClick={goToDashboard} className="common-btn profile-btn">
+              <button onClick={handleDashboardClick} className="common-btn profile-btn">
                 <MdDashboard style={{ marginRight: 8 }} /> Admin Dashboard
               </button>
             </>
+          ) : isInstructor ? (
+            <>
+              <div className="admin-actions-divider">Instructor Actions</div>
+              <button onClick={handleDashboardClick} className="common-btn profile-btn">
+                <MdDashboard style={{ marginRight: 8 }} /> Instructor Dashboard
+              </button>
+            </>
           ) : (
-            <button onClick={goToDashboard} className="common-btn profile-btn">
+            <button onClick={handleDashboardClick} className="common-btn profile-btn">
               <MdDashboard style={{ marginRight: 8 }} /> Dashboard
             </button>
           )}

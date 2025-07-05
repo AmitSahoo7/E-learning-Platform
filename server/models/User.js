@@ -18,6 +18,7 @@ const schema=new mongoose.Schema({
         default:"user",
         enum: ["user", "admin", "superadmin"],
     },
+    roles: { type: [String], default: [] }, 
     subscription:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Courses",
