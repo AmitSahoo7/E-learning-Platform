@@ -30,6 +30,7 @@ import Leaderboard from "./pages/leaderboard/Leaderboard";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import axios from "axios";
 import { server } from "./main";
+import Events from "./pages/events";
 
 
 const App = () => {
@@ -176,6 +177,8 @@ const App = () => {
               path="/leaderboard"
               element={<Leaderboard user={user} />}
             />
+            <Route path="/events" element={<Events />} />
+
             <Route
               path="/instructor/dashboard"
               element={

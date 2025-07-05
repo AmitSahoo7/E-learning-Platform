@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import "./header.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Bell, Trophy, User } from "lucide-react";
+import ProfileModal from "../ProfileModal";
+import { UserData } from "../../context/UserContext";
 
 // Simple bell SVG icon
 const BellIcon = () => (
@@ -17,30 +20,68 @@ function timeAgo(dateStr) {
   return date.toLocaleString();
 }
 
+const navLinks = [
+  { name: "Home", path: "/" },
+  { name: "Courses", path: "/courses" },
+  { name: "About", path: "/about" },
+  { name: "Leaderboard", path: "/leaderboard", icon: <Trophy size={18} style={{ marginLeft: 4, color: '#FFD700' }} /> },
+];
+
 const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnouncementRead }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [modal, setModal] = useState(null); // { message, timestamp }
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const { user, setIsAuth, setUser } = UserData ? UserData() : { user: null, setIsAuth: () => {}, setUser: () => {} };
   // Filter out invalid announcements
   const validAnnouncements = announcements.filter(a => a && typeof a === 'object' && typeof a.message === 'string');
-  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).length;
+  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a.id)).length;
+  const location = useLocation();
+
   const handleAnnouncementClick = (a) => {
     setModal(a);
     if (markAnnouncementRead) markAnnouncementRead(a._id);
   };
+  const logoutHandler = () => {
+    localStorage.clear();
+    setUser([]);
+    setIsAuth(false);
+    setShowProfileModal(false);
+    window.location.href = "/login";
+  };
+  const goToDashboard = () => {
+    setShowProfileModal(false);
+    if (user?.role === "admin") {
+      window.location.href = "/admin/dashboard";
+    } else if (user?._id) {
+      window.location.href = `/${user._id}/dashboard`;
+    }
+  };
   return (
-    <header className="hero-header-bar">
-      <Link to="/" className="logo">
-        Skill Nest
-      </Link>
-      <nav className="hero-nav">
-        <Link to="/">Home</Link>
-        <Link to="/courses">Courses</Link>
-        <Link to="/about">About</Link>
-        <Link to="/leaderboard">🏆 Leaderboard</Link>
+    <header className="modern-header glassy-header">
+      <div className="header-logo">SkillNest</div>
+      <nav className="header-nav">
+        {navLinks.map((link) => (
+          <Link
+            key={link.name}
+            to={link.path}
+            className={`header-link${location.pathname === link.path ? " active" : ""}`}
+          >
+            {link.name} {link.icon && link.icon}
+          </Link>
+        ))}
+      </nav>
+      <div className="header-left-actions">
         {isAuth ? (
-          <Link to="/account">Account</Link>
+          <button
+            className="header-profile-link"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4em', marginRight: '1.2em', background: 'none', border: 'none', cursor: 'pointer' }}
+            onClick={() => setShowProfileModal((v) => !v)}
+          >
+            <User size={20} style={{ marginBottom: '-2px' }} />
+            Profile
+          </button>
         ) : (
-          <Link to="/login" className="login-btn" id="login">Login</Link>
+          <Link to="/login" className="header-login-btn" id="login">Login</Link>
         )}
         <div className="notification-bell-wrapper">
           <button type="button" className="notification-bell" onClick={() => setShowDropdown((v) => !v)} aria-label="Notifications">
@@ -67,7 +108,7 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
             </div>
           )}
         </div>
-      </nav>
+      </div>
       {modal && (
         <div className="announcement-modal-bg" onClick={() => setModal(null)}>
           <div className="announcement-modal-content" onClick={e => e.stopPropagation()}>
@@ -78,7 +119,15 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
           </div>
         </div>
       )}
+      <ProfileModal
+        open={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        user={user}
+        logoutHandler={logoutHandler}
+        goToDashboard={goToDashboard}
+      />
     </header>
   );
 };
+
 export default Header;

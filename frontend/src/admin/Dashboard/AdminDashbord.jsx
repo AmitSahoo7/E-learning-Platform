@@ -5,6 +5,8 @@ import axios from "axios";
 import { server } from "../../main";
 import CourseCard from "../../components/coursecard/CourseCard";
 import "./dashboard.css";
+import { FaLayerGroup, FaUserFriends, FaRupeeSign, FaMoneyCheckAlt, FaBullhorn, FaRegCommentDots, FaRegComments } from "react-icons/fa";
+import { BiBook } from "react-icons/bi";
 
 const AdminDashbord = ({ user, addAnnouncement }) => {
   const navigate = useNavigate();
@@ -112,7 +114,7 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
     try {
       await axios.delete(`${server}/api/comments/${commentId}`, {
         headers: {
-          token: localStorage.getItem("token"),
+          token: localStorage.getItem("token")
         },
       });
       toast.success("Comment deleted successfully");
@@ -147,19 +149,19 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
         {/* Stats Cards */}
         <div className="admin-stats-grid">
           <div className="admin-stat-card stat-courses">
-            <h3>Total Courses</h3>
+            <h3><FaLayerGroup style={{marginRight:8}}/>Total Courses</h3>
             <p>{stats.totalCourses}</p>
           </div>
           <div className="admin-stat-card stat-lectures">
-            <h3>Total Lectures</h3>
+            <h3><BiBook style={{marginRight:8}}/>Total Lectures</h3>
             <p>{stats.totalLectures}</p>
           </div>
           <div className="admin-stat-card stat-users">
-            <h3>Total Users</h3>
+            <h3><FaUserFriends style={{marginRight:8}}/>Total Users</h3>
             <p>{stats.totalUsers}</p>
           </div>
           <div className="admin-stat-card stat-revenue">
-            <h3>Revenue</h3>
+            <h3><FaRupeeSign style={{marginRight:8}}/>Revenue</h3>
             <p>₹ {totalRevenue.toLocaleString()}</p>
           </div>
         </div>
@@ -167,30 +169,30 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
         {/* Main Widgets Row */}
         <div className="admin-main-widgets">
           {/* Recent Courses */}
-          <div className="admin-widget recent-courses">
+          <div className="admin-widget recent-courses" style={{marginBottom:'2.5rem'}}>
             <div className="widget-header">
-              <h2>Recent Courses</h2>
+              <h2><FaLayerGroup style={{marginRight:8}}/>Recent Courses</h2>
               <Link to="/admin/course" className="see-all-link">See all</Link>
             </div>
-            <div className="widget-content-cards">
+            <div className="widget-content-cards" style={{paddingBottom:'0.5rem'}}>
               {recentCourses.length === 0 ? (
                 <p>No courses yet.</p>
               ) : (
                 <>
                   {recentCourses.slice(0, 2).map(course => (
-                    <CourseCard key={course._id} course={course} />
+                    <CourseCard key={course._id} course={course} hideDescription={true} />
                   ))}
                 </>
               )}
             </div>
           </div>
           {/* Recent Users */}
-          <div className="admin-widget recent-users">
+          <div className="admin-widget recent-users" style={{marginBottom:'2.5rem'}}>
             <div className="widget-header">
-              <h2>Recent Users</h2>
+              <h2><FaUserFriends style={{marginRight:8}}/>Recent Users</h2>
               <Link to="/admin/users" className="see-all-link">See all</Link>
             </div>
-            <div className="widget-content-users">
+            <div className="widget-content-users" style={{paddingBottom:'0.5rem'}}>
               {recentUsers.length === 0 ? (
                 <p>No users yet.</p>
               ) : (
@@ -207,12 +209,12 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
             </div>
           </div>
           {/* Recent Payments */}
-          <div className="admin-widget recent-payments">
+          <div className="admin-widget recent-payments" style={{marginBottom:'2.5rem'}}>
             <div className="widget-header">
-              <h2>Recent Payments</h2>
+              <h2><FaMoneyCheckAlt style={{marginRight:8}}/>Recent Payments</h2>
               <Link to="/admin/payments" className="see-all-link">See all</Link>
             </div>
-            <div className="widget-content-payments">
+            <div className="widget-content-payments" style={{paddingBottom:'0.5rem'}}>
               {loading ? <p>Loading...</p> : recentPayments.length === 0 ? <p>No payments yet.</p> : recentPayments.map(p => (
                 <div key={p._id} className="payment-list-item">
                   <span className="payment-user">{p.user?.name || "-"}</span>
@@ -224,8 +226,8 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
             </div>
           </div>
           {/* Send Announcement */}
-          <div className="admin-widget announcement-widget">
-            <h2>Send Announcement</h2>
+          <div className="admin-widget announcement-widget" style={{marginBottom:'2.5rem'}}>
+            <h2><FaBullhorn style={{marginRight:8}}/>Send Announcement</h2>
             <button className="quick-action-btn" onClick={() => setShowAnnouncement(true)}>
               Send Announcement
             </button>
@@ -243,9 +245,9 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
             )}
           </div>
           {/* Feedback/Support Tickets */}
-          <div className="admin-widget feedback-widget">
-            <h2>Latest Feedback / Support Tickets</h2>
-            <div className="widget-content-feedbacks">
+          <div className="admin-widget feedback-widget" style={{marginBottom:'2.5rem'}}>
+            <h2><FaRegCommentDots style={{marginRight:8}}/>Latest Feedback / Support Tickets</h2>
+            <div className="widget-content-feedbacks" style={{paddingBottom:'0.5rem'}}>
               {loading ? <p>Loading...</p> : feedbacks.length === 0 ? <p>No feedback yet.</p> : feedbacks.slice(0, 5).map(f => (
                 <div key={f._id} className="feedback-list-item">
                   <span className="feedback-user">{f.user?.name || "-"}</span>
@@ -256,13 +258,13 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
             </div>
           </div>
           {/* Latest Comments */}
-          <div className="admin-widget comments-widget">
+          <div className="admin-widget comments-widget" style={{marginBottom:'2.5rem'}}>
             <div className="widget-header">
-              <h2>Latest Comments</h2>
+              <h2><FaRegComments style={{marginRight:8}}/>Latest Comments</h2>
               <Link to="/admin/comments" className="see-all-link">See all</Link>
             </div>
 
-            <div className="widget-content-comments">
+            <div className="widget-content-comments" style={{paddingBottom:'0.5rem'}}>
               {loading ? (
                 <p>Loading...</p>
               ) : comments.length === 0 ? (

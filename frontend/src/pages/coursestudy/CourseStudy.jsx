@@ -99,6 +99,7 @@ const CourseStudy = ({ user }) => {
   // Fetch course and progress data
   useEffect(() => {
     fetchCourse(params.id);
+    // Fetch course progress only for non-admin users who are enrolled
 
     async function fetchProgress() {
       try {
@@ -140,9 +141,11 @@ const CourseStudy = ({ user }) => {
     }
 
 
+
     
     if (user && course && user.subscription.includes(course._id))
       fetchProgress();
+
 
     // eslint-disable-next-line
   }, [params.id, user, course]);
