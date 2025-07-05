@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import axios from "axios";
 import { server } from "../../main";
+import AddQuiz from "../../admin/Courses/AddQuiz.jsx";
+
 import CourseReviewBox from "../../components/reviews/CourseReviewBox";
 
 const placeholderAvatar =
@@ -27,6 +29,47 @@ const CourseStudy = ({ user }) => {
   const { fetchCourse, course } = CourseData();
   const navigate = useNavigate();
 
+
+  const [quizCount, setQuizCount] = useState(0);
+
+  // Fetch quiz data when component mounts or when course ID changes
+  useEffect(() => {
+    if (!course || !course._id) return;
+    const fetchQuiz = async () => {
+      try {
+        const { data } = await axios.get(`${server}/api/quiz/${course._id}`, {
+          headers: {
+            token: localStorage.getItem("token"),
+          },
+        });
+        setQuizCount(Array.isArray(data) ? data.length : 0);
+      } catch {
+        console.log("No quiz or user not enrolled");
+        setQuizCount(0);
+      }
+    };
+
+    fetchQuiz();
+  }, [course, course?._id]);
+
+  // Placeholder data for demo
+  const prerequisites = [
+    "Basic math skills",
+    "Logical thinking",
+    "No prior coding experience required"
+  ];
+  const whatYouLearn = [
+    "Software development fundamentals",
+    "Algorithms and data structures",
+    "Artificial intelligence basics",
+    "Computer networks overview"
+  ];
+  const courseOutcome = [
+    "Be job-ready for software engineering roles",
+    "Understand core CS concepts",
+    "Build real-world projects"
+  ];
+
   // Helper function to convert string to array (for prerequisites, whatYouLearn, courseOutcomes)
   const stringToArray = (str) => {
     if (!str) return [];
@@ -38,18 +81,25 @@ const CourseStudy = ({ user }) => {
   const whatYouLearn = stringToArray(course?.whatYouLearn);
   const courseOutcome = stringToArray(course?.courseOutcomes);
 
+
   // Progress state
   const [completed, setCompleted] = useState(0);
   const [completedLec, setCompletedLec] = useState(0);
   const [lectLength, setLectLength] = useState(1);
   const [enrolling, setEnrolling] = useState(false);
 
-  const isEnrolled = user && course && user.subscription.includes(course._id);
+  // Add quiz progress state
+  const [quizProgress, setQuizProgress] = useState(0);
+  const [completedQuizCount, setCompletedQuizCount] = useState(0);
+  const [totalQuizCount, setTotalQuizCount] = useState(0);
+
+  const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
 
+  // Fetch course and progress data
   useEffect(() => {
     fetchCourse(params.id);
-    // Fetch course progress
+
     async function fetchProgress() {
       try {
         const { data } = await axios.get(
@@ -71,20 +121,47 @@ const CourseStudy = ({ user }) => {
         setCompleted(percent);
         setCompletedLec(safeCompletedLec);
         setLectLength(safeLectLength);
-      } catch (error) {
+        // Quiz progress
+        const safeQuizCount = data.allQuizzes || 0;
+        const safeCompletedQuiz = Math.min(data.completedQuizzes || 0, safeQuizCount);
+        let quizPercent = safeQuizCount > 0 ? Math.round((safeCompletedQuiz / safeQuizCount) * 100) : 0;
+        quizPercent = Math.min(quizPercent, 100);
+        setQuizProgress(quizPercent);
+        setCompletedQuizCount(safeCompletedQuiz);
+        setTotalQuizCount(safeQuizCount);
+      } catch {
         setCompleted(0);
         setCompletedLec(0);
         setLectLength(1);
+        setQuizProgress(0);
+        setCompletedQuizCount(0);
+        setTotalQuizCount(0);
       }
     }
+
+
+    
     if (user && course && user.subscription.includes(course._id))
       fetchProgress();
+
     // eslint-disable-next-line
   }, [params.id, user, course]);
 
   const handleEnroll = async () => {
     setEnrolling(true);
-    // ...enroll logic here (reuse from your course description page)...
+    try {
+      // Example enroll request to backend (adjust endpoint and payload as needed)
+      await axios.post(
+        `${server}/api/course/enroll`, 
+        { courseId: course._id },
+        { headers: { token: localStorage.getItem("token") } }
+      );
+      // After successful enrollment, navigate to lectures
+      navigate(`/lectures/${course._id}`);
+    } catch (error) {
+      console.error("Enrollment failed:", error);
+    }
+    setEnrolling(false);
   };
 
   if (!course) return null;
@@ -106,52 +183,50 @@ const CourseStudy = ({ user }) => {
           )}
         </div>
       </div>
+
       {/* Main Content */}
       <div className="cd-main">
         {/* Left Side */}
         <div className="cd-main-left">
           <div className="cd-main-left-card" data-aos="fade-up">
-            {prerequisites.length > 0 && (
-              <div className="cd-section">
-                <h3>Prerequisites</h3>
-                <ul className="cd-list">
-                  {prerequisites.map((item, i) => (
-                    <li key={i}>
-                      <span className="cd-list-icon">✔️</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {whatYouLearn.length > 0 && (
-              <div className="cd-section">
-                <h3>What you'll learn</h3>
-                <ul className="cd-list">
-                  {whatYouLearn.map((item, i) => (
-                    <li key={i}>
-                      <span className="cd-list-icon">✔️</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {courseOutcome.length > 0 && (
-              <div className="cd-section">
-                <h3>Course Outcome</h3>
-                <ul className="cd-list">
-                  {courseOutcome.map((item, i) => (
-                    <li key={i}>
-                      <span className="cd-list-icon">✔️</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+
+            <div className="cd-section">
+              <h3>Prerequisites</h3>
+              <ul className="cd-list">
+                {prerequisites.map((item, i) => (
+                  <li key={i}>
+                    <span className="cd-list-icon">✔️</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="cd-section">
+              <h3>What you'll learn</h3>
+              <ul className="cd-list">
+                {whatYouLearn.map((item, i) => (
+                  <li key={i}>
+                    <span className="cd-list-icon">✔️</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="cd-section">
+              <h3>Course Outcome</h3>
+              <ul className="cd-list">
+                {courseOutcome.map((item, i) => (
+                  <li key={i}>
+                    <span className="cd-list-icon">✔️</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
           </div>
         </div>
+
         {/* Right Side */}
         <div className="cd-main-right">
           <div className="cd-card cd-info-card" data-aos="fade-up">
@@ -163,12 +238,14 @@ const CourseStudy = ({ user }) => {
               <span className="cd-info-label">Duration:</span>
               <span className="cd-info-value">{course.duration} weeks</span>
             </div>
+
             {course.difficulty && (
               <div className="cd-info-row">
                 <span className="cd-info-label">Difficulty:</span>
                 <span className="cd-info-value">{course.difficulty}</span>
               </div>
             )}
+
             {/* Progress tracker for admins and enrolled users */}
             {isAdmin ? (
               <div
@@ -190,76 +267,112 @@ const CourseStudy = ({ user }) => {
                   </div>
                 </div>
               ) : completed === 0 ? (
-                <div
-                  className="lecture-progress-bar"
-                  style={{ margin: "12px 0" }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 600,
-                      marginBottom: 8,
-                      textAlign: "center",
-                    }}
-                  >
-                    Course Progress: 0% (No lectures completed yet)
+
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                    Lecture Progress: 0% (No lectures completed yet)
                   </div>
                   <div className="lecture-progress-bar-track">
-                    <div
-                      className="lecture-progress-bar-fill"
-                      style={{ width: `0%` }}
-                    ></div>
+                    <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
                   </div>
-                  <span
-                    className="lecture-progress-bar-percent"
-                    style={{
-                      color: "#34c759",
-                      fontWeight: 700,
-                      fontSize: "1.1rem",
-                    }}
-                  >
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+
                     Start your first lecture!
                   </span>
                 </div>
               ) : (
-                <div
-                  className="lecture-progress-bar"
-                  style={{ margin: "12px 0" }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 600,
-                      marginBottom: 8,
-                      textAlign: "center",
-                    }}
-                  >
-                    Course Progress - {completedLec} out of {lectLength}
+
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                    Lecture Progress - {completedLec} out of {lectLength}
                   </div>
                   <div className="lecture-progress-bar-track">
-                    <div
-                      className="lecture-progress-bar-fill"
-                      style={{ width: `${completed}%` }}
-                    ></div>
+                    <div className="lecture-progress-bar-fill" style={{ width: `${completed}%`, background: '#1cc524' }}></div>
                   </div>
-                  <span
-                    className="lecture-progress-bar-percent"
-                    style={{
-                      color: "#34c759",
-                      fontWeight: 700,
-                      fontSize: "1.1rem",
-                    }}
-                  >
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+
                     {completed}%
                   </span>
                 </div>
               )
             ) : null}
-            {isAdmin || isEnrolled ? (
+
+            {/* Add spacing between lecture and quiz progress */}
+            <div style={{ height: 24 }} />
+
+            {isAdmin ? null : isEnrolled ? (
+              totalQuizCount === 0 ? (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                    No quizzes available yet.
+                  </div>
+                </div>
+              ) : quizProgress === 0 ? (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
+                    Quiz Progress: 0% (No quizzes attempted yet)
+                  </div>
+                  <div className="lecture-progress-bar-track">
+                    <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
+                  </div>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                    Start your first quiz!
+                  </span>
+                </div>
+              ) : (
+                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
+                    Quiz Progress - {completedQuizCount} out of {totalQuizCount}
+                  </div>
+                  <div className="lecture-progress-bar-track">
+                    <div className="lecture-progress-bar-fill" style={{ width: `${quizProgress}%`, background: '#1cc524' }}></div>
+                  </div>
+                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                    {quizProgress}%
+                  </span>
+                </div>
+              )
+            ) : null}
+            
+            {/* Show total lectures and quizzes count above the buttons */}
+            {lectLength > 0 && (
+              <div style={{ fontWeight: 500, color: '#007aff', margin: '10px 0 2px 0', textAlign: 'center' }}>
+                Total Lectures: {lectLength}
+              </div>
+            )}
+            
+
+            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
                 onClick={() => navigate(`/lectures/${course._id}`)}
                 disabled={enrolling}
               >
                 Lectures
+              </button>
+            ) : (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                onClick={handleEnroll}
+                disabled={enrolling}
+              >
+                {enrolling ? "Processing..." : "Enroll"}
+              </button>
+            )}
+
+            
+            {quizCount > 0 && (
+              <div style={{ fontWeight: 500, color: '#007aff', margin: '2px 0 14px 0', textAlign: 'center' }}>
+                Total Quizzes: {quizCount}
+              </div>
+            )}
+            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                onClick={() => navigate(`/quiz/${course._id}`)}
+                disabled={enrolling}
+              >
+                Quizs
               </button>
             ) : (
               <button
@@ -290,7 +403,7 @@ const CourseStudy = ({ user }) => {
           </div>
         </div>
       </div>
-      {/* Instructor Card at Bottom */}
+
       <div className="cd-instructor-card" data-aos="fade-up">
         <img
           src={

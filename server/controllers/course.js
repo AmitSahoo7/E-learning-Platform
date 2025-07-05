@@ -7,6 +7,7 @@ import { User } from "../models/User.js";
 import { Progress } from "../models/Progress.js";
 import { Reward } from "../models/Reward.js";
 import crypto from 'crypto';
+import Quiz from '../models/quiz.js';
 // import { deleteLecture } from "../controllers/course.js";
 
 export const getAllCourses = TryCatch(async (req, res) => {
@@ -291,24 +292,35 @@ export const getYourProgress = TryCatch(async (req, res) => {
 }
 
   const allLectures = (await Lecture.find({ course: req.query.course })).length;
+  const allQuizzes = (await Quiz.find({ courseId: req.query.course })).length;
 
   if (!progress || progress.length === 0) {
     return res.json({
       courseProgressPercentage: 0,
       completedLectures: 0,
       allLectures,
+      quizProgressPercentage: 0,
+      completedQuizzes: 0,
+      allQuizzes,
       progress: [],
     });
   }
 
 
   const completedLectures = progress[0].completedLectures.length;
-  const courseProgressPercentage = (completedLectures * 100) / allLectures;
+  const courseProgressPercentage = (completedLectures * 100) / (allLectures || 1);
+  const completedQuizzes = Array.isArray(progress[0].completedQuizzes) ? progress[0].completedQuizzes.length : 0;
+  const quizProgressPercentage = (completedQuizzes * 100) / (allQuizzes || 1);
+
 
   res.json({
     courseProgressPercentage,
     completedLectures,
     allLectures,
+    quizProgressPercentage,
+    completedQuizzes,
+    allQuizzes,
+    quizScores: progress[0].quizScores || [],
     progress,
   });
 });
