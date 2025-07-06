@@ -7,8 +7,12 @@ export async function createWebinar(req, res) {
   try {
     const { date, topic, time, instructors, description, objectives, notes } = req.body;
     let document = null;
-    if (req.file) {
-      document = req.file.filename;
+    let poster = null;
+    if (req.files && req.files.document && req.files.document[0]) {
+      document = req.files.document[0].filename;
+    }
+    if (req.files && req.files.poster && req.files.poster[0]) {
+      poster = req.files.poster[0].filename;
     }
     const webinar = await Webinar.create({
       date,
@@ -18,7 +22,8 @@ export async function createWebinar(req, res) {
       description,
       objectives,
       notes,
-      document
+      document,
+      poster
     });
     // Create announcement for all users
     if (req.user && req.user._id) {
@@ -49,8 +54,11 @@ export async function updateWebinar(req, res) {
     const { id } = req.params;
     const { date, topic, time, instructors, description, objectives, notes } = req.body;
     let updateData = { date, topic, time, instructors, description, objectives, notes };
-    if (req.file) {
-      updateData.document = req.file.filename;
+    if (req.files && req.files.document && req.files.document[0]) {
+      updateData.document = req.files.document[0].filename;
+    }
+    if (req.files && req.files.poster && req.files.poster[0]) {
+      updateData.poster = req.files.poster[0].filename;
     }
     if (instructors && !Array.isArray(instructors)) {
       updateData.instructors = [instructors];

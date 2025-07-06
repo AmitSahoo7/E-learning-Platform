@@ -83,6 +83,7 @@ header {
   right: 10px;
   left: auto;
   min-width: 260px;
+  max-height: 50vh; /* Limit to half page height */
   background: #fff;
   border-radius: 1rem;
   box-shadow: 0 4px 16px #10b98122;
@@ -92,6 +93,7 @@ header {
   flex-direction: column;
   gap: 0.7rem;
   border: 2px solid #10b981; /* DEBUG: Remove after confirming */
+  position: relative; /* For scroll button positioning */
 }
 .dropdown-title {
   font-weight: 700;
@@ -120,10 +122,25 @@ header {
   .notification-dropdown {
     min-width: 180px;
     padding: 0.7rem 0.3rem;
+    max-height: 60vh; /* Slightly larger on mobile */
+  }
+  .dropdown-content {
+    max-height: calc(60vh - 120px);
   }
   .dropdown-announcement {
     font-size: 0.95rem;
     padding: 0.5rem 0.6rem;
+  }
+  .scroll-up-btn,
+  .scroll-down-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .scroll-up-btn {
+    top: 3px;
+  }
+  .scroll-down-btn {
+    bottom: 3px;
   }
 }
 
@@ -451,4 +468,65 @@ header {
     width: 12px;
     height: 12px;
   }
+}
+
+.dropdown-content {
+  max-height: calc(50vh - 120px); /* Account for title and buttons */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #10b981 #f0f0f0;
+  padding: 0.5rem 0;
+}
+
+.dropdown-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+  background: #10b981;
+  border-radius: 3px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
+
+.dropdown-actions-row {
+  display: flex;
+  flex-direction: row;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.dropdown-action-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s;
+  min-width: 90px;
+  max-width: 120px;
+  width: auto;
+  box-shadow: 0 2px 8px #10b98122;
+  margin: 0;
+}
+
+.dropdown-action-btn:hover {
+  background: #059669;
+}
+
+/* Remove scroll arrow button styles */
+.scroll-up-btn,
+.scroll-down-btn {
+  display: none !important;
 }

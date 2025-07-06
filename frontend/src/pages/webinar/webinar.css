@@ -33,11 +33,15 @@
 
 .webinar-cards-row {
   display: flex;
-  flex-direction: row;
-  gap: 32px;
-  overflow-x: auto;
-  padding: 24px 0 8px 0;
-  margin-top: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
 }
 
 .webinar-card {
@@ -91,4 +95,25 @@
   color: #b0eacd;
   font-size: 1.2rem;
   margin-top: 32px;
+}
+
+.webinar-card-poster {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px #10b98122;
+}
+
+.webinar-countdown {
+  margin-top: 12px;
+  font-weight: 600;
+  color: #3ecf8e;
+  background: #19223a;
+  border-radius: 8px;
+  padding: 6px 0;
+  text-align: center;
+  font-size: 1.08rem;
+  letter-spacing: 0.5px;
 } 

@@ -100,11 +100,15 @@ export default function TiltedCard({
       </div>
       <div className="udemy-card-body">
         {description && <div className="udemy-card-desc">{description}</div>}
-        <div className="udemy-card-rating-row">
-          <span className="udemy-card-rating-num">{rating.toFixed(1)}</span>
-          <span className="udemy-card-stars">{renderStars(rating)}</span>
-          <span className="udemy-card-rating-count">({ratingCount.toLocaleString()})</span>
-        </div>
+        {(typeof rating === 'number' && !isNaN(rating)) ? (
+          <div className="udemy-card-rating-row">
+            <span className="udemy-card-rating-num">{rating.toFixed(1)}</span>
+            <span className="udemy-card-stars">{renderStars(rating)}</span>
+            {typeof ratingCount === 'number' && !isNaN(ratingCount) ? (
+              <span className="udemy-card-rating-count">({ratingCount.toLocaleString()})</span>
+            ) : null}
+          </div>
+        ) : null}
         <div className="udemy-card-price-row">
           {oldPrice && <span className="udemy-card-old-price">{oldPrice}</span>}
           <span className="udemy-card-price">{price}</span>

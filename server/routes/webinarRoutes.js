@@ -19,13 +19,17 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+const multiUpload = upload.fields([
+  { name: 'document', maxCount: 1 },
+  { name: 'poster', maxCount: 1 }
+]);
 
 // CREATE Webinar
-router.post('/', isAuth, upload.single('document'), TryCatch(createWebinar));
+router.post('/', isAuth, multiUpload, TryCatch(createWebinar));
 // GET all webinars (public)
 router.get('/', TryCatch(getWebinars));
 // UPDATE Webinar
-router.put('/:id', isAuth, upload.single('document'), TryCatch(updateWebinar));
+router.put('/:id', isAuth, multiUpload, TryCatch(updateWebinar));
 // DELETE Webinar
 router.delete('/:id', isAuth, TryCatch(deleteWebinar));
 

@@ -12,7 +12,8 @@ const emptyWebinar = {
   description: '',
   objectives: '',
   notes: '',
-  document: null
+  document: null,
+  poster: null
 };
 
 const AddWebinar = ({ onClose, editWebinar }) => {
@@ -53,6 +54,10 @@ const AddWebinar = ({ onClose, editWebinar }) => {
     setForm(f => ({ ...f, document: e.target.files[0] }));
   };
 
+  const handlePosterChange = e => {
+    setForm(f => ({ ...f, poster: e.target.files[0] }));
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     setSubmitting(true);
@@ -64,7 +69,9 @@ const AddWebinar = ({ onClose, editWebinar }) => {
           value.forEach(i => formData.append('instructors', i));
         } else if (key === 'document' && value) {
           formData.append('document', value);
-        } else if (key !== 'document') {
+        } else if (key === 'poster' && value) {
+          formData.append('poster', value);
+        } else if (key !== 'document' && key !== 'poster') {
           formData.append(key, value);
         }
       });
@@ -108,6 +115,12 @@ const AddWebinar = ({ onClose, editWebinar }) => {
           </div>
           <label>Notes (optional)<textarea name="notes" value={form.notes} onChange={handleChange} /></label>
           <label>Document (optional)<input type="file" name="document" onChange={handleFileChange} accept=".pdf,.doc,.docx,.txt,.ppt,.pptx" /></label>
+          <label>Poster (cover image)
+            <input type="file" name="poster" onChange={handlePosterChange} accept="image/*" />
+          </label>
+          {form.poster && typeof form.poster === 'object' && (
+            <img src={URL.createObjectURL(form.poster)} alt="Poster preview" style={{ maxWidth: 180, margin: '8px 0', borderRadius: 8 }} />
+          )}
           {error && <div className="form-error">{error}</div>}
           <div className="form-actions">
             <button type="button" onClick={() => onClose(false)} disabled={submitting}>Cancel</button>

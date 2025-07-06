@@ -16,13 +16,17 @@ import Testimonials from "../../components/testimonials/Testimonials";
 import Footer from "../../components/footer/Footer";
 import Header from "../../components/header/Header";
 import TiltedCard from "../../components/TiltedCard";
+import CountdownIST from "../../components/CountdownIST";
 import { CourseData } from "../../context/CourseContext";
 import { server } from "../../main";
+import axios from 'axios';
 
 const Home = () => {
   const navigate = useNavigate();
   const { courses } = CourseData();
   const featuredCourses = courses.slice(0, 6);
+  const [webinars, setWebinars] = useState([]);
+  const [loadingWebinars, setLoadingWebinars] = useState(true);
 
   const partnerLogos = ["HubSpot", "Loom", "GitLab", "LiveChat", "monday.com"];
   const categories = [
@@ -68,6 +72,19 @@ const Home = () => {
       badge: "Hot"
     },
   ];
+
+  useEffect(() => {
+    const fetchWebinars = async () => {
+      try {
+        const { data } = await axios.get('/api/webinar');
+        setWebinars(data.webinars || []);
+      } catch {
+        setWebinars([]);
+      }
+      setLoadingWebinars(false);
+    };
+    fetchWebinars();
+  }, []);
 
   return (
     <>
@@ -182,6 +199,36 @@ const Home = () => {
               />
             ))}
           </div>
+        </section>
+
+        {/* Webinars Section */}
+        <section className="home-webinars-section">
+          <h2 className="section-title">Current Webinars</h2>
+          {loadingWebinars ? (
+            <div style={{ color: '#888', fontSize: '1.1rem', padding: '1.5rem' }}>Loading webinars...</div>
+          ) : webinars.length === 0 ? (
+            <div style={{ color: '#888', fontSize: '1.1rem', padding: '1.5rem' }}>No webinars listed.</div>
+          ) : (
+            <div className="news-tips-row">
+              {webinars.map((w, idx) => (
+                <div key={w._id || idx} style={{ position: 'relative' }}>
+                  <TiltedCard
+                    imageSrc={w.poster ? `${server}/uploads/${w.poster}` : "/default-course.png"}
+                    altText={w.topic}
+                    title={w.topic}
+                    subtitle={w.instructors && w.instructors.join(', ')}
+                    description={w.description || ''}
+                    rating={null}
+                    ratingCount={null}
+                    price={w.date ? `${new Date(w.date).toLocaleDateString()} ${w.time ? 'at ' + w.time : ''}` : ''}
+                    oldPrice={''}
+                    badge={w.objectives ? w.objectives : ''}
+                  />
+                  <CountdownIST date={w.date} time={w.time} />
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Learn More Section */}

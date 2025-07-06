@@ -52,6 +52,34 @@ A full-stack **E-Learning Management System** built using the **MERN Stack (Mong
 ### 💳 Payment Integration (Future Scope)
 - Razorpay / Stripe (can be added for paid courses)
 
+### Announcement System
+- **Smart Dropdown**: Notification dropdown with scroll functionality when content exceeds half page height
+- **Auto-Close**: Automatically closes when clicking outside the announcement area
+- **Scroll Controls**: Up/down scroll buttons appear when content is scrollable
+- **Responsive Design**: Optimized for both desktop and mobile devices
+- **Real-time Updates**: Polls for new announcements every 10 seconds
+
+### Key Components
+- **Header Component**: Main navigation with integrated announcement system
+- **Scroll Management**: Dynamic scroll button visibility based on content overflow
+- **Click Outside Detection**: Uses event listeners to detect clicks outside dropdown
+- **Mobile Optimization**: Adjusted heights and button sizes for mobile devices
+
+## Technical Implementation
+
+### Announcement Dropdown Features
+1. **Height Limitation**: Dropdown is limited to 50% of viewport height (60% on mobile)
+2. **Scroll Detection**: Automatically detects when content exceeds available space
+3. **Scroll Buttons**: Chevron up/down buttons appear when scrolling is needed
+4. **Auto-Close**: Closes dropdown when clicking anywhere outside the notification area
+5. **Smooth Scrolling**: Custom scroll behavior with 100px increments
+
+### CSS Features
+- Custom scrollbar styling with brand colors
+- Responsive design with mobile-specific adjustments
+- Smooth transitions and hover effects
+- Backdrop blur effects for modern UI
+
 ---
 
 ## 📂 Project Structure

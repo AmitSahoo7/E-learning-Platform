@@ -9,6 +9,7 @@ const WebinarSchema = new mongoose.Schema({
   objectives: { type: String, required: true },
   notes: { type: String }, // Optional text notes
   document: { type: String }, // Optional file path
+  poster: { type: String }, // Optional poster/cover image path
   createdAt: { type: Date, default: Date.now }
 });
 
