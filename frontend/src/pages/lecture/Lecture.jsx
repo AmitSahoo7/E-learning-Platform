@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./lecture.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
@@ -42,6 +42,8 @@ const Lecture = ({ user }) => {
   const watchStartRef = useRef(null);
   const watchDurationRef = useRef(0);
   const lastLectureIdRef = useRef(null);
+
+  const location = useLocation();
 
   useEffect(() => {
     if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
@@ -204,6 +206,15 @@ const Lecture = ({ user }) => {
     fetchCourse(params.id);
   }, []);
 
+  // Auto-select lecture if lectureId is present in query string
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const lectureId = searchParams.get('lectureId');
+    if (lectureId) {
+      fetchLecture(lectureId);
+    }
+  }, [location.search, lectures.length]);
+
   //css for comment and desc
   const infoRef = useRef(null);
   const commentRef = useRef(null);
@@ -271,6 +282,7 @@ const Lecture = ({ user }) => {
     const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
     logWatchTime(elapsed);
     watchStartRef.current = Date.now(); // reset for possible replay
+  };
 
   // Fetch lectures and quizzes, merge and sort by order
   useEffect(() => {
@@ -415,7 +427,6 @@ const Lecture = ({ user }) => {
         }
       }
     }
-
   };
 
   return (
@@ -725,5 +736,4 @@ const Lecture = ({ user }) => {
   );
 };
 
-}
 export default Lecture;

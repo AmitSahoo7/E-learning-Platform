@@ -18,7 +18,7 @@ const CourseContentOrder = ({ user }) => {
       setLoading(true);
       try {
         const [lecturesRes, quizzesRes] = await Promise.all([
-          axios.get(`${server}/api/course/${courseId}/lectures`, { headers: { token: localStorage.getItem('token') } }),
+          axios.get(`${server}/api/lectures/${courseId}`, { headers: { token: localStorage.getItem('token') } }),
           axios.get(`${server}/api/quiz/${courseId}`, { headers: { token: localStorage.getItem('token') } })
         ]);
         const lectures = Array.isArray(lecturesRes.data) ? lecturesRes.data : lecturesRes.data.lectures || [];
