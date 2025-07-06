@@ -6,6 +6,7 @@ import { Payment } from "../models/Payment.js";
 import { User } from "../models/User.js";
 import { Progress } from "../models/Progress.js";
 import { Reward } from "../models/Reward.js";
+import { UserActivity } from "../models/UserActivity.js";
 import crypto from 'crypto';
 import Quiz from '../models/Quiz.js';
 // import { deleteLecture } from "../controllers/course.js";
@@ -225,6 +226,17 @@ export const addProgress = TryCatch(async (req, res) => {
           const user = await User.findById(req.user._id);
           user.totalPoints += 1;
           await user.save();
+
+          // Record user activity
+          await UserActivity.create({
+            user: req.user._id,
+            activityType: "video",
+            title: `Completed ${lecture.title}`,
+            course: req.query.course,
+            courseName: (await Courses.findById(req.query.course))?.title || "Unknown Course",
+            points: 1,
+            lecture: lectureId
+          });
         }
       }
     } catch (error) {
@@ -256,21 +268,32 @@ export const addProgress = TryCatch(async (req, res) => {
         description: `Completed video lecture: ${lectureId}`
       });
 
-      if (!existingReward) {
-        // Award 1 point for video completion
-        await Reward.create({
-          user: req.user._id,
-          course: req.query.course,
-          activityType: "video",
-          points: 1,
-          description: `Completed video lecture: ${lecture.title}`
-        });
+              if (!existingReward) {
+          // Award 1 point for video completion
+          await Reward.create({
+            user: req.user._id,
+            course: req.query.course,
+            activityType: "video",
+            points: 1,
+            description: `Completed video lecture: ${lecture.title}`
+          });
 
-        // Update user's total points
-        const user = await User.findById(req.user._id);
-        user.totalPoints += 1;
-        await user.save();
-      }
+          // Update user's total points
+          const user = await User.findById(req.user._id);
+          user.totalPoints += 1;
+          await user.save();
+
+          // Record user activity
+          await UserActivity.create({
+            user: req.user._id,
+            activityType: "video",
+            title: `Completed ${lecture.title}`,
+            course: req.query.course,
+            courseName: (await Courses.findById(req.query.course))?.title || "Unknown Course",
+            points: 1,
+            lecture: lectureId
+          });
+        }
     }
   } catch (error) {
     console.log("Error awarding points:", error.message);
