@@ -28,20 +28,17 @@ import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import axios from "axios";
 import { server } from "./main";
 import Events from "./pages/events";
-
 import Webinar from "./pages/webinar/Webinar";
 import AdminWebinars from "./admin/Webinar/AdminWebinars";
 import AddQuiz from './admin/Courses/AddQuiz.jsx';
-
+import RegisterInstructor from "./pages/auth/RegisterInstructor";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
 
-  // Announcement state
   const [announcements, setAnnouncements] = useState([]);
   const [readAnnouncements, setReadAnnouncements] = useState([]);
 
-  // Fetch announcements from backend
   useEffect(() => {
     if (!isAuth) return;
     const fetchAnnouncements = async () => {
@@ -55,16 +52,15 @@ const App = () => {
       }
     };
     fetchAnnouncements();
-    // Optionally, poll every 60s for new announcements
     // const interval = setInterval(fetchAnnouncements, 60000);
     // return () => clearInterval(interval);
   }, [isAuth]);
 
-  // Mark announcement as read (local only)
   useEffect(() => {
     const read = localStorage.getItem("readAnnouncements");
     if (read) setReadAnnouncements(JSON.parse(read));
   }, []);
+
   const markAnnouncementRead = (id) => {
     if (!readAnnouncements.includes(id)) {
       const updated = [id, ...readAnnouncements];
@@ -73,7 +69,6 @@ const App = () => {
     }
   };
 
-  // Add announcement (admin only)
   const addAnnouncement = async (msg) => {
     if (!user || user.role !== "admin") return;
     try {
@@ -82,133 +77,131 @@ const App = () => {
         { message: msg },
         { headers: { token: localStorage.getItem("token") } }
       );
-      // Prepend new announcement to state
       setAnnouncements((prev) => [data.announcement, ...prev]);
     } catch {
-      // Optionally show error
       // alert("Failed to send announcement");
     }
   };
 
-  return (
-    <BrowserRouter>
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <Header
-            isAuth={isAuth}
-            announcements={announcements}
-            readAnnouncements={readAnnouncements}
-            markAnnouncementRead={markAnnouncementRead}
-          />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route
-              path="/account"
-              element={isAuth ? <Account user={user} /> : <Login />}
-            />
-            <Route path="/login" element={isAuth ? <Home /> : <Login />} />
-            <Route
-              path="/register"
-              element={isAuth ? <Home /> : <Register />}
-            />
-            <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
-            <Route
-              path="/course/:id"
-              element={isAuth ? <CourseDescription user={user} /> : <Login />}
-            />
-            <Route
-              path="/payment-success/:id"
-              element={isAuth ? <PaymentSuccess user={user} /> : <Login />}
-            />
-            <Route
-              path=":id/dashboard"
-              element={isAuth ? <Dashboard user={user} /> : <Login />}
-            />
-            <Route
-              path="/course/study/:id"
-              element={isAuth ? <CourseStudy user={user} /> : <Login />}
-            />
-            <Route
-              path="/quiz/course/:courseId"
-              element={isAuth ? <Quiz user={user} /> : <Login />}
-            />
-            <Route
-              path="/quiz/:quizId"
-              element={isAuth ? <Quiz user={user} /> : <Login />}
-            />
-            <Route
-              path="/quiz/create/:courseId"
-              element={<AddQuiz />}
-            />
-            <Route
-              path="/admin/course"
-              element={
-                isAuth && user.role === "admin" ? (
-                  <AdminCourses />
-                ) : (
-                  <Home />
-                )
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                isAuth && user.role === "admin" ? <AdminUsers /> : <Home />
-              }
-            />
-            <Route
-              path="/lectures/:id"
-              element={isAuth ? <Lecture user={user} /> : <Login />}
-            />
-            <Route
-              path="/admin/dashboard"
-              element={
-                isAuth && user.role === "admin"
-                  ? <AdminDashbord user={user} addAnnouncement={addAnnouncement} />
-                  : <Home />
-              }
-            />
-            <Route
-              path="/admin/course/add"
-              element={
-                isAuth && user.role === "admin" ? (
-                  <AddCourse user={user} />
-                ) : (
-                  <Home />
-                )
-              }
-            />
-            <Route
-              path="/leaderboard"
-              element={<Leaderboard user={user} />}
-            />
-            <Route path="/events" element={<Events />} />
-
-            <Route
-              path="/instructor/dashboard"
-              element={
-                isAuth && (user.role === "instructor" || (Array.isArray(user.roles) && user.roles.includes("instructor"))) ? (
-                  <InstructorDashboard user={user} />
-                ) : (
-                  <Home />
-                )
-              }
-            />
-            <Route path="/webinar" element={<Webinar />} />
-            <Route
-              path="/admin/webinars"
-              element={isAuth && user.role === "admin" ? <AdminWebinars /> : <Home />}
-            />
-          </Routes>
-          <Footer />
-          <GeneralChatbot />
-        </>
-      )}
-    </BrowserRouter>
+  return loading ? (
+    <Loading />
+  ) : (
+    <>
+      <Header
+        isAuth={isAuth}
+        announcements={announcements}
+        readAnnouncements={readAnnouncements}
+        markAnnouncementRead={markAnnouncementRead}
+      />
+      <Routes>
+        <Route
+          path="*"
+          element={
+            <>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/courses" element={<Courses />} />
+                <Route
+                  path="/account"
+                  element={isAuth ? <Account user={user} /> : <Login />}
+                />
+                <Route path="/login" element={isAuth ? <Home /> : <Login />} />
+                <Route path="/register" element={isAuth ? <Home /> : <Register />} />
+                <Route path="/verify" element={isAuth ? <Home /> : <Verify />} />
+                <Route
+                  path="/course/:id"
+                  element={isAuth ? <CourseDescription user={user} /> : <Login />}
+                />
+                <Route
+                  path="/payment-success/:id"
+                  element={isAuth ? <PaymentSuccess user={user} /> : <Login />}
+                />
+                <Route
+                  path=":id/dashboard"
+                  element={isAuth ? <Dashboard user={user} /> : <Login />}
+                />
+                <Route
+                  path="/course/study/:id"
+                  element={isAuth ? <CourseStudy user={user} /> : <Login />}
+                />
+                <Route
+                  path="/quiz/course/:courseId"
+                  element={isAuth ? <Quiz user={user} /> : <Login />}
+                />
+                <Route
+                  path="/quiz/:quizId"
+                  element={isAuth ? <Quiz user={user} /> : <Login />}
+                />
+                <Route
+                  path="/quiz/create/:courseId"
+                  element={<AddQuiz />}
+                />
+                <Route
+                  path="/admin/course"
+                  element={
+                    isAuth && user.role === "admin" ? <AdminCourses /> : <Home />
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    isAuth && user.role === "admin" ? <AdminUsers /> : <Home />
+                  }
+                />
+                <Route
+                  path="/lectures/:id"
+                  element={isAuth ? <Lecture user={user} /> : <Login />}
+                />
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    isAuth && user.role === "admin" ? (
+                      <AdminDashbord user={user} addAnnouncement={addAnnouncement} />
+                    ) : (
+                      <Home />
+                    )
+                  }
+                />
+                <Route
+                  path="/admin/course/add"
+                  element={
+                    isAuth && user.role === "admin" ? <AddCourse user={user} /> : <Home />
+                  }
+                />
+                <Route path="/leaderboard" element={<Leaderboard user={user} />} />
+                <Route path="/events" element={<Events />} />
+                <Route
+                  path="/instructor/dashboard"
+                  element={
+                    isAuth &&
+                    (user.role === "instructor" ||
+                      (Array.isArray(user.roles) && user.roles.includes("instructor"))) ? (
+                      <InstructorDashboard user={user} />
+                    ) : (
+                      <Home />
+                    )
+                  }
+                />
+                <Route
+                  path="/register-instructor"
+                  element={isAuth ? <Home /> : <RegisterInstructor />}
+                />
+                <Route path="/webinar" element={<Webinar />} />
+                <Route
+                  path="/admin/webinars"
+                  element={
+                    isAuth && user.role === "admin" ? <AdminWebinars /> : <Home />
+                  }
+                />
+              </Routes>
+            </>
+          }
+        />
+      </Routes>
+      <Footer />
+      <GeneralChatbot />
+    </>
   );
 };
 

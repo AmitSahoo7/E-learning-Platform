@@ -35,6 +35,7 @@ const Lecture = ({ user }) => {
   const [loadingContent, setLoadingContent] = useState(true);
   const [showEditQuiz, setShowEditQuiz] = useState(false);
   const [editQuizId, setEditQuizId] = useState(null);
+  const [showCreateQuiz, setShowCreateQuiz] = useState(false);
 
   const { fetchCourse, course } = CourseData();
 
@@ -543,15 +544,22 @@ const Lecture = ({ user }) => {
               </div>
             )
           ) : null}
-          {/* Admin Add Lecture Button */}
+          {/* Admin Add Lecture and Create Quiz Buttons */}
           {user && (user.role === 'admin' || user.role === 'instructor') && (
-            <button
-              className="common-btn"
-              style={{ margin: "0 auto 16px auto", display: "block" }}
-              onClick={() => setShow(!show)}
-            >
-              {show ? "Close" : "Add Lecture +"}
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
+              <button
+                className="common-btn"
+                onClick={() => setShow(!show)}
+              >
+                {show ? "Close" : "Add Lecture +"}
+              </button>
+              <button
+                className="common-btn"
+                onClick={() => setShowCreateQuiz(true)}
+              >
+                Create Quiz +
+              </button>
+            </div>
           )}
           {/* Admin Add Lecture Form */}
           {show && user && (user.role === 'admin' || user.role === 'instructor') && (
@@ -699,6 +707,15 @@ const Lecture = ({ user }) => {
               <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                 <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowEditQuiz(false)}>×</button>
                 <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ fetchContent(); }} />
+              </div>
+            </div>
+          )}
+          {/* Create Quiz Modal */}
+          {showCreateQuiz && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowCreateQuiz(false)}>×</button>
+                <AddQuiz courseId={params.id} onSuccess={() => { setShowCreateQuiz(false); /* refresh content list if needed */ }} />
               </div>
             </div>
           )}

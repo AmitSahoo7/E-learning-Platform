@@ -34,13 +34,14 @@ export const UserContextProvider = ({ children }) => {
   }
 
 
-  async function registerUser(name, email, password, navigate) {
+  async function registerUser(name, email, password, navigate, options = {}) {
     setBtnLoading(true);
     try {
       const { data } = await axios.post(`${server}/api/user/register`, {
         name,
         email,
         password,
+        ...options,
       });
 
       toast.success(data.message);
