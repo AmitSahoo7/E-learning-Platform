@@ -23,15 +23,13 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
-
-import { useNavigate, useParams } from "react-router-dom";
-
 import Leaderboard from "./pages/leaderboard/Leaderboard";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import axios from "axios";
 import { server } from "./main";
 import Events from "./pages/events";
-
+import Webinar from "./pages/webinar/Webinar";
+import AdminWebinars from "./admin/Webinar/AdminWebinars";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
@@ -49,7 +47,7 @@ const App = () => {
           headers: { token: localStorage.getItem("token") },
         });
         setAnnouncements(data.announcements || []);
-      } catch (err) {
+      } catch {
         setAnnouncements([]);
       }
     };
@@ -83,7 +81,7 @@ const App = () => {
       );
       // Prepend new announcement to state
       setAnnouncements((prev) => [data.announcement, ...prev]);
-    } catch (err) {
+    } catch {
       // Optionally show error
       // alert("Failed to send announcement");
     }
@@ -188,6 +186,11 @@ const App = () => {
                   <Home />
                 )
               }
+            />
+            <Route path="/webinar" element={<Webinar />} />
+            <Route
+              path="/admin/webinars"
+              element={isAuth && user.role === "admin" ? <AdminWebinars /> : <Home />}
             />
           </Routes>
           <Footer />

@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { connectDb } from "./database/db.js";
 import Razorpay from 'razorpay';
 import cors from 'cors';
+import webinarRoutes from './routes/webinarRoutes.js';
 
 //
 
@@ -45,6 +46,7 @@ app.use("/api", courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/reward", rewardRoutes);
+app.use('/api/webinar', webinarRoutes);
 
 app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`);
