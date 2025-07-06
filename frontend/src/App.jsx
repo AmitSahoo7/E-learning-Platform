@@ -23,6 +23,10 @@ import AdminCourses from "./admin/Courses/AdminCourses";
 import AdminUsers from "./admin/Users/AdminUsers";
 import AdminDashbord from "./admin/Dashboard/AdminDashbord";
 import AddCourse from "./admin/Courses/AddCourse";
+import AdminFinalAssessmentPage from './admin/Courses/AdminFinalAssessmentPage';
+import AssessmentAttemptsViewer from './admin/Courses/AssessmentAttemptsViewer';
+import CertificateGenerator from './components/certificate/CertificateGenerator';
+import FinalAssessment from './components/finalassessment/FinalAssessment';
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -136,6 +140,14 @@ const App = () => {
               element={isAuth ? <Quiz user={user} /> : <Login />}
             />
             <Route
+              path="/course/:courseId/assessment"
+              element={isAuth ? <FinalAssessment user={user} /> : <Login />}
+            />
+            <Route
+              path="/course/:courseId/certificate"
+              element={isAuth ? <CertificateGenerator user={user} /> : <Login />}
+            />
+            <Route
               path="/admin/course"
               element={
                 isAuth && user.role === "admin" ? (
@@ -171,6 +183,18 @@ const App = () => {
                 ) : (
                   <Home />
                 )
+              }
+            />
+            <Route
+              path="/admin/course/:courseId/assessments"
+              element={
+                isAuth && user.role === "admin" ? <AdminFinalAssessmentPage /> : <Home />
+              }
+            />
+            <Route
+              path="/admin/course/:courseId/attempts"
+              element={
+                isAuth && user.role === "admin" ? <AssessmentAttemptsViewer /> : <Home />
               }
             />
             <Route

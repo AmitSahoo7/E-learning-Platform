@@ -72,12 +72,18 @@ export const submitQuiz = async (req, res) => {
         quizScores: [{ quiz: quiz._id, bestScore: score }],
       });
     } else {
-      // Update best score for this quiz
-      const scoreEntry = progress.quizScores.find(qs => qs.quiz.toString() === quiz._id.toString());
-      if (!scoreEntry) {
+      // Ensure quizScores is always an array
+      if (!Array.isArray(progress.quizScores)) progress.quizScores = [];
+      // Find if this quiz already has a score entry
+      const scoreIndex = progress.quizScores.findIndex(qs => qs.quiz.toString() === quiz._id.toString());
+      if (scoreIndex === -1) {
+        // New quiz, add entry
         progress.quizScores.push({ quiz: quiz._id, bestScore: score });
-      } else if (score > scoreEntry.bestScore) {
-        scoreEntry.bestScore = score;
+      } else {
+        // Existing quiz, update bestScore if higher
+        if (score > progress.quizScores[scoreIndex].bestScore) {
+          progress.quizScores[scoreIndex].bestScore = score;
+        }
       }
       // Only add to completedQuizzes if >=75% and not already present
       if (percent >= 0.75 && !progress.completedQuizzes.includes(quiz._id)) {

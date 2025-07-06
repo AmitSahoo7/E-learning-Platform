@@ -234,27 +234,205 @@
 
 .edit-fab-btn {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 10;
-  width: 38px;
-  height: 38px;
-  background: #10b981;
+  top: 10px;
+  right: 10px;
+  background: #8a4baf;
   color: #fff;
   border: none;
   border-radius: 50%;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.18);
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  box-shadow: 0 2px 8px #8a4baf44;
   cursor: pointer;
-  transition: background 0.18s, box-shadow 0.18s, transform 0.15s;
-  outline: none;
+  z-index: 2;
 }
-.edit-fab-btn:hover, .edit-fab-btn:focus {
-  background: #059669;
-  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.28);
-  transform: scale(1.08);
+.edit-fab-btn:hover {
+  background: #34d399;
+  color: #181c28;
+}
+
+.assessment-fab-btn {
+  position: absolute;
+  top: 10px;
+  right: 56px;
+  background: #34d399;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px #34d39944;
+  cursor: pointer;
+  z-index: 2;
+}
+.assessment-fab-btn:hover {
+  background: #8a4baf;
+  color: #fff;
+}
+
+.admin-assessment-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px #8a4baf11;
+}
+.admin-assessment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.admin-assessment-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #8a4baf;
+}
+.admin-assessment-create-btn {
+  background: #34d399;
+  color: #fff;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.admin-assessment-create-btn:hover {
+  background: #10b981;
+}
+.admin-assessment-table {
+  width: 100%;
+  margin-top: 16px;
+  border-collapse: collapse;
+  background: #fafaff;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px #8a4baf11;
+}
+.admin-assessment-table th, .admin-assessment-table td {
+  padding: 12px 8px;
+  border: 1px solid #eee;
+  text-align: left;
+}
+.admin-assessment-table th {
+  background: #f8f8f8;
+  font-weight: 700;
+  color: #8a4baf;
+}
+.admin-assessment-table tr.active {
+  background: #e0ffe0;
+}
+.admin-assessment-table tr:hover {
+  background: #f3f7fa;
+}
+.admin-assessment-actions button {
+  margin-right: 8px;
+  background: #8a4baf;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.98rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.admin-assessment-actions button:last-child {
+  margin-right: 0;
+}
+.admin-assessment-actions button:hover {
+  background: #34d399;
+}
+.admin-assessment-form label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  display: block;
+}
+.admin-assessment-form input[type="text"],
+.admin-assessment-form select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+.admin-assessment-form .question-block {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  background: #f9f9ff;
+}
+.admin-assessment-form .remove-question-btn {
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.admin-assessment-form .remove-question-btn:hover {
+  background: #d32f2f;
+}
+.admin-assessment-form .add-question-btn {
+  background: #34d399;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.admin-assessment-form .add-question-btn:hover {
+  background: #10b981;
+}
+.admin-assessment-form .submit-btn {
+  background: #8a4baf;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.18s;
+}
+.admin-assessment-form .submit-btn:hover {
+  background: #34d399;
+}
+.admin-assessment-preview {
+  padding: 18px 8px;
+}
+.admin-assessment-preview h3 {
+  color: #8a4baf;
+  margin-bottom: 10px;
+}
+.admin-assessment-preview .question-preview {
+  margin-bottom: 18px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8f8ff;
+  border: 1px solid #eee;
+}
+.admin-assessment-preview ul {
+  margin: 0;
+  padding: 0 0 0 18px;
+}
+.admin-assessment-preview li {
+  margin-bottom: 2px;
 }
 

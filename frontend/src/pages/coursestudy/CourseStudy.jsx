@@ -77,6 +77,8 @@ const CourseStudy = ({ user }) => {
   const [completedQuizCount, setCompletedQuizCount] = useState(0);
   const [totalQuizCount, setTotalQuizCount] = useState(0);
 
+  const [showAssessment, setShowAssessment] = useState(false);
+
   const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
 
@@ -374,6 +376,26 @@ const CourseStudy = ({ user }) => {
                 disabled={enrolling}
               >
                 {enrolling ? "Processing..." : "Enroll"}
+              </button>
+            )}
+            {/* Final Assessment Button */}
+            {isEnrolled && (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                style={{ marginTop: 8, background: '#34d399' }}
+                onClick={() => navigate(`/course/${course._id}/assessment`)}
+              >
+                Final Assessment
+              </button>
+            )}
+            {/* Certificate Button */}
+            {isEnrolled && (
+              <button
+                className="cd-btn-primary cd-enroll-btn"
+                style={{ marginTop: 8, background: '#f59e0b' }}
+                onClick={() => navigate(`/course/${course._id}/certificate`)}
+              >
+                🎓 Get Certificate
               </button>
             )}
             {/* Preview Video */}
