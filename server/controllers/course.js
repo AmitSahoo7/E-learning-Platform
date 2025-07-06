@@ -39,7 +39,8 @@ export const fetchLectures = TryCatch(async (req, res) => {
       message: "You have not subscribed to this course",
     });
 
-  res.json({ lectures });
+  // Always return an array, even if empty
+  return res.json({ lectures: lectures || [] });
 });
 
 export const fetchLecture = TryCatch(async (req, res) => {
@@ -168,6 +169,14 @@ export const addLecture = TryCatch(async (req, res) => {
     lectureData.pdf = files.pdf[0].path;
   }
 
+  // Find the max order among lectures and quizzes for this course
+  const lectures = await Lecture.find({ course: course._id });
+  const quizzes = await Quiz.find({ courseId: course._id });
+  const maxLectureOrder = lectures.length > 0 ? Math.max(...lectures.map(l => l.order || 0)) : 0;
+  const maxQuizOrder = quizzes.length > 0 ? Math.max(...quizzes.map(q => q.order || 0)) : 0;
+  const nextOrder = Math.max(maxLectureOrder, maxQuizOrder) + 1;
+  lectureData.order = nextOrder;
+
   const lecture = await Lecture.create(lectureData);
 
   res.status(201).json({
@@ -179,6 +188,11 @@ export const addLecture = TryCatch(async (req, res) => {
 export const deleteLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);
   if (!lecture) return res.status(404).json({ message: "Lecture not found" });
+  // Remove this lecture from all users' progress.completedLectures for the course
+  await Progress.updateMany(
+    { course: lecture.course },
+    { $pull: { completedLectures: lecture._id } }
+  );
   await lecture.deleteOne();
   res.json({ message: "Lecture Deleted" });
 });
@@ -297,11 +311,11 @@ export const getYourProgress = TryCatch(async (req, res) => {
 
   let completedQuizzes = 0;
   if (progress[0] && Array.isArray(progress[0].quizScores)) {
-    // Only count quizzes where bestScore >= 75% of total questions
+    // Only count quizzes where bestScore >= 50% of total questions
     completedQuizzes = progress[0].quizScores.filter(qs => {
       const quiz = allQuizzesArr.find(q => q._id.toString() === qs.quiz.toString());
       if (!quiz) return false;
-      return quiz.questions && quiz.questions.length > 0 && (qs.bestScore / quiz.questions.length) >= 0.75;
+      return quiz.questions && quiz.questions.length > 0 && (qs.bestScore / quiz.questions.length) >= 0.5;
     }).length;
   }
   const quizProgressPercentage = (completedQuizzes * 100) / (allQuizzes || 1);
@@ -401,4 +415,18 @@ export const getCourseUserStats = TryCatch(async (req, res) => {
     };
   }));
   res.json({ userStats });
+});
+
+// Update order of lectures and quizzes for a course
+export const updateCourseContentOrder = TryCatch(async (req, res) => {
+  const { courseId, items } = req.body; // items: [{type: 'lecture'|'quiz', id, order}]
+  if (!Array.isArray(items)) return res.status(400).json({ message: "Invalid items array" });
+  for (const item of items) {
+    if (item.type === 'lecture') {
+      await Lecture.findByIdAndUpdate(item.id, { order: item.order });
+    } else if (item.type === 'quiz') {
+      await Quiz.findByIdAndUpdate(item.id, { order: item.order });
+    }
+  }
+  res.json({ message: "Order updated" });
 });

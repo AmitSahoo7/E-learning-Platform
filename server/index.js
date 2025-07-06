@@ -39,10 +39,9 @@ import adminRoutes from "./routes/admin.js";
 import feedbackRoutes from "./routes/feedback.js";
 import rewardRoutes from "./routes/reward.js";
 //using routes
-app.use('/api',userRoutes);
 app.use('/api/quiz', quizRoutes);
-
-app.use("/api", courseRoutes);
+app.use('/api',userRoutes);
+app.use('/api', courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/reward", rewardRoutes);
