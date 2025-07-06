@@ -708,4 +708,5 @@ const Lecture = ({ user }) => {
   );
 };
 
+}
 export default Lecture;
