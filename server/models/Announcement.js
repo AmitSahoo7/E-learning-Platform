@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const announcementSchema = new mongoose.Schema({
+const AnnouncementSchema = new mongoose.Schema({
   message: {
     type: String,
     required: true,
@@ -16,4 +16,4 @@ const announcementSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.model("Announcement", announcementSchema); 
+export default mongoose.model("Announcement", AnnouncementSchema); 

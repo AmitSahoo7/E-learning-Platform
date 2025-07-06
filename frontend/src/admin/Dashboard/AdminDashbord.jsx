@@ -137,6 +137,7 @@ const AdminDashbord = ({ user, addAnnouncement }) => {
           <Link to="/admin/course/add" className="admin-feature-link">Add Course</Link>
           <Link to="/admin/course" className="admin-feature-link">Manage Courses</Link>
           <Link to="/admin/users" className="admin-feature-link">Manage Users</Link>
+          <Link to="/admin/webinars" className="admin-feature-link">Manage Webinars</Link>
         </nav>
         {/* Welcome Section */}
         <div className="admin-welcome">
