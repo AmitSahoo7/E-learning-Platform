@@ -5,9 +5,14 @@ import axios from "axios";
 import { server } from "../../main";
 import "./quiz.css";
 import AddQuiz from '../../admin/Courses/AddQuiz.jsx';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const Quiz = ({ user }) => {
-  const { courseId } = useParams();
+  const params = useParams();
+  const courseId = params.courseId;
+  const quizId = params.quizId;
   const navigate = useNavigate();
 
   const [quizzes, setQuizzes] = useState([]);
@@ -22,6 +27,13 @@ const Quiz = ({ user }) => {
   const [pendingQuiz, setPendingQuiz] = useState(null);
   const [showAddQuiz, setShowAddQuiz] = useState(false);
   const [editQuizId, setEditQuizId] = useState(null);
+  const [reorderMode, setReorderMode] = useState(false);
+  const [quizOrder, setQuizOrder] = useState([]);
+  const [singleQuizCourseId, setSingleQuizCourseId] = useState(null);
+  const [normalizedSubs, setNormalizedSubs] = useState([]);
+
+  // Disambiguate params: if quizId is present, ignore courseId for fetching
+  const isSingleQuizView = !!quizId;
 
   // Move fetchQuizzes out of useEffect for reuse
   const fetchQuizzes = async () => {
@@ -34,6 +46,7 @@ const Quiz = ({ user }) => {
       });
       setQuizzes(data);
       setError(null);
+      setQuizOrder(Array.isArray(data) ? data.map(q => q._id) : []);
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setQuizzes([]);
@@ -45,10 +58,10 @@ const Quiz = ({ user }) => {
     setLoading(false);
   };
 
-  // Update fetchQuizProgress to handle 404
-  const fetchQuizProgress = async () => {
+  // Update fetchQuizProgress to handle 404 and accept courseId param
+  const fetchQuizProgress = async (cid) => {
     try {
-      const { data } = await axios.get(`${server}/api/user/progress?course=${courseId}`, {
+      const { data } = await axios.get(`${server}/api/user/progress?course=${cid}`, {
         headers: { token: localStorage.getItem("token") },
       });
       // Map quizId to bestScore
@@ -63,18 +76,56 @@ const Quiz = ({ user }) => {
         scores,
       });
     } catch (err) {
-      if (err.response && err.response.status === 404) {
-        setQuizProgress({ completed: [], scores: {} });
-      } else {
-        setQuizProgress({ completed: [], scores: {} });
-      }
+      setQuizProgress({ completed: [], scores: {} });
     }
   };
 
+  // Fetch a single quiz if quizId is present
+  const fetchSingleQuiz = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${server}/api/quiz/single/${quizId}`, {
+        headers: { token: localStorage.getItem("token") },
+      });
+      setSelectedQuiz(data);
+      setQuizzes([data]);
+      setSingleQuizCourseId(data.courseId || data.course || null);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load quiz");
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    fetchQuizzes();
-    fetchQuizProgress();
-  }, [courseId]);
+    if (isSingleQuizView) {
+      fetchSingleQuiz();
+    } else if (courseId) {
+      fetchQuizzes();
+      fetchQuizProgress(courseId);
+    }
+  }, [courseId, quizId, isSingleQuizView]);
+
+  // New effect: fetch progress when singleQuizCourseId is set
+  useEffect(() => {
+    if (quizId && singleQuizCourseId && user) {
+      // Debug: log subscription and courseId
+      console.log('user.subscription:', user.subscription);
+      console.log('singleQuizCourseId:', singleQuizCourseId);
+      // Defensive: normalize subscription to array of strings
+      let userSubs = user.subscription;
+      if (Array.isArray(userSubs) && typeof userSubs[0] === 'object' && userSubs[0] !== null) {
+        userSubs = userSubs.map(s => s._id ? s._id.toString() : String(s));
+      } else if (Array.isArray(userSubs)) {
+        userSubs = userSubs.map(s => s.toString());
+      } else {
+        userSubs = [];
+      }
+      // Store normalized for enrollment check
+      setNormalizedSubs(userSubs);
+      fetchQuizProgress(singleQuizCourseId);
+    }
+  }, [quizId, singleQuizCourseId, user]);
 
   useEffect(() => {
     if (selectedQuiz) {
@@ -145,15 +196,104 @@ const Quiz = ({ user }) => {
     fetchQuizzes();
   };
 
+  // Drag-and-drop handlers for quiz reordering
+  function DraggableQuizItem({ quiz, isDraggable }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: quiz._id });
+    return (
+      <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, border: '1px solid #eee', borderRadius: 8, margin: '8px 0', background: '#fff', padding: 16, display: 'flex', alignItems: 'center', cursor: isDraggable ? 'grab' : 'default' }}>
+        {isDraggable && <span {...attributes} {...listeners} style={{ marginRight: 12, fontWeight: 700, cursor: 'grab' }}>≡</span>}
+        <span>{quiz.title || 'Untitled Quiz'}</span>
+      </div>
+    );
+  }
+
+  const handleQuizDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = quizOrder.findIndex(id => id === active.id);
+    const newIndex = quizOrder.findIndex(id => id === over.id);
+    const newOrder = arrayMove(quizOrder, oldIndex, newIndex);
+    setQuizOrder(newOrder);
+    // Prepare payload for backend
+    const items = newOrder.map((id, idx) => ({ type: 'quiz', id, order: idx + 1 }));
+    try {
+      await axios.post(`${server}/api/course/update-content-order`, { courseId, items }, { headers: { token: localStorage.getItem('token') } });
+      fetchQuizzes();
+    } catch {}
+  };
+
   if (loading) return <div className="quiz-container">Loading quizzes...</div>;
   if (error) return <div className="quiz-container error">{error}</div>;
+
+  // If quizId is present, show only that quiz
+  if (quizId && selectedQuiz) {
+    // Enrollment check for single quiz view
+    const enrolled = user && Array.isArray(normalizedSubs) && singleQuizCourseId && normalizedSubs.includes(singleQuizCourseId.toString());
+    if (!enrolled && user?.role !== 'admin' && user?.role !== 'instructor') {
+      return (
+        <div className="quiz-container">
+          <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600, background: '#fff', borderRadius: 12, padding: 24, maxWidth: 480 }}>
+            You must enroll in this course to take the quizzes
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="quiz-container">
+        <div className="quiz-header">
+          <h2>{selectedQuiz.title || "Quiz"}</h2>
+          <button className="quiz-back-btn" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+        </div>
+        {selectedQuiz.questions.map((q, qIndex) => (
+          <div className="quiz-question-card" key={qIndex}>
+            <h4>
+              Q{qIndex + 1}. {q.question}
+            </h4>
+            {Array.isArray(q.options) && q.options.map((opt, optIndex) => {
+              const selected = Array.isArray(answers[qIndex]) && answers[qIndex].includes(optIndex);
+              const isCorrect = submitted && Array.isArray(q.correctAnswers) && q.correctAnswers.includes(optIndex);
+              const isWrongSelected = submitted && selected && !isCorrect;
+
+              return (
+                <div
+                  key={optIndex}
+                  className={`quiz-option ${selected ? "selected" : ""} ${
+                    submitted && isCorrect ? "correct" : ""
+                  } ${submitted && isWrongSelected ? "wrong" : ""}`}
+                  onClick={() => {
+                    if (!submitted) handleOptionToggle(qIndex, optIndex);
+                  }}
+                >
+                  {opt}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+        {!submitted ? (
+          <button className="quiz-submit-btn" onClick={handleSubmit}>
+            Submit Quiz
+          </button>
+        ) : (
+          <div className="quiz-result">
+            Your Score: {score} / {selectedQuiz.questions.length}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="quiz-container">
       {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
         <div style={{ marginBottom: '1.5rem' }}>
-          <button className="quiz-create-btn" onClick={handleCreateQuiz}>
+          <button className="quiz-create-btn" onClick={handleCreateQuiz} disabled={reorderMode}>
             ➕ Create Quiz
+          </button>
+          <button className="quiz-create-btn" style={{ marginLeft: 8 }} onClick={() => setReorderMode(r => !r)}>
+            {reorderMode ? 'Done' : 'Reorder Quizzes'}
           </button>
           {showAddQuiz && (
             <div style={{ marginTop: '1.5rem' }}>
@@ -161,6 +301,19 @@ const Quiz = ({ user }) => {
               <button className="quiz-create-btn" style={{ background: '#ff3b30', marginTop: 8 }} onClick={handleCloseAddQuiz}>
                 Cancel
               </button>
+            </div>
+          )}
+          {reorderMode && (
+            <div style={{ marginTop: '2rem' }}>
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleQuizDragEnd}>
+                <SortableContext items={quizOrder} strategy={verticalListSortingStrategy}>
+                  {quizOrder.map(id => {
+                    const quiz = quizzes.find(q => q._id === id);
+                    if (!quiz) return null;
+                    return <DraggableQuizItem key={quiz._id} quiz={quiz} isDraggable={true} />;
+                  })}
+                </SortableContext>
+              </DndContext>
             </div>
           )}
         </div>

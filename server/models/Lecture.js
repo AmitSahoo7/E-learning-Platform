@@ -31,6 +31,10 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  order: {
+    type: Number,
+    default: 0,
+  },
 });
 
 export const Lecture = mongoose.model("Lecture", schema);

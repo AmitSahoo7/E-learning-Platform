@@ -3,13 +3,15 @@ import Layout from "../Utils/Layout";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { server } from "../../main";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
-const AddQuiz = ({ courseId, quizId: propQuizId, onSuccess }) => {
+const AddQuiz = ({ courseId: propCourseId, quizId: propQuizId, onSuccess }) => {
+  const params = useParams();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const urlQuizId = searchParams.get("quizId");
   const quizId = propQuizId || urlQuizId;
+  const courseId = propCourseId || params.courseId;
 
   const [quizTitle, setQuizTitle] = useState("");
   const [questions, setQuestions] = useState([

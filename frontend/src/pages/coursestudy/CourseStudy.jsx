@@ -7,6 +7,9 @@ import { server } from "../../main";
 import AddQuiz from "../../admin/Courses/AddQuiz.jsx";
 
 import CourseReviewBox from "../../components/reviews/CourseReviewBox";
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const placeholderAvatar =
   "https://ui-avatars.com/api/?name=Instructor&background=6c63ff&color=fff&rounded=true&size=64";
@@ -31,6 +34,8 @@ const CourseStudy = ({ user }) => {
 
 
   const [quizCount, setQuizCount] = useState(0);
+  const [contentList, setContentList] = useState([]);
+  const [loadingContent, setLoadingContent] = useState(true);
 
   // Fetch quiz data when component mounts or when course ID changes
   useEffect(() => {
@@ -133,6 +138,63 @@ const CourseStudy = ({ user }) => {
 
     // eslint-disable-next-line
   }, [params.id, user, course]);
+
+  // Fetch lectures and quizzes, merge and sort by order
+  useEffect(() => {
+    if (!course || !course._id) return;
+    const fetchContent = async () => {
+      setLoadingContent(true);
+      try {
+        const [lecturesRes, quizzesRes] = await Promise.all([
+          axios.get(`${server}/api/course/${course._id}/lectures`, { headers: { token: localStorage.getItem('token') } }),
+          axios.get(`${server}/api/quiz/${course._id}`, { headers: { token: localStorage.getItem('token') } })
+        ]);
+        const lectures = Array.isArray(lecturesRes.data) ? lecturesRes.data : lecturesRes.data.lectures || [];
+        const quizzes = Array.isArray(quizzesRes.data) ? quizzesRes.data : [];
+        const merged = [
+          ...lectures.map(l => ({ ...l, type: 'lecture', id: l._id })),
+          ...quizzes.map(q => ({ ...q, type: 'quiz', id: q._id }))
+        ];
+        merged.sort((a, b) => (a.order || 0) - (b.order || 0));
+        setContentList(merged);
+      } catch (err) {
+        setContentList([]);
+      }
+      setLoadingContent(false);
+    };
+    fetchContent();
+  }, [course, course?._id]);
+
+  // Drag-and-drop handlers
+  function DraggableItem(props) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.item.id });
+    return (
+      <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, border: '1px solid #eee', borderRadius: 8, margin: '8px 0', background: '#fff', padding: 16, display: 'flex', alignItems: 'center', cursor: props.isDraggable ? 'grab' : 'default' }}>
+        {props.isDraggable && <span {...attributes} {...listeners} style={{ marginRight: 12, fontWeight: 700, cursor: 'grab' }}>≡</span>}
+        {props.item.type === 'lecture' ? (
+          <span>Lecture: {props.item.title}</span>
+        ) : (
+          <span>Quiz: {props.item.title}</span>
+        )}
+      </div>
+    );
+  }
+
+  const isInstructor = user && (user.role === 'admin' || user.role === 'superadmin' || user.role === 'instructor');
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = contentList.findIndex(i => i.id === active.id);
+    const newIndex = contentList.findIndex(i => i.id === over.id);
+    const newList = arrayMove(contentList, oldIndex, newIndex);
+    setContentList(newList);
+    // Prepare payload for backend
+    const items = newList.map((item, idx) => ({ type: item.type, id: item.id, order: idx + 1 }));
+    try {
+      await axios.post(`${server}/api/course/update-content-order`, { courseId: course._id, items }, { headers: { token: localStorage.getItem('token') } });
+    } catch {}
+  };
 
   const handleEnroll = async () => {
     setEnrolling(true);
@@ -359,23 +421,7 @@ const CourseStudy = ({ user }) => {
                 Total Quizzes: {quizCount}
               </div>
             )}
-            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                onClick={() => navigate(`/quiz/${course._id}`)}
-                disabled={enrolling}
-              >
-                Quizs
-              </button>
-            ) : (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                onClick={handleEnroll}
-                disabled={enrolling}
-              >
-                {enrolling ? "Processing..." : "Enroll"}
-              </button>
-            )}
+            {/* Removed Quizs button here */}
             {/* Preview Video */}
             {course.previewVideo && (
               <div className="cd-preview-video">
@@ -421,6 +467,33 @@ const CourseStudy = ({ user }) => {
       </div>
       <div className="cd-review-box-wrapper" data-aos="fade-up">
         <CourseReviewBox courseId={course._id} user={user} />
+      </div>
+
+      <div className="cd-section" style={{ marginTop: 32 }}>
+        <h3>Course Content</h3>
+        {loadingContent ? (
+          <div>Loading content...</div>
+        ) : (
+          isInstructor ? (
+            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                {contentList.map(item => (
+                  <DraggableItem key={item.id} item={item} isDraggable={true} />
+                ))}
+              </SortableContext>
+            </DndContext>
+          ) : (
+            contentList.map(item => (
+              <div key={item.id} style={{ border: '1px solid #eee', borderRadius: 8, margin: '8px 0', background: '#fff', padding: 16 }}>
+                {item.type === 'lecture' ? (
+                  <span>Lecture: {item.title}</span>
+                ) : (
+                  <span>Quiz: {item.title}</span>
+                )}
+              </div>
+            ))
+          )
+        )}
       </div>
     </div>
   );
