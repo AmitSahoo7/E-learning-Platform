@@ -38,6 +38,10 @@ const Lecture = ({ user }) => {
 
   const { fetchCourse, course } = CourseData();
 
+  const watchStartRef = useRef(null);
+  const watchDurationRef = useRef(0);
+  const lastLectureIdRef = useRef(null);
+
   useEffect(() => {
     if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
 
@@ -222,6 +226,51 @@ const Lecture = ({ user }) => {
   };
 }, []);
 
+
+  // Helper to log watch time
+  const logWatchTime = async (durationMinutes) => {
+    if (!lecture?._id || !params.id || user?.role === "admin" || durationMinutes <= 0) return;
+    try {
+      await axios.post(`${server}/api/user/log-lecture-watch`, {
+        lectureId: lecture._id,
+        courseId: params.id,
+        duration: durationMinutes
+      }, {
+        headers: { token: localStorage.getItem("token") }
+      });
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
+
+  // Start timer when lecture changes
+  useEffect(() => {
+    if (!lecture?._id || user?.role === "admin") return;
+    // If switching lectures, log previous watch time
+    if (lastLectureIdRef.current && lastLectureIdRef.current !== lecture._id) {
+      const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+      logWatchTime(elapsed);
+    }
+    watchStartRef.current = Date.now();
+    lastLectureIdRef.current = lecture._id;
+    // Reset duration
+    watchDurationRef.current = 0;
+    return () => {
+      // On unmount, log time for current lecture
+      if (watchStartRef.current && lastLectureIdRef.current === lecture._id) {
+        const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+        logWatchTime(elapsed);
+      }
+    };
+  }, [lecture?._id]);
+
+  // On video end, log time and reset timer
+  const handleVideoEnded = () => {
+    if (!watchStartRef.current) return;
+    const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+    logWatchTime(elapsed);
+    watchStartRef.current = Date.now(); // reset for possible replay
+
   // Fetch lectures and quizzes, merge and sort by order
   useEffect(() => {
     const fetchContent = async () => {
@@ -365,6 +414,7 @@ const Lecture = ({ user }) => {
         }
       }
     }
+
   };
 
   return (
@@ -532,7 +582,7 @@ const Lecture = ({ user }) => {
                 disablePictureInPicture
                 disableRemotePlayback
                 autoPlay
-                onEnded={() => addProgress(lecture._id)}
+                onEnded={handleVideoEnded}
                 style={{
                   borderRadius: "16px",
                   marginBottom: "1.5rem",
