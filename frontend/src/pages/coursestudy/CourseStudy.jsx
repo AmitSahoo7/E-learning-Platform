@@ -403,7 +403,7 @@ const CourseStudy = ({ user }) => {
                 onClick={() => navigate(`/lectures/${course._id}`)}
                 disabled={enrolling}
               >
-                Lectures
+                Start Learning
               </button>
             ) : (
               <button
