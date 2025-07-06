@@ -12,12 +12,16 @@ import {
   getInstructorCourses,
   getInstructorCourseStats,
   getCourseUserStats,
+  updateCourseContentOrder,
 } from "../controllers/course.js";
 import { isAuth } from "../middlewares/isAuth.js";
 import { uploadFiles } from "../middlewares/multer.js";
 // import { deleteLecture } from "../controllers/lecture.js";
 
 const router = express.Router();
+
+// Move this route for updating order to the top, before any /:id routes
+router.post('/course/update-content-order', isAuth, updateCourseContentOrder);
 
 router.get("/course/all", getAllCourses);
 router.get("/course/:id", getSingleCourse);
