@@ -897,7 +897,7 @@
 .dashboard-section.study-goals .goals-list {
   display: flex;
   flex-direction: column;
-  gap: 2.2rem !important;
+  gap: 1.2rem !important;
 }
 .dashboard-section.study-goals .goal-item:not(:last-child) {
   margin-bottom: 2.2rem;
@@ -916,4 +916,94 @@
 .dashboard-section li,
 .dashboard-section .section-header {
   color: #fff;
+}
+
+/* Calendar Section Modern Styles */
+.calendar-section {
+  background: var(--glass-bg);
+  border-radius: 1.2rem;
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.react-calendar {
+  background: #181c28 !important;
+  border: none;
+  color: #fff;
+  border-radius: 1rem;
+  font-family: inherit;
+  box-shadow: none;
+  width: 100%;
+  min-width: 260px;
+  max-width: 100%;
+  overflow: visible;
+}
+
+.react-calendar__navigation {
+  background: transparent;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.react-calendar__navigation button {
+  color: #fff;
+  background: none;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.react-calendar__month-view {
+  background: transparent;
+}
+
+.react-calendar__tile {
+  color: #fff !important;
+  background: none !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background: #fff !important;
+  color: #181c28 !important;
+}
+
+.calendar-activity-day,
+.calendar-goal-day,
+.calendar-event-day {
+  background: none !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.tick-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #232a36;
+  border: 2px solid #3ecf8e;
+  color: #3ecf8e;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 auto;
+  box-shadow: 0 0 8px #3ecf8e44;
+}
+
+.react-calendar__month-view__weekdays {
+  background: transparent;
+  color: #b9f8d3;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  color: #b9f8d3;
+  font-weight: 600;
+  background: transparent;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #444 !important;
+  opacity: 0.5;
 }

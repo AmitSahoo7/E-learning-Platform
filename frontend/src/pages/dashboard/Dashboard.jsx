@@ -25,6 +25,9 @@ import {
 } from 'react-icons/fa';
 import { BiBook } from 'react-icons/bi';
 import { MdTrendingUp } from 'react-icons/md';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import Modal from '../../components/Modal';
 
 const Dashboard = () => {
   const { mycourse } = CourseData();
@@ -62,6 +65,12 @@ const Dashboard = () => {
   const [editingDailyGoal, setEditingDailyGoal] = useState(false);
   const [newDailyGoal, setNewDailyGoal] = useState(studyGoals.dailyGoal);
   const [savingGoal, setSavingGoal] = useState(false);
+  const [calendarActivityDates, setCalendarActivityDates] = useState([]); // ISO strings
+  const [calendarGoalDates, setCalendarGoalDates] = useState([]); // ISO strings
+  const [calendarEventDates, setCalendarEventDates] = useState([]); // ISO strings
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDayDetails, setSelectedDayDetails] = useState([]);
+  const [calendarLoading, setCalendarLoading] = useState(false);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -197,6 +206,41 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [mycourse]);
 
+  // Fetch activity and events for the current month
+  useEffect(() => {
+    const fetchCalendarData = async () => {
+      setCalendarLoading(true);
+      try {
+        // Fetch user activity for the month
+        const activityRes = await axios.get(`${server}/api/user/recent-activity`, {
+          headers: { token: localStorage.getItem("token") }
+        });
+        // Convert activity timestamps to ISO date strings
+        const activityDates = (activityRes.data.activities || []).map(a => new Date(a.timestamp).toISOString().slice(0, 10));
+        setCalendarActivityDates([...new Set(activityDates)]);
+        // For demo: treat all activity days as goal days if daily goal met (customize as needed)
+        setCalendarGoalDates([...new Set(activityDates)]);
+        // Fetch events (if you have an endpoint)
+        try {
+          const eventsRes = await axios.get(`${server}/api/events`, {
+            headers: { token: localStorage.getItem("token") }
+          });
+          const eventDates = (eventsRes.data.events || []).map(e => new Date(e.date).toISOString().slice(0, 10));
+          setCalendarEventDates([...new Set(eventDates)]);
+        } catch {
+          setCalendarEventDates([]);
+        }
+      } catch {
+        setCalendarActivityDates([]);
+        setCalendarGoalDates([]);
+        setCalendarEventDates([]);
+      } finally {
+        setCalendarLoading(false);
+      }
+    };
+    fetchCalendarData();
+  }, []);
+
   // Calculate overall progress
   const overallProgress = courseProgress.length > 0 
     ? Math.round(courseProgress.reduce((sum, cp) => sum + (cp.progress.courseProgressPercentage || 0), 0) / courseProgress.length)
@@ -265,6 +309,15 @@ const Dashboard = () => {
   // Handler to cancel editing
   const handleCancelEdit = () => {
     setEditingDailyGoal(false);
+  };
+
+  // Handle day click
+  const handleCalendarDayClick = (date) => {
+    setSelectedDate(date);
+    // For demo: show all activities/events for this day
+    const iso = date.toISOString().slice(0, 10);
+    const activities = recentActivity.filter(a => new Date(a.timestamp).toISOString().slice(0, 10) === iso);
+    setSelectedDayDetails(activities);
   };
 
   if (loading) {
@@ -590,6 +643,44 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Calendar Section */}
+          <div className="dashboard-section calendar-section">
+            <div className="section-header">
+              <h2 className="gradient-title">Learning Calendar</h2>
+            </div>
+            <Calendar
+              tileClassName={({ date, view }) => {
+                // Remove all highlight classes, keep all days white
+                return null;
+              }}
+              tileContent={({ date, view }) => {
+                const iso = date.toISOString().slice(0, 10);
+                if (calendarActivityDates.includes(iso)) {
+                  return (
+                    <span style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      background: '#232a36',
+                      border: '2px solid #3ecf8e',
+                      color: '#3ecf8e',
+                      fontWeight: 700,
+                      fontSize: 18,
+                      margin: '0 auto',
+                      boxShadow: '0 0 8px #3ecf8e44',
+                    }}>
+                      ✓
+                    </span>
+                  );
+                }
+                return null;
+              }}
+            />
           </div>
         </div>
       </div>
