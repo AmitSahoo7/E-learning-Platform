@@ -12,7 +12,14 @@ export const createQuiz = async (req, res) => {
       return res.status(400).json({ success: false, message: "Title, Course ID and at least one question are required." });
     }
 
-    const quiz = new Quiz({ title, courseId, questions });
+    // Find the max order among lectures and quizzes for this course
+    const lectures = await (await import('../models/Lecture.js')).Lecture.find({ course: courseId });
+    const quizzes = await Quiz.find({ courseId });
+    const maxLectureOrder = lectures.length > 0 ? Math.max(...lectures.map(l => l.order || 0)) : 0;
+    const maxQuizOrder = quizzes.length > 0 ? Math.max(...quizzes.map(q => q.order || 0)) : 0;
+    const nextOrder = Math.max(maxLectureOrder, maxQuizOrder) + 1;
+
+    const quiz = new Quiz({ title, courseId, questions, order: nextOrder });
     await quiz.save();
 
     res.status(201).json({ success: true, message: "Quiz created" });
@@ -37,7 +44,7 @@ export const getQuizzesByCourse = async (req, res) => {
     }
 
     const quizzes = await Quiz.find({ courseId });
-    if (!quizzes || quizzes.length === 0) return res.status(404).json({ message: "No quizzes found for this course" });
+    if (!quizzes || quizzes.length === 0) return res.json([]);
 
     res.status(200).json(quizzes);
   } catch (error) {

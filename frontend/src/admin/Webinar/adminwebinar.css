@@ -1,0 +1,131 @@
+.admin-webinar-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 32px;
+  background: #17223b;
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+}
+.admin-webinar-container h2 {
+  color: #b0eacd;
+  margin-bottom: 18px;
+}
+.add-webinar-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.add-webinar-btn:hover {
+  background: #0e9e6e;
+}
+.webinar-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+.webinar-table th, .webinar-table td {
+  border: 1px solid #263159;
+  padding: 10px 8px;
+  color: #fff;
+  text-align: left;
+}
+.webinar-table th {
+  background: #263159;
+}
+.webinar-table tr:nth-child(even) {
+  background: #1b2a47;
+}
+.delete-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+.delete-btn:hover {
+  background: #c0392b;
+}
+.webinar-modal-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.webinar-modal {
+  background: #222f43;
+  padding: 32px 28px;
+  border-radius: 12px;
+  min-width: 350px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+}
+.webinar-form label {
+  display: block;
+  color: #b0eacd;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.webinar-form input[type="text"],
+.webinar-form input[type="date"],
+.webinar-form input[type="time"],
+.webinar-form textarea {
+  width: 100%;
+  padding: 7px 10px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  border: 1px solid #263159;
+  background: #1b2a47;
+  color: #fff;
+  font-size: 1rem;
+}
+.webinar-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+.instructors-section {
+  margin-bottom: 14px;
+}
+.instructor-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.instructor-row input {
+  flex: 1;
+}
+.add-instructor, .remove-instructor {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  margin-left: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.remove-instructor {
+  background: #e74c3c;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+.form-error {
+  color: #e74c3c;
+  margin-bottom: 10px;
+  text-align: center;
+} 

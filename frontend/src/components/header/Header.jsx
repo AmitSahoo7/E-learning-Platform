@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./header.css";
 import { Link, useLocation } from "react-router-dom";
 import { Bell, Trophy, User } from "lucide-react";
@@ -23,6 +23,7 @@ function timeAgo(dateStr) {
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Courses", path: "/courses" },
+  { name: "Webinar", path: "/webinar" },
   { name: "About", path: "/about" },
   { name: "Leaderboard", path: "/leaderboard", icon: <Trophy size={18} style={{ marginLeft: 4, color: '#FFD700' }} /> },
 ];
@@ -31,10 +32,18 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
   const [showDropdown, setShowDropdown] = useState(false);
   const [modal, setModal] = useState(null); // { message, timestamp }
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [clearedIds, setClearedIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('clearedAnnouncements') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [liveAnnouncements, setLiveAnnouncements] = useState(announcements);
   const { user, setIsAuth, setUser } = UserData ? UserData() : { user: null, setIsAuth: () => {}, setUser: () => {} };
   // Filter out invalid announcements
-  const validAnnouncements = announcements.filter(a => a && typeof a === 'object' && typeof a.message === 'string');
-  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a.id)).length;
+  const validAnnouncements = liveAnnouncements.filter(a => a && typeof a === 'object' && typeof a.message === 'string' && !clearedIds.includes(a._id));
+  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).length;
   const location = useLocation();
 
   const handleAnnouncementClick = (a) => {
@@ -58,6 +67,64 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
       window.location.href = `/${user._id}/dashboard`;
     }
   };
+  const handleClearAll = () => {
+    const allIds = validAnnouncements.map(a => a._id);
+    localStorage.setItem('readAnnouncements', JSON.stringify(allIds));
+    localStorage.setItem('clearedAnnouncements', JSON.stringify([...clearedIds, ...allIds]));
+    setClearedIds(prev => [...prev, ...allIds]);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+    }
+    if (typeof markAnnouncementRead === 'function') {
+      markAnnouncementRead('__all__');
+    }
+  };
+  // Add read all handler
+  const handleReadAll = () => {
+    const unreadIds = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).map(a => a._id);
+    const updated = [...readAnnouncements, ...unreadIds];
+    localStorage.setItem('readAnnouncements', JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+    }
+    if (typeof markAnnouncementRead === 'function') {
+      markAnnouncementRead('__all__');
+    }
+  };
+  // Add per-announcement read and clear handlers
+  const handleReadOne = (id) => {
+    if (!readAnnouncements.includes(id)) {
+      const updated = [...readAnnouncements, id];
+      localStorage.setItem('readAnnouncements', JSON.stringify(updated));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('storage'));
+      }
+      if (typeof markAnnouncementRead === 'function') {
+        markAnnouncementRead(id);
+      }
+    }
+  };
+  const handleClearOne = (id) => {
+    if (!clearedIds.includes(id)) {
+      const updated = [...clearedIds, id];
+      localStorage.setItem('clearedAnnouncements', JSON.stringify(updated));
+      setClearedIds(updated);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('storage'));
+      }
+    }
+  };
+  // Poll for new announcements every 10 seconds
+  useEffect(() => {
+    setLiveAnnouncements(announcements);
+    const interval = setInterval(() => {
+      // Optionally, fetch announcements from backend here if not passed as prop
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('storage'));
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [announcements]);
   return (
     <header className="modern-header glassy-header">
       <div className="header-logo">SkillNest</div>
@@ -93,6 +160,14 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
           {showDropdown && (
             <div className="notification-dropdown">
               <div className="dropdown-title">Announcements</div>
+              {validAnnouncements.length > 0 && (
+                <>
+                  <button className="clear-all-btn" onClick={handleClearAll} style={{marginBottom:'8px',float:'right',background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'4px 10px',cursor:'pointer'}}>Clear All</button>
+                  {unreadCount > 0 && (
+                    <button className="clear-all-btn" onClick={handleReadAll} style={{marginBottom:'8px',marginRight:'8px',float:'right',background:'#3b82f6',color:'#fff',border:'none',borderRadius:'4px',padding:'4px 10px',cursor:'pointer'}}>Read All</button>
+                  )}
+                </>
+              )}
               {validAnnouncements.length === 0 ? (
                 <div className="dropdown-empty">No announcements yet.</div>
               ) : (
@@ -104,6 +179,12 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
                   >
                     <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
                     <div className="dropdown-announcement-time">{a.createdAt ? timeAgo(a.createdAt) : (a.timestamp ? timeAgo(a.timestamp) : '')}</div>
+                    <div style={{display:'flex',gap:'6px',marginTop:'4px'}}>
+                      {!readAnnouncements.includes(a._id) && (
+                        <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleReadOne(a._id);}}>Read</button>
+                      )}
+                      <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleClearOne(a._id);}}>Clear</button>
+                    </div>
                   </div>
                 ))
               )}
