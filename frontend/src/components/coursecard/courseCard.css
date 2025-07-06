@@ -123,7 +123,7 @@
     width: 90%;
     padding: 0.8rem;
     border: none;
-    background: linear-gradient(90deg, #8a4baf 0%, #34d399 100%);
+    background: linear-gradient(90deg, #6381d9 0%, #34d399 100%);
     color: #fff;
     font-size: 0.98rem;
     font-weight: 600;
@@ -136,7 +136,7 @@
 }
 
 .common-btn-new:hover {
-    background: linear-gradient(90deg, #34d399 0%, #8a4baf 100%);
+    background: linear-gradient(90deg, #34d399 0%, #6381d9 100%);
     color: #181c28;
     box-shadow: 0 0 16px #7cffb288;
 }

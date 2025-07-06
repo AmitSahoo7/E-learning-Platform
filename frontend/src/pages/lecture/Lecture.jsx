@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./lecture.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
@@ -35,8 +35,15 @@ const Lecture = ({ user }) => {
   const [loadingContent, setLoadingContent] = useState(true);
   const [showEditQuiz, setShowEditQuiz] = useState(false);
   const [editQuizId, setEditQuizId] = useState(null);
+  const [showCreateQuiz, setShowCreateQuiz] = useState(false);
 
   const { fetchCourse, course } = CourseData();
+
+  const watchStartRef = useRef(null);
+  const watchDurationRef = useRef(0);
+  const lastLectureIdRef = useRef(null);
+
+  const location = useLocation();
 
   useEffect(() => {
     if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
@@ -199,6 +206,15 @@ const Lecture = ({ user }) => {
     fetchCourse(params.id);
   }, []);
 
+  // Auto-select lecture if lectureId is present in query string
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const lectureId = searchParams.get('lectureId');
+    if (lectureId) {
+      fetchLecture(lectureId);
+    }
+  }, [location.search, lectures.length]);
+
   //css for comment and desc
   const infoRef = useRef(null);
   const commentRef = useRef(null);
@@ -221,6 +237,52 @@ const Lecture = ({ user }) => {
     window.removeEventListener("resize", setWidth);
   };
 }, []);
+
+
+  // Helper to log watch time
+  const logWatchTime = async (durationMinutes) => {
+    if (!lecture?._id || !params.id || user?.role === "admin" || durationMinutes <= 0) return;
+    try {
+      await axios.post(`${server}/api/user/log-lecture-watch`, {
+        lectureId: lecture._id,
+        courseId: params.id,
+        duration: durationMinutes
+      }, {
+        headers: { token: localStorage.getItem("token") }
+      });
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
+
+  // Start timer when lecture changes
+  useEffect(() => {
+    if (!lecture?._id || user?.role === "admin") return;
+    // If switching lectures, log previous watch time
+    if (lastLectureIdRef.current && lastLectureIdRef.current !== lecture._id) {
+      const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+      logWatchTime(elapsed);
+    }
+    watchStartRef.current = Date.now();
+    lastLectureIdRef.current = lecture._id;
+    // Reset duration
+    watchDurationRef.current = 0;
+    return () => {
+      // On unmount, log time for current lecture
+      if (watchStartRef.current && lastLectureIdRef.current === lecture._id) {
+        const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+        logWatchTime(elapsed);
+      }
+    };
+  }, [lecture?._id]);
+
+  // On video end, log time and reset timer
+  const handleVideoEnded = () => {
+    if (!watchStartRef.current) return;
+    const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+    logWatchTime(elapsed);
+    watchStartRef.current = Date.now(); // reset for possible replay
+  };
 
   // Fetch lectures and quizzes, merge and sort by order
   useEffect(() => {
@@ -493,15 +555,22 @@ const Lecture = ({ user }) => {
               </div>
             )
           ) : null}
-          {/* Admin Add Lecture Button */}
+          {/* Admin Add Lecture and Create Quiz Buttons */}
           {user && (user.role === 'admin' || user.role === 'instructor') && (
-            <button
-              className="common-btn"
-              style={{ margin: "0 auto 16px auto", display: "block" }}
-              onClick={() => setShow(!show)}
-            >
-              {show ? "Close" : "Add Lecture +"}
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
+              <button
+                className="common-btn"
+                onClick={() => setShow(!show)}
+              >
+                {show ? "Close" : "Add Lecture +"}
+              </button>
+              <button
+                className="common-btn"
+                onClick={() => setShowCreateQuiz(true)}
+              >
+                Create Quiz +
+              </button>
+            </div>
           )}
           {/* Admin Add Lecture Form */}
           {show && user && (user.role === 'admin' || user.role === 'instructor') && (
@@ -532,7 +601,7 @@ const Lecture = ({ user }) => {
                 disablePictureInPicture
                 disableRemotePlayback
                 autoPlay
-                onEnded={() => addProgress(lecture._id)}
+                onEnded={handleVideoEnded}
                 style={{
                   borderRadius: "16px",
                   marginBottom: "1.5rem",
@@ -649,6 +718,15 @@ const Lecture = ({ user }) => {
               <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                 <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowEditQuiz(false)}>×</button>
                 <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ fetchContent(); }} />
+              </div>
+            </div>
+          )}
+          {/* Create Quiz Modal */}
+          {showCreateQuiz && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowCreateQuiz(false)}>×</button>
+                <AddQuiz courseId={params.id} onSuccess={() => { setShowCreateQuiz(false); /* refresh content list if needed */ }} />
               </div>
             </div>
           )}

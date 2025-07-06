@@ -1,6 +1,7 @@
 import Quiz from '../models/Quiz.js';
 import { Courses } from '../models/Courses.js';
 import { Progress } from '../models/Progress.js';
+import { UserActivity } from '../models/UserActivity.js';
 
 // Create Quiz with title, support for single/multiple correct MCQs
 export const createQuiz = async (req, res) => {
@@ -93,6 +94,18 @@ export const submitQuiz = async (req, res) => {
       // If score drops below 75% on a later attempt, do NOT remove from completedQuizzes (keeps best attempt logic)
       await progress.save();
     }
+
+    // Record user activity for quiz
+    await UserActivity.create({
+      user: userId,
+      activityType: "quiz",
+      title: `Completed quiz: ${quiz.title}`,
+      course: courseId,
+      courseName: (await Courses.findById(courseId))?.title || "Unknown Course",
+      points: percent >= 0.75 ? 10 : 0,
+      metadata: { score, total: quiz.questions.length, percent: Math.round(percent * 100) },
+      quiz: quiz._id
+    });
 
     res.status(200).json({ score, total: quiz.questions.length });
   } catch (error) {

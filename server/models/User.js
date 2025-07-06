@@ -16,7 +16,7 @@ const schema=new mongoose.Schema({
     role:{
         type:String,
         default:"user",
-        enum: ["user", "admin", "superadmin"],
+        enum: ["user", "admin", "superadmin", "instructor"],
     },
     roles: { type: [String], default: [] }, 
     subscription:[{
@@ -26,6 +26,20 @@ const schema=new mongoose.Schema({
     totalPoints: {
         type: Number,
         default: 0,
+    },
+    studyGoals: {
+        dailyGoal: {
+            type: Number,
+            default: 30
+        },
+        weeklyGoal: {
+            type: Number,
+            default: 5
+        },
+        monthlyGoal: {
+            type: Number,
+            default: 2
+        }
     }
 },{
     timestamps:true,

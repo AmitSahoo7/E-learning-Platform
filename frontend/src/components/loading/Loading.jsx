@@ -1,10 +1,11 @@
 import React from "react";
 import "./loading.css";
 
-const Loading = () => {
+const Loading = ({ message = "Loading..." }) => {
   return (
-    <div className="loading-page">
-      <div className="loader"></div>
+    <div className="loading-container">
+      <div className="loading-spinner"></div>
+      <p className="loading-text">{message}</p>
     </div>
   );
 };

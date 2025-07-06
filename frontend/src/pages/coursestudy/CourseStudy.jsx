@@ -146,7 +146,7 @@ const CourseStudy = ({ user }) => {
       setLoadingContent(true);
       try {
         const [lecturesRes, quizzesRes] = await Promise.all([
-          axios.get(`${server}/api/course/${course._id}/lectures`, { headers: { token: localStorage.getItem('token') } }),
+          axios.get(`${server}/api/lectures/${course._id}`, { headers: { token: localStorage.getItem('token') } }),
           axios.get(`${server}/api/quiz/${course._id}`, { headers: { token: localStorage.getItem('token') } })
         ]);
         const lectures = Array.isArray(lecturesRes.data) ? lecturesRes.data : lecturesRes.data.lectures || [];
@@ -403,7 +403,7 @@ const CourseStudy = ({ user }) => {
                 onClick={() => navigate(`/lectures/${course._id}`)}
                 disabled={enrolling}
               >
-                Lectures
+                Start Learning
               </button>
             ) : (
               <button
@@ -484,7 +484,21 @@ const CourseStudy = ({ user }) => {
             </DndContext>
           ) : (
             contentList.map(item => (
-              <div key={item.id} style={{ border: '1px solid #eee', borderRadius: 8, margin: '8px 0', background: '#fff', padding: 16 }}>
+              <div
+                key={item.id}
+                style={{
+                  border: '1px solid #eee',
+                  borderRadius: 8,
+                  margin: '8px 0',
+                  background: '#fff',
+                  padding: 16,
+                  cursor: item.type === 'lecture' || item.type === 'quiz' ? 'pointer' : 'default'
+                }}
+                onClick={() => {
+                  if (item.type === 'lecture') navigate(`/lectures/${course._id}?lectureId=${item.id}`);
+                  else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
+                }}
+              >
                 {item.type === 'lecture' ? (
                   <span>Lecture: {item.title}</span>
                 ) : (
