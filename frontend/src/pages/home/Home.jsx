@@ -81,8 +81,8 @@ const Home = () => {
               In a coaching role, you ask the questions and rely more on your staff, who become the experts, to provide the information.
             </p>
             <div className="hero-cta-row-modern">
-              <button className="cta-btn cta-student">Join as Student</button>
-              <button className="cta-btn cta-instructor">Join as Instructor</button>
+              <button className="cta-btn cta-student" onClick={() => navigate('/register')}>Join as Student</button>
+              <button className="cta-btn cta-instructor" onClick={() => navigate('/register-instructor')}>Join as Instructor</button>
             </div>
             <div className="hero-trusted-row">
               <span className="hero-trusted-text">Trusted by <b>1,000+</b> learners</span>

@@ -5,7 +5,7 @@ import sendMail, { sendForgotMail } from "../middlewares/sendMail.js";
 import TryCatch from "../middlewares/TryCatch.js";
 
 export const register = TryCatch(async (req, res) => {
-  const { email, name, password } = req.body;
+  const { email, name, password, role } = req.body;
 
   let user = await User.findOne({ email });
 
@@ -20,6 +20,7 @@ export const register = TryCatch(async (req, res) => {
     name,
     email,
     password: hashPassword,
+    role: role || 'user',
   };
 
   const otp = Math.floor(Math.random() * 1000000);
@@ -67,6 +68,7 @@ export const verifyUser = TryCatch(async (req, res) => {
     name: verify.user.name,
     email: verify.user.email,
     password: verify.user.password,
+    role: verify.user.role || 'user',
   });
 
   res.json({
