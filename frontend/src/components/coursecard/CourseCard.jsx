@@ -96,24 +96,42 @@ const CourseCard = ({ course, hideDescription = false }) => {
           </button>
         </div>
       ) : (
-        <button
-          onClick={() => {
-            if (user) {
-              if (Array.isArray(user?.subscription) && user.subscription.includes(course._id)) {
-                navigate(`/course/study/${course._id}`);
-              } else {
-                navigate(`/course/${course._id}`);
-              }
-            } else {
-              navigate("/login");
-            }
-          }}
-          className="common-btn-new"
-        >
-          {Array.isArray(user?.subscription) && user.subscription.includes(course._id)
-            ? "Study Now"
-            : "Get Started"}
-        </button>
+        (() => {
+          const isEnrolled = user && Array.isArray(user?.subscription) && user.subscription.includes(course._id);
+          const isCourseInstructor = user && (
+            user.role === 'admin' ||
+            user.role === 'superadmin' ||
+            (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
+          );
+          return (
+            <button
+              onClick={() => {
+                if (user) {
+                  if (isEnrolled || isCourseInstructor) {
+                    if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
+                      navigate(`/course/study/${course._id}`);
+                    } else {
+                      toast.error("Invalid course ID");
+                    }
+                  } else {
+                    if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
+                      navigate(`/course/${course._id}`);
+                    } else {
+                      toast.error("Invalid course ID");
+                    }
+                  }
+                } else {
+                  navigate("/login");
+                }
+              }}
+              className="common-btn-new"
+            >
+              {(isEnrolled || isCourseInstructor)
+                ? "Study Now"
+                : "Get Started"}
+            </button>
+          );
+        })()
       )}
     </div>
   );

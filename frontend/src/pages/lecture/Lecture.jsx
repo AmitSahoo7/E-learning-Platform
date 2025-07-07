@@ -46,11 +46,21 @@ const Lecture = ({ user }) => {
   const location = useLocation();
 
   useEffect(() => {
-    if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
-
+    // Allow access for admins, superadmins, assigned instructors, or enrolled students
+    const isCourseInstructor = user && (
+      user.role === 'admin' ||
+      user.role === 'superadmin' ||
+      (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
+    );
+    if (
+      user &&
+      !isCourseInstructor &&
+      Array.isArray(user.subscription) &&
+      !user.subscription.includes(params.id)
+    ) {
       navigate("/");
     }
-  }, [user, params.id, navigate]);
+  }, [user, params.id, navigate, course]);
 
   async function fetchLectures() {
     try {

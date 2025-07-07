@@ -22,7 +22,8 @@ export const createCourse = TryCatch(async (req, res) => {
     whatYouLearn,
     courseOutcomes,
     instructorName,
-    instructorBio
+    instructorBio,
+    instructors
   } = req.body;
 
   const image = req.files?.image?.[0] || req.file;
@@ -48,6 +49,13 @@ export const createCourse = TryCatch(async (req, res) => {
     instructorBio,
     instructorAvatar: instructorAvatar?.path,
     previewVideo: previewVideo?.path,
+    instructors: instructors
+      ? Array.isArray(instructors)
+        ? instructors
+        : typeof instructors === 'string' && instructors.length > 0
+          ? instructors.split(',').map(s => s.trim()).filter(Boolean)
+          : []
+      : [],
   });
 
   // Auto-enroll the creator as a student in their own course
@@ -265,7 +273,6 @@ export const getFeedbacks = TryCatch(async (req, res) => {
   res.json({ feedbacks });
 });
 
-
 export const updateCourse = TryCatch(async (req, res) => {
   const course = await Courses.findById(req.params.id);
   if (!course) return res.status(404).json({ message: "Course not found" });
@@ -285,6 +292,17 @@ export const updateCourse = TryCatch(async (req, res) => {
   if (req.files?.pdf?.[0]) course.pdf = req.files.pdf[0].path;
   if (req.files?.instructorAvatar?.[0]) course.instructorAvatar = req.files.instructorAvatar[0].path;
   if (req.files?.previewVideo?.[0]) course.previewVideo = req.files.previewVideo[0].path;
+
+  // Update instructors if provided
+  if (req.body.instructors !== undefined) {
+    if (Array.isArray(req.body.instructors)) {
+      course.instructors = req.body.instructors;
+    } else if (typeof req.body.instructors === 'string' && req.body.instructors.length > 0) {
+      course.instructors = req.body.instructors.split(',').map(s => s.trim()).filter(Boolean);
+    } else {
+      course.instructors = [];
+    }
+  }
 
   await course.save();
   res.json({ message: "Course updated successfully", course });
@@ -316,9 +334,6 @@ export const getAnnouncements = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-
-
 
 //Adding comment part over here
 import { Comment } from "../models/Comment.js";

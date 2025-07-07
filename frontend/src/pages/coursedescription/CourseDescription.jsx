@@ -87,6 +87,12 @@ const CourseDescription = ({ user }) => {
 
   // Button logic
   const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
+  // Add isCourseInstructor: true if user is admin, superadmin, or their _id is in course.instructors (compare as strings)
+  const isCourseInstructor = user && (
+    user.role === 'admin' ||
+    user.role === 'superadmin' ||
+    (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
+  );
 
   return (
     <>
@@ -111,7 +117,9 @@ const CourseDescription = ({ user }) => {
                   className="cd-btn-primary"
                   onClick={() =>
                     isEnrolled
-                      ? navigate(`/course/study/${course._id}`)
+                      ? (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)
+                          ? navigate(`/course/study/${course._id}`)
+                          : toast.error("Invalid course ID"))
                       : checkoutHandler()
                   }
                   disabled={enrolling}
@@ -185,21 +193,21 @@ const CourseDescription = ({ user }) => {
                       <span className="cd-info-value">{course.difficulty}</span>
                     </div>
                   )}
-                  {!isEnrolled && (
+                  {/* Show Lectures button for enrolled users or course instructors/admins, else show Enroll */}
+                  {(isEnrolled || isCourseInstructor) ? (
+                    <button
+                      className="cd-btn-primary cd-enroll-btn"
+                      onClick={() => navigate(`/course/study/${course._id}`)}
+                    >
+                      Lectures
+                    </button>
+                  ) : (
                     <button
                       className="cd-btn-primary cd-enroll-btn"
                       onClick={checkoutHandler}
                       disabled={enrolling}
                     >
                       {enrolling ? "Processing..." : "Enroll"}
-                    </button>
-                  )}
-                  {isEnrolled && (
-                    <button
-                      className="cd-btn-primary cd-enroll-btn"
-                      onClick={() => navigate(`/course/study/${course._id}`)}
-                    >
-                      Lectures
                     </button>
                   )}
                   {/* Preview Video */}
