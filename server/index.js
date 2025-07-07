@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { connectDb } from "./database/db.js";
 import Razorpay from 'razorpay';
 import cors from 'cors';
+import webinarRoutes from './routes/webinarRoutes.js';
 
 //
 
@@ -40,15 +41,18 @@ import rewardRoutes from "./routes/reward.js";
 import assessmentRoutes from './routes/assessment.js';
 import finalAssessmentRoutes from './routes/finalAssessment.js';
 //using routes
-app.use('/api',userRoutes);
 app.use('/api/quiz', quizRoutes);
-
-app.use("/api", courseRoutes);
+app.use('/api',userRoutes);
+app.use('/api', courseRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/reward", rewardRoutes);
+
 app.use('/api', assessmentRoutes);
 app.use('/api', finalAssessmentRoutes);
+
+app.use('/api/webinar', webinarRoutes);
+
 
 app.listen(port, ()=>{
     console.log(`Server is running on http://localhost:${port}`);

@@ -2,6 +2,7 @@ import express from 'express';
 import { createQuiz, getQuizzesByCourse, submitQuiz } from '../controllers/quizController.js';
 import { isAuth, isInstructorOrAdmin } from '../middlewares/isAuth.js';
 import Quiz from '../models/Quiz.js';
+import { Progress } from '../models/Progress.js';
 
 const router = express.Router();
 
@@ -30,6 +31,11 @@ router.delete("/:quizId/question/:questionIndex", async (req, res) => {
 router.delete('/:quizId', isAuth, isInstructorOrAdmin, async (req, res) => {
   try {
     const quizId = req.params.quizId;
+    // Remove this quiz from all users' progress.completedQuizzes and quizScores
+    await Progress.updateMany(
+      { completedQuizzes: quizId },
+      { $pull: { completedQuizzes: quizId, quizScores: { quiz: quizId } } }
+    );
     await Quiz.findByIdAndDelete(quizId);
     res.json({ message: 'Quiz deleted successfully' });
   } catch (error) {
@@ -48,6 +54,17 @@ router.put('/:quizId', isAuth, isInstructorOrAdmin, async (req, res) => {
       { new: true }
     );
     res.json({ message: 'Quiz updated successfully', quiz: updatedQuiz });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Add route to fetch a single quiz by its ID
+router.get('/single/:quizId', isAuth, async (req, res) => {
+  try {
+    const quiz = await Quiz.findById(req.params.quizId);
+    if (!quiz) return res.status(404).json({ message: 'Quiz not found' });
+    res.json(quiz);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

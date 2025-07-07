@@ -14,10 +14,15 @@
   bottom: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+
+
 }
+
 .modal-content {
-  background: #fff;
+  background: #181c28;
+  color: #fff;
   border-radius: 1.2rem;
+
   box-shadow: 0 4px 24px #8a4baf22;
   padding: 32px 24px 24px 24px;
   min-width: 320px;
@@ -28,7 +33,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+
 }
+
 .modal-close-btn {
   position: absolute;
   top: 16px;
@@ -47,13 +54,15 @@
   justify-content: center;
   transition: background 0.18s;
 }
+
 .modal-close-btn:hover {
   background: #8a4baf;
 }
+
 @media (max-width: 600px) {
   .modal-content {
-    min-width: 90vw;
-    padding: 1rem 0.5rem 1.2rem 0.5rem;
+    max-width: 95vw;
+    padding: 1.2rem 0.5rem;
   }
   .modal-close-btn {
     top: 0.5rem;

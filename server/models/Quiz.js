@@ -11,6 +11,7 @@ const quizSchema = new mongoose.Schema({
   courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course", required: true },
   title: { type: String, required: true }, // new field
   questions: [questionSchema],
+  order: { type: Number, default: 0 },
 });
 
 export default mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./lecture.css";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import Loading from "../../components/loading/Loading";
@@ -9,6 +9,10 @@ import { MdOutlineDone } from "react-icons/md";
 import { CourseData } from "../../context/CourseContext";
 import LectureCommentSection from "../../components/comment/LectureCommentSection";
 import { useRef } from "react";
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import AddQuiz from '../../admin/Courses/AddQuiz.jsx';
 
 // Adjust path
 
@@ -27,8 +31,19 @@ const Lecture = ({ user }) => {
   const [btnLoading, setBtnLoading] = useState(false);
   const [pdf, setPdf] = useState("");
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [contentList, setContentList] = useState([]);
+  const [loadingContent, setLoadingContent] = useState(true);
+  const [showEditQuiz, setShowEditQuiz] = useState(false);
+  const [editQuizId, setEditQuizId] = useState(null);
+  const [showCreateQuiz, setShowCreateQuiz] = useState(false);
 
   const { fetchCourse, course } = CourseData();
+
+  const watchStartRef = useRef(null);
+  const watchDurationRef = useRef(0);
+  const lastLectureIdRef = useRef(null);
+
+  const location = useLocation();
 
   useEffect(() => {
     if (user && user.role !== "admin" && Array.isArray(user.subscription) && !user.subscription.includes(params.id)) {
@@ -145,12 +160,16 @@ const Lecture = ({ user }) => {
           },
         }
       );
-
-      setCompleted(data.courseProgressPercentage);
-      setCompletedLec(data.completedLectures);
-      setLectLength(data.allLectures);
-      setProgress(data.progress);
+      setCompleted(data.courseProgressPercentage || 0);
+      setCompletedLec(data.completedLectures || 0);
+      setLectLength(data.allLectures || 0);
+      setProgress(data.progress || []);
     } catch (error) {
+      // If 404 or error, set all to 0/defaults
+      setCompleted(0);
+      setCompletedLec(0);
+      setLectLength(0);
+      setProgress([]);
       console.log(error);
     }
   }
@@ -187,6 +206,15 @@ const Lecture = ({ user }) => {
     fetchCourse(params.id);
   }, []);
 
+  // Auto-select lecture if lectureId is present in query string
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const lectureId = searchParams.get('lectureId');
+    if (lectureId) {
+      fetchLecture(lectureId);
+    }
+  }, [location.search, lectures.length]);
+
   //css for comment and desc
   const infoRef = useRef(null);
   const commentRef = useRef(null);
@@ -209,6 +237,197 @@ const Lecture = ({ user }) => {
     window.removeEventListener("resize", setWidth);
   };
 }, []);
+
+
+  // Helper to log watch time
+  const logWatchTime = async (durationMinutes) => {
+    if (!lecture?._id || !params.id || user?.role === "admin" || durationMinutes <= 0) return;
+    try {
+      await axios.post(`${server}/api/user/log-lecture-watch`, {
+        lectureId: lecture._id,
+        courseId: params.id,
+        duration: durationMinutes
+      }, {
+        headers: { token: localStorage.getItem("token") }
+      });
+    } catch (err) {
+      // Optionally handle error
+    }
+  };
+
+  // Start timer when lecture changes
+  useEffect(() => {
+    if (!lecture?._id || user?.role === "admin") return;
+    // If switching lectures, log previous watch time
+    if (lastLectureIdRef.current && lastLectureIdRef.current !== lecture._id) {
+      const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+      logWatchTime(elapsed);
+    }
+    watchStartRef.current = Date.now();
+    lastLectureIdRef.current = lecture._id;
+    // Reset duration
+    watchDurationRef.current = 0;
+    return () => {
+      // On unmount, log time for current lecture
+      if (watchStartRef.current && lastLectureIdRef.current === lecture._id) {
+        const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+        logWatchTime(elapsed);
+      }
+    };
+  }, [lecture?._id]);
+
+  // On video end, log time and reset timer
+  const handleVideoEnded = () => {
+    if (!watchStartRef.current) return;
+    const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
+    logWatchTime(elapsed);
+    watchStartRef.current = Date.now(); // reset for possible replay
+  };
+
+  // Fetch lectures and quizzes, merge and sort by order
+  useEffect(() => {
+    const fetchContent = async () => {
+      setLoadingContent(true);
+      try {
+        const [lecturesRes, quizzesRes] = await Promise.all([
+          axios.get(`${server}/api/lectures/${params.id}`, { headers: { token: localStorage.getItem('token') } }),
+          axios.get(`${server}/api/quiz/${params.id}`, { headers: { token: localStorage.getItem('token') } })
+        ]);
+        const lectures = Array.isArray(lecturesRes.data.lectures) ? lecturesRes.data.lectures : [];
+        const quizzes = Array.isArray(quizzesRes.data) ? quizzesRes.data : [];
+        const merged = [
+          ...lectures.map(l => ({ ...l, type: 'lecture', id: l._id })),
+          ...quizzes.map(q => ({ ...q, type: 'quiz', id: q._id }))
+        ];
+        merged.sort((a, b) => (a.order || 0) - (b.order || 0));
+        console.log('Merged contentList (order):', merged.map(item => ({ type: item.type, title: item.title, order: item.order })));
+        setContentList(merged);
+      } catch (err) {
+        // Do not clear contentList on error; just log the error
+        console.error('Failed to fetch lectures/quizzes:', err);
+      }
+      setLoadingContent(false);
+    };
+    fetchContent();
+  }, [params.id]);
+
+  // Helper to get best score for a quiz
+  const getBestQuizScore = (quizId) => {
+    if (!progress[0] || !Array.isArray(progress[0].quizScores)) return null;
+    const found = progress[0].quizScores.find(q => q.quiz === quizId || q.quiz?._id === quizId);
+    return found ? found.bestScore : null;
+  };
+
+  function DraggableItem({ item, isDraggable }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+    return (
+      <div style={{ background: '#f4f4fb', borderRadius: 16, margin: '8px 0', padding: 0 }}>
+        <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, display: 'flex', alignItems: 'center', cursor: isDraggable ? 'grab' : 'pointer', padding: 16 }}>
+          {isDraggable && <span {...attributes} {...listeners} style={{ marginRight: 12, fontWeight: 700, cursor: 'grab' }}>≡</span>}
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            {item.type === 'lecture' ? (
+              <>
+                <span style={{ fontSize: 20, marginRight: 8 }}>🎬</span>
+                <span style={{ fontWeight: 500 }}>{item.title}</span>
+              </>
+            ) : (
+              <>
+                <span style={{ fontSize: 20, marginRight: 8 }}>📝</span>
+                <span style={{ color: '#007aff', fontWeight: 600, marginRight: 8 }}>{item.title}</span>
+                {typeof getBestQuizScore(item.id) === 'number' && (
+                  <span style={{ color: '#34c759', fontWeight: 700, fontSize: 14 }}>
+                    (Best: {getBestQuizScore(item.id)})
+                  </span>
+                )}
+                {isInstructor && (
+                  <>
+                    <button
+                      style={{ marginLeft: 10, background: '#007aff', color: 'white', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 13 }}
+                      onClick={e => { e.stopPropagation(); handleEditQuiz(item.id); }}
+                      title="Edit Quiz"
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      style={{ marginLeft: 6, background: '#ff3b30', color: 'white', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 13 }}
+                      onClick={e => { e.stopPropagation(); handleDeleteQuiz(item.id); }}
+                      title="Delete Quiz"
+                    >
+                      🗑️ Delete
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const isInstructor = user && (user.role === 'admin' || user.role === 'superadmin' || user.role === 'instructor');
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = contentList.findIndex(i => i.id === active.id);
+    const newIndex = contentList.findIndex(i => i.id === over.id);
+    const newList = arrayMove(contentList, oldIndex, newIndex);
+    setContentList(newList);
+    // Prepare payload for backend
+    const items = newList.map((item, idx) => ({ type: item.type, id: item.id, order: idx + 1 }));
+    try {
+      await axios.post(`${server}/api/course/update-content-order`, { courseId: params.id, items }, { headers: { token: localStorage.getItem('token') } });
+      // Refetch the latest order from backend
+      const [lecturesRes, quizzesRes] = await Promise.all([
+        axios.get(`${server}/api/lectures/${params.id}`, { headers: { token: localStorage.getItem('token') } }),
+        axios.get(`${server}/api/quiz/${params.id}`, { headers: { token: localStorage.getItem('token') } })
+      ]);
+      const lectures = Array.isArray(lecturesRes.data.lectures) ? lecturesRes.data.lectures : [];
+      const quizzes = Array.isArray(quizzesRes.data) ? quizzesRes.data : [];
+      const merged = [
+        ...lectures.map(l => ({ ...l, type: 'lecture', id: l._id })),
+        ...quizzes.map(q => ({ ...q, type: 'quiz', id: q._id }))
+      ];
+      merged.sort((a, b) => (a.order || 0) - (b.order || 0));
+      setContentList(merged);
+    } catch {}
+  };
+
+  // Add handlers for edit and delete quiz
+  const handleEditQuiz = (quizId) => {
+    setEditQuizId(quizId);
+    setShowEditQuiz(true);
+  };
+  const handleDeleteQuiz = async (quizId) => {
+    if (window.confirm('Are you sure you want to delete this quiz?')) {
+      try {
+        await axios.delete(`${server}/api/quiz/${quizId}`, {
+          headers: { token: localStorage.getItem('token') },
+        });
+        // Only refresh content list if delete succeeds
+        const [lecturesRes, quizzesRes] = await Promise.all([
+          axios.get(`${server}/api/lectures/${params.id}`, { headers: { token: localStorage.getItem('token') } }),
+          axios.get(`${server}/api/quiz/${params.id}`, { headers: { token: localStorage.getItem('token') } })
+        ]);
+        const lectures = Array.isArray(lecturesRes.data.lectures) ? lecturesRes.data.lectures : [];
+        const quizzes = Array.isArray(quizzesRes.data) ? quizzesRes.data : [];
+        const merged = [
+          ...lectures.map(l => ({ ...l, type: 'lecture', id: l._id })),
+          ...quizzes.map(q => ({ ...q, type: 'quiz', id: q._id }))
+        ];
+        merged.sort((a, b) => (a.order || 0) - (b.order || 0));
+        setContentList(merged);
+      } catch (err) {
+        // Show a toast notification instead of alert, and do not clear content
+        if (window && window.toast) {
+          window.toast.error('Failed to delete quiz');
+        } else {
+          alert('Failed to delete quiz');
+        }
+      }
+    }
+  };
 
   return (
     <>
@@ -311,7 +530,7 @@ const Lecture = ({ user }) => {
                     textAlign: "center",
                   }}
                 >
-                  Course Progress - {completedLec} out of {lectLength}
+                  Course Progress - {completedLec || 0} out of {lectLength || 0}
                 </div>
                 <div
                   className="lecture-progress-bar-track"
@@ -336,18 +555,25 @@ const Lecture = ({ user }) => {
               </div>
             )
           ) : null}
-          {/* Admin Add Lecture Button */}
-          {user && user.role === "admin" && (
-            <button
-              className="common-btn"
-              style={{ margin: "0 auto 16px auto", display: "block" }}
-              onClick={() => setShow(!show)}
-            >
-              {show ? "Close" : "Add Lecture +"}
-            </button>
+          {/* Admin Add Lecture and Create Quiz Buttons */}
+          {user && (user.role === 'admin' || user.role === 'instructor') && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
+              <button
+                className="common-btn"
+                onClick={() => setShow(!show)}
+              >
+                {show ? "Close" : "Add Lecture +"}
+              </button>
+              <button
+                className="common-btn"
+                onClick={() => setShowCreateQuiz(true)}
+              >
+                Create Quiz +
+              </button>
+            </div>
           )}
           {/* Admin Add Lecture Form */}
-          {show && user && user.role === "admin" && (
+          {show && user && (user.role === 'admin' || user.role === 'instructor') && (
             <div className="lecture-form-box">
               <div className="lecture-form">
                 <form onSubmit={submitHandler}>
@@ -375,7 +601,7 @@ const Lecture = ({ user }) => {
                 disablePictureInPicture
                 disableRemotePlayback
                 autoPlay
-                onEnded={() => addProgress(lecture._id)}
+                onEnded={handleVideoEnded}
                 style={{
                   borderRadius: "16px",
                   marginBottom: "1.5rem",
@@ -415,72 +641,62 @@ const Lecture = ({ user }) => {
             )}
 
             <div className="lecture-list-vertical-scroll">
-              {lectures && lectures.length > 0 ? (
-                lectures.map((e, i) => (
-                  <div
-                    key={e._id}
-                    style={{ position: "relative", display: "inline-block" }}
-                  >
-                    <button
-                      className={`lecture-list-btn-modern${
-                        lecture._id === e._id ? " active" : ""
-                      }`}
-                      onClick={() => fetchLecture(e._id)}
+              {loadingContent ? (
+                <div>Loading content...</div>
+              ) : isInstructor ? (
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                    {contentList.map((item, i) => (
+                      <div key={item.id} style={{ position: 'relative', display: 'inline-block' }}>
+                        <div
+                          className={`lecture-list-btn-modern${lecture._id === item.id ? ' active' : ''}`}
+                          onClick={() => item.type === 'lecture' ? fetchLecture(item.id) : navigate(`/quiz/${item.id}`)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {i + 1}. <DraggableItem item={item} isDraggable={true} />
+                          {item.type === 'lecture' && item.video && (
+                            <span style={{ marginLeft: 10, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#155724', fontWeight: 700, fontSize: 13, borderRadius: 8, padding: '2px 10px', boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)', verticalAlign: 'middle', display: 'inline-block', letterSpacing: 0.5, marginTop: -2 }}>
+                              +1 point
+                            </span>
+                          )}
+                          {item.type === 'lecture' && progress[0] && progress[0].completedLectures.includes(item.id) && (
+                            <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
+                          )}
+                        </div>
+                        {isInstructor && (user.role === 'admin' || user.role === 'instructor') && item.type === 'lecture' && (
+                          <button
+                            className="delete-lecture-btn"
+                            style={{ position: 'absolute', top: 6, right: 6, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontWeight: 700, fontSize: 14, zIndex: 2 }}
+                            onClick={() => deleteHandler(item.id)}
+                            title={`Delete ${item.title}`}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              ) : (
+                contentList.map((item, i) => (
+                  <div key={item.id} style={{ position: 'relative', display: 'inline-block' }}>
+                    <div
+                      className={`lecture-list-btn-modern${lecture._id === item.id ? ' active' : ''}`}
+                      onClick={() => item.type === 'lecture' ? fetchLecture(item.id) : navigate(`/quiz/${item.id}`)}
+                      style={{ cursor: 'pointer' }}
                     >
-                      {i + 1}. {e.title}
-
-                      {/* +1 point badge for video lectures only */}
-                      {e.video && (
-                        <span style={{
-                          marginLeft: 10,
-                          background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)',
-                          color: '#155724',
-                          fontWeight: 700,
-                          fontSize: 13,
-                          borderRadius: 8,
-                          padding: '2px 10px',
-                          boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)',
-                          verticalAlign: 'middle',
-                          display: 'inline-block',
-                          letterSpacing: 0.5,
-                          marginTop: -2
-                        }}>
+                      {i + 1}. {item.type === 'lecture' ? <span>🎬 {item.title}</span> : <span style={{ color: '#007aff', fontWeight: 600 }}>📝 Quiz: {item.title}{typeof getBestQuizScore(item.id) === 'number' && (<span style={{ marginLeft: 8, color: '#34c759', fontWeight: 700, fontSize: 14 }}>(Best: {getBestQuizScore(item.id)})</span>)}</span>}
+                      {item.type === 'lecture' && item.video && (
+                        <span style={{ marginLeft: 10, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#155724', fontWeight: 700, fontSize: 13, borderRadius: 8, padding: '2px 10px', boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)', verticalAlign: 'middle', display: 'inline-block', letterSpacing: 0.5, marginTop: -2 }}>
                           +1 point
                         </span>
                       )}
-                      {progress[0] && progress[0].completedLectures.includes(e._id) && (
+                      {item.type === 'lecture' && progress[0] && progress[0].completedLectures.includes(item.id) && (
                         <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
                       )}
-
-                    </button>
-                    {user && user.role === "admin" && (
-                      <button
-                        className="delete-lecture-btn"
-                        style={{
-                          position: "absolute",
-                          top: 6,
-                          right: 6,
-                          background: "red",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "50%",
-                          width: 24,
-                          height: 24,
-                          cursor: "pointer",
-                          fontWeight: 700,
-                          fontSize: 14,
-                          zIndex: 2,
-                        }}
-                        onClick={() => deleteHandler(e._id)}
-                        title={`Delete ${e.title}`}
-                      >
-                        ×
-                      </button>
-                    )}
+                    </div>
                   </div>
                 ))
-              ) : (
-                <p>No Lectures Yet!</p>
               )}
             </div>
 
@@ -497,6 +713,23 @@ const Lecture = ({ user }) => {
               </div>
             )}
           </div>
+          {showEditQuiz && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowEditQuiz(false)}>×</button>
+                <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ fetchContent(); }} />
+              </div>
+            </div>
+          )}
+          {/* Create Quiz Modal */}
+          {showCreateQuiz && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowCreateQuiz(false)}>×</button>
+                <AddQuiz courseId={params.id} onSuccess={() => { setShowCreateQuiz(false); /* refresh content list if needed */ }} />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

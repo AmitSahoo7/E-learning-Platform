@@ -27,24 +27,23 @@ import AdminFinalAssessmentPage from './admin/Courses/AdminFinalAssessmentPage';
 import AssessmentAttemptsViewer from './admin/Courses/AssessmentAttemptsViewer';
 import CertificateGenerator from './components/certificate/CertificateGenerator';
 import FinalAssessment from './components/finalassessment/FinalAssessment';
-
 import { useNavigate, useParams } from "react-router-dom";
-
 import Leaderboard from "./pages/leaderboard/Leaderboard";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import axios from "axios";
 import { server } from "./main";
 import Events from "./pages/events";
-
+import Webinar from "./pages/webinar/Webinar";
+import AdminWebinars from "./admin/Webinar/AdminWebinars";
+import AddQuiz from './admin/Courses/AddQuiz.jsx';
+import RegisterInstructor from "./pages/auth/RegisterInstructor";
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
 
-  // Announcement state
   const [announcements, setAnnouncements] = useState([]);
   const [readAnnouncements, setReadAnnouncements] = useState([]);
 
-  // Fetch announcements from backend
   useEffect(() => {
     if (!isAuth) return;
     const fetchAnnouncements = async () => {
@@ -53,21 +52,20 @@ const App = () => {
           headers: { token: localStorage.getItem("token") },
         });
         setAnnouncements(data.announcements || []);
-      } catch (err) {
+      } catch {
         setAnnouncements([]);
       }
     };
     fetchAnnouncements();
-    // Optionally, poll every 60s for new announcements
     // const interval = setInterval(fetchAnnouncements, 60000);
     // return () => clearInterval(interval);
   }, [isAuth]);
 
-  // Mark announcement as read (local only)
   useEffect(() => {
     const read = localStorage.getItem("readAnnouncements");
     if (read) setReadAnnouncements(JSON.parse(read));
   }, []);
+
   const markAnnouncementRead = (id) => {
     if (!readAnnouncements.includes(id)) {
       const updated = [id, ...readAnnouncements];
@@ -76,7 +74,6 @@ const App = () => {
     }
   };
 
-  // Add announcement (admin only)
   const addAnnouncement = async (msg) => {
     if (!user || user.role !== "admin") return;
     try {
@@ -85,10 +82,8 @@ const App = () => {
         { message: msg },
         { headers: { token: localStorage.getItem("token") } }
       );
-      // Prepend new announcement to state
       setAnnouncements((prev) => [data.announcement, ...prev]);
-    } catch (err) {
-      // Optionally show error
+    } catch {
       // alert("Failed to send announcement");
     }
   };
@@ -136,8 +131,16 @@ const App = () => {
               element={isAuth ? <CourseStudy user={user} /> : <Login />}
             />
             <Route
-              path="/quiz/:courseId"
+              path="/quiz/course/:courseId"
               element={isAuth ? <Quiz user={user} /> : <Login />}
+            />
+            <Route
+              path="/quiz/:quizId"
+              element={isAuth ? <Quiz user={user} /> : <Login />}
+            />
+            <Route
+              path="/quiz/create/:courseId"
+              element={<AddQuiz />}
             />
             <Route
               path="/course/:courseId/assessment"
@@ -202,7 +205,6 @@ const App = () => {
               element={<Leaderboard user={user} />}
             />
             <Route path="/events" element={<Events />} />
-
             <Route
               path="/instructor/dashboard"
               element={
@@ -211,6 +213,17 @@ const App = () => {
                 ) : (
                   <Home />
                 )
+              }
+            />
+            <Route
+              path="/register-instructor"
+              element={isAuth ? <Home /> : <RegisterInstructor />}
+            />
+            <Route path="/webinar" element={<Webinar />} />
+            <Route
+              path="/admin/webinars"
+              element={
+                isAuth && user.role === "admin" ? <AdminWebinars /> : <Home />
               }
             />
           </Routes>

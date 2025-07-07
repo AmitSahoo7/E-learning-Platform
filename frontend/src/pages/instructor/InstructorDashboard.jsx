@@ -147,10 +147,7 @@ const InstructorDashboard = () => {
                     View Details
                   </button>
                   <button className="instructor-btn" onClick={() => handleManageLecture(course._id)}>
-                    Manage Lecture
-                  </button>
-                  <button className="instructor-btn" onClick={() => navigate(`/quiz/${course._id}`)}>
-                    Manage Quizzes
+                    Manage Lectures/Quizzes
                   </button>
                 </div>
               </div>
