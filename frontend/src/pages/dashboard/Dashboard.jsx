@@ -55,6 +55,7 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [userRewards, setUserRewards] = useState([]);
+  const [rewardsTotalPoints, setRewardsTotalPoints] = useState(0);
   const [recommendedCourses, setRecommendedCourses] = useState([]);
   const [studyGoals, setStudyGoals] = useState({
     dailyGoal: 30, // minutes
@@ -71,6 +72,11 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDayDetails, setSelectedDayDetails] = useState([]);
   const [calendarLoading, setCalendarLoading] = useState(false);
+
+  // Calculate quiz points from userRewards
+  const quizPoints = userRewards
+    .filter(r => r.activityType === 'quiz')
+    .reduce((sum, r) => sum + (r.points || 0), 0);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -128,13 +134,15 @@ const Dashboard = () => {
 
         // Fetch user rewards/achievements
         try {
-          const rewardsRes = await axios.get(`${server}/api/user/rewards`, {
+          const rewardsRes = await axios.get(`${server}/api/reward/user/rewards`, {
             headers: { token: localStorage.getItem("token") }
           });
           setUserRewards(rewardsRes.data.rewards || []);
+          setRewardsTotalPoints(rewardsRes.data.totalPoints || 0);
         } catch (error) {
           console.log("No rewards data available");
           setUserRewards([]);
+          setRewardsTotalPoints(0);
         }
 
         // Fetch real recent activity
@@ -380,7 +388,7 @@ const Dashboard = () => {
             <FaTrophy />
           </div>
           <div className="stat-content">
-            <h3>{dashboardStats.totalPoints}</h3>
+            <h3>{rewardsTotalPoints}</h3>
             <p>Total Points</p>
           </div>
         </div>
@@ -466,7 +474,7 @@ const Dashboard = () => {
                     </div>
                     {activity.points > 0 && (
                       <div className="activity-points">
-                        +{activity.points}
+                        {activity.activityType === 'quiz' ? '+5' : `+${activity.points}`}
                       </div>
                     )}
                   </div>

@@ -2,10 +2,13 @@ import React, { useRef, useEffect, useState } from "react";
 import { MdDashboard } from "react-icons/md";
 import { IoMdLogOut } from "react-icons/io";
 import "../pages/account/account.css";
+import axios from "axios";
+import { server } from "../main";
 
 const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard }) => {
   const modalRef = useRef();
   const [dashboardType, setDashboardType] = useState("admin");
+  const [rewardsTotalPoints, setRewardsTotalPoints] = useState(null);
 
   // Support both user.role (string) and user.roles (array)
   const isAdmin = user && (user.role === "admin" || (Array.isArray(user.roles) && user.roles.includes("admin")));
@@ -32,6 +35,21 @@ const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard }) => 
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || !user) return;
+    const fetchPoints = async () => {
+      try {
+        const res = await axios.get(`${server}/api/reward/user/rewards`, {
+          headers: { token: localStorage.getItem("token") }
+        });
+        setRewardsTotalPoints(res.data.totalPoints || 0);
+      } catch {
+        setRewardsTotalPoints(user.totalPoints || 0);
+      }
+    };
+    fetchPoints();
+  }, [open, user]);
 
   if (!open) return null;
 
@@ -72,7 +90,7 @@ const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard }) => 
             <strong>{user.email}</strong>
           </p>
           <p className="profile-role">Role: <span>{user.role || (user.roles && user.roles.join(", "))}</span></p>
-          <p className="profile-points">Total Points: <span className="points-value">🏆 {user.totalPoints || 0}</span></p>
+          <p className="profile-points">Total Points: <span className="points-value">🏆 {rewardsTotalPoints !== null ? rewardsTotalPoints : (user.totalPoints || 0)}</span></p>
           {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
         </div>
         <div className="profile-actions">

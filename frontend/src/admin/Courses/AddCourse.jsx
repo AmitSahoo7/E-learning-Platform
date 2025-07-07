@@ -20,7 +20,6 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [createdBy, setCreatedBy] = useState("");
   const [duration, setDuration] = useState("");
   const [image, setImage] = useState("");
   const [imagePrev, setImagePrev] = useState("");
@@ -37,6 +36,7 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
   const [instructorAvatarPrev, setInstructorAvatarPrev] = useState("");
   const [previewVideo, setPreviewVideo] = useState("");
   const [previewVideoPrev, setPreviewVideoPrev] = useState("");
+  const [instructors, setInstructors] = useState([]);
 
   // Pre-fill form in edit mode
   useEffect(() => {
@@ -45,7 +45,6 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
       setDescription(initialData.description || "");
       setCategory(initialData.category || "");
       setPrice(initialData.price || "");
-      setCreatedBy(initialData.createdBy || "");
       setDuration(initialData.duration || "");
       setImagePrev(initialData.image ? `${server}/${initialData.image}` : "");
       setTagline(initialData.tagline || "");
@@ -59,6 +58,22 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
       setPreviewVideoPrev(initialData.previewVideo ? `${server}/${initialData.previewVideo}` : "");
     }
   }, [editMode, initialData]);
+
+  // Fetch instructors on mount
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const res = await axios.get(`${server}/api/admin/users`, {
+          headers: { token: localStorage.getItem("token") },
+        });
+        const instructorUsers = res.data.users.filter(u => u.role === "instructor");
+        setInstructors(instructorUsers);
+      } catch (err) {
+        toast.error("Failed to fetch instructors");
+      }
+    };
+    fetchInstructors();
+  }, []);
 
   const changeImageHandler = (e) => {
     const file = e.target.files[0];
@@ -95,7 +110,6 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
     myForm.append("description", description);
     myForm.append("category", category);
     myForm.append("price", price);
-    myForm.append("createdBy", createdBy);
     myForm.append("duration", duration);
     myForm.append("tagline", tagline);
     myForm.append("difficulty", difficulty);
@@ -131,7 +145,6 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
         setDescription("");
         setDuration("");
         setImagePrev("");
-        setCreatedBy("");
         setPrice("");
         setCategory("");
         setTagline("");
@@ -183,14 +196,18 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
                 onChange={(e) => setPrice(e.target.value)}
                 required
               />
-              <label>createdBy</label>
-              <input
+              <label>Instructor</label>
+              <select
                 className="cd-input"
-                type="text"
-                value={createdBy}
-                onChange={(e) => setCreatedBy(e.target.value)}
+                value={instructorName}
+                onChange={(e) => setInstructorName(e.target.value)}
                 required
-              />
+              >
+                <option value="">Select Instructor</option>
+                {instructors.map(inst => (
+                  <option value={inst.name} key={inst._id}>{inst.name} ({inst.email})</option>
+                ))}
+              </select>
               <label>Category</label>
               <select
                 className="cd-input"
@@ -260,14 +277,6 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
                 placeholder="Enter each course outcome on a new line"
                 rows={3}
               />
-              <label>Instructor Name</label>
-              <input
-                className="cd-input"
-                type="text"
-                value={instructorName}
-                onChange={(e) => setInstructorName(e.target.value)}
-                placeholder="Instructor's full name"
-              />
               <label>Instructor Bio</label>
               <textarea
                 className="cd-input"
@@ -331,14 +340,18 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
                   onChange={(e) => setPrice(e.target.value)}
                   required
                 />
-                <label>createdBy</label>
-                <input
+                <label>Instructor</label>
+                <select
                   className="cd-input"
-                  type="text"
-                  value={createdBy}
-                  onChange={(e) => setCreatedBy(e.target.value)}
+                  value={instructorName}
+                  onChange={(e) => setInstructorName(e.target.value)}
                   required
-                />
+                >
+                  <option value="">Select Instructor</option>
+                  {instructors.map(inst => (
+                    <option value={inst.name} key={inst._id}>{inst.name} ({inst.email})</option>
+                  ))}
+                </select>
                 <label>Category</label>
                 <select
                   className="cd-input"
@@ -407,14 +420,6 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
                   onChange={(e) => setCourseOutcomes(e.target.value)}
                   placeholder="Enter each course outcome on a new line"
                   rows={3}
-                />
-                <label>Instructor Name</label>
-                <input
-                  className="cd-input"
-                  type="text"
-                  value={instructorName}
-                  onChange={(e) => setInstructorName(e.target.value)}
-                  placeholder="Instructor's full name"
                 />
                 <label>Instructor Bio</label>
                 <textarea
