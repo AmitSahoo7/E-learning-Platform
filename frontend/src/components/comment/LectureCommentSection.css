@@ -81,7 +81,7 @@
 .comment-text {
   font-size: 14px;
   margin: 8px 0;
-  color: #333;
+  color: #000000 !important;
 }
 
 .comment-date {

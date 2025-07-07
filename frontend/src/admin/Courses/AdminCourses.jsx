@@ -5,11 +5,12 @@ import { CourseData } from "../../context/CourseContext";
 import CourseCard from "../../components/coursecard/CourseCard";
 import AddCourse from "./AddCourse";
 import Modal from "../../components/Modal";
-import { FaPencilAlt } from "react-icons/fa";
+import { FaPencilAlt, FaFileAlt } from "react-icons/fa";
 import "./admincourses.css";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { server } from "../../main";
+import FinalAssessmentManager from './FinalAssessmentManager';
 
 const categories = [
   "Web Development",
@@ -55,6 +56,7 @@ const AdminCourses = ({ user }) => {
 
   const { courses, fetchCourses } = CourseData();
   const [editCourse, setEditCourse] = useState(null);
+  const [assessmentCourseId, setAssessmentCourseId] = useState(null);
 
   // Custom onClose for modal: only allow close via close button
   const handleModalClose = (e) => {
@@ -152,6 +154,14 @@ const AdminCourses = ({ user }) => {
                   >
                     <FaPencilAlt size={16} />
                   </button>
+                  {/* Floating Assessment Button */}
+                  <button
+                    className="assessment-fab-btn"
+                    title="Manage Final Assessments"
+                    onClick={() => navigate(`/admin/course/${course._id}/assessments`)}
+                  >
+                    <FaFileAlt size={16} />
+                  </button>
                   <CourseCard course={course} />
                 </div>
               ))
@@ -175,6 +185,9 @@ const AdminCourses = ({ user }) => {
             }}
           />
         )}
+      </Modal>
+      <Modal isOpen={!!assessmentCourseId} onClose={() => setAssessmentCourseId(null)}>
+        {assessmentCourseId && <FinalAssessmentManager courseId={assessmentCourseId} />}
       </Modal>
     </Layout>
   );
