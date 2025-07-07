@@ -134,7 +134,7 @@
 }
 
 .stat-card {
-  background: var(--glass-bg);
+  background: #181c28 !important;
   backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
   border-radius: 1.2rem;
@@ -182,21 +182,29 @@
   box-shadow: 0 0 20px rgba(62, 207, 142, 0.3);
 }
 
-.stat-content h3 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin: 0;
+.stat-content {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.stat-number {
+  font-size: 2.2rem;
+  font-weight: 900;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: 1px;
+  line-height: 1;
 }
 
-.stat-content p {
-  margin: 0;
+.stat-label {
+  font-size: 1.1rem;
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
+  margin-left: 0.2rem;
+  line-height: 1;
 }
 
 /* Dashboard Main Layout */
@@ -319,7 +327,7 @@
 
 .progress-fill {
   height: 100%;
-  background: var(--gradient-primary);
+  background: var(--gradient-primary) !important;
   border-radius: 3px;
   transition: width 0.3s ease;
 }

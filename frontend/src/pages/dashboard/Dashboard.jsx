@@ -358,8 +358,8 @@ const Dashboard = () => {
             <BiBook />
           </div>
           <div className="stat-content">
-            <h3>{dashboardStats.totalCourses}</h3>
-            <p>Enrolled Courses</p>
+            <span className="stat-number">{dashboardStats.totalCourses}</span>
+            <span className="stat-label">Enrolled Courses</span>
           </div>
         </div>
         
@@ -368,8 +368,8 @@ const Dashboard = () => {
             <MdTrendingUp />
           </div>
           <div className="stat-content">
-            <h3>{overallProgress}%</h3>
-            <p>Overall Progress</p>
+            <span className="stat-number">{overallProgress}%</span>
+            <span className="stat-label">Overall Progress</span>
           </div>
         </div>
         
@@ -378,8 +378,8 @@ const Dashboard = () => {
             <FaFire />
           </div>
           <div className="stat-content">
-            <h3>{currentStreak}</h3>
-            <p>Day Streak</p>
+            <span className="stat-number">{currentStreak}</span>
+            <span className="stat-label">Day Streak</span>
           </div>
         </div>
         
@@ -388,8 +388,8 @@ const Dashboard = () => {
             <FaTrophy />
           </div>
           <div className="stat-content">
-            <h3>{rewardsTotalPoints}</h3>
-            <p>Total Points</p>
+            <span className="stat-number">{rewardsTotalPoints}</span>
+            <span className="stat-label">Total Points</span>
           </div>
         </div>
       </div>
