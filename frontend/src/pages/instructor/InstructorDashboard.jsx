@@ -15,6 +15,7 @@ const InstructorDashboard = () => {
   const [modalCourseTitle, setModalCourseTitle] = useState("");
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState(null);
+  const [animatedChartData, setAnimatedChartData] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,6 +77,31 @@ const InstructorDashboard = () => {
       }))
     : [];
 
+  // Animated bar chart effect
+  useEffect(() => {
+    if (!chartData.length) return;
+    let progress = 0;
+    const max = 30; // number of animation steps
+    const interval = 18; // ms per step
+    const target = chartData.map(d => d.Enrolled);
+    let animFrame;
+    function animate() {
+      progress++;
+      setAnimatedChartData(
+        chartData.map((d, i) => ({
+          ...d,
+          Enrolled: Math.round(target[i] * Math.min(progress / max, 1)),
+        }))
+      );
+      if (progress < max) {
+        animFrame = setTimeout(animate, interval);
+      }
+    }
+    setAnimatedChartData(chartData.map(d => ({ ...d, Enrolled: 0 })));
+    animate();
+    return () => clearTimeout(animFrame);
+  }, [JSON.stringify(chartData)]);
+
   // Calculate chart width: 120px per bar, min 400px
   const chartWidth = Math.max(chartData.length * 120, 400);
 
@@ -93,7 +119,7 @@ const InstructorDashboard = () => {
             <h3 className="dashboard-chart-title">Enrolled Users per Course</h3>
             <div style={{ width: "100%", overflowX: "auto" }}>
               <div style={{ minWidth: chartWidth }}>
-                <BarChart width={chartWidth} height={300} data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                <BarChart width={chartWidth} height={300} data={animatedChartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" tick={{ fontSize: 14 }} interval={0} angle={-15} textAnchor="end" height={60} />
                   <YAxis allowDecimals={false} />
