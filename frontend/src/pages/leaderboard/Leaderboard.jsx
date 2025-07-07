@@ -77,6 +77,23 @@ const Leaderboard = ({ user }) => {
     }
   };
 
+  const getRewardDisplay = (reward) => {
+    if (reward.isQuizAttempt) {
+      return {
+        icon: reward.isSuccessful ? "✅" : "❌",
+        description: reward.description,
+        points: reward.isSuccessful ? `+${reward.points} pts` : "0 pts",
+        className: reward.isSuccessful ? "reward-points" : "reward-points failed"
+      };
+    }
+    return {
+      icon: getActivityIcon(reward.activityType),
+      description: reward.description,
+      points: `+${reward.points} pts`,
+      className: "reward-points"
+    };
+  };
+
   if (loading) return <Loading />;
 
   return (
@@ -125,20 +142,20 @@ const Leaderboard = ({ user }) => {
         <div className="leaderboard-section">
           <h2>Top Learners</h2>
           <div className="leaderboard-list">
-            {leaderboard.map((user, index) => (
+            {leaderboard.map((lbUser, index) => (
               <div
-                key={user._id}
+                key={lbUser._id}
                 className={`leaderboard-item ${
-                  user._id === user?._id ? "current-user" : ""
+                  user && lbUser._id === user._id ? "current-user" : ""
                 }`}
               >
                 <div className="rank-position">
                   {getRankIcon(index + 1)}
                 </div>
                 <div className="user-info">
-                  <div className="user-name">{user.name}</div>
-                  <div className={`user-points${(user.role === 'admin' || user.role === 'instructor') ? ' na' : ''}`}>
-                    {(user.role === 'admin' || user.role === 'instructor') ? 'NA' : user.totalPoints + ' points'}
+                  <div className="user-name">{lbUser.name}</div>
+                  <div className={`user-points${(lbUser.role === 'admin' || lbUser.role === 'instructor') ? ' na' : ''}`}>
+                    {(lbUser.role === 'admin' || lbUser.role === 'instructor') ? 'NA' : lbUser.totalPoints + ' points'}
                   </div>
                 </div>
               </div>
@@ -151,24 +168,27 @@ const Leaderboard = ({ user }) => {
           <div className="rewards-section">
             <h2>Your Achievement History</h2>
             <div className="rewards-list">
-              {userRewards.slice(0, 10).map((reward) => (
-                <div key={reward._id} className="reward-item">
-                  <div className="reward-icon">
-                    {getActivityIcon(reward.activityType)}
-                  </div>
-                  <div className="reward-details">
-                    <div className="reward-description">
-                      {reward.description}
+              {userRewards.slice(0, 10).map((reward) => {
+                const display = getRewardDisplay(reward);
+                return (
+                  <div key={reward._id} className="reward-item">
+                    <div className="reward-icon">
+                      {display.icon}
                     </div>
-                    <div className="reward-meta">
-                      <span className="reward-points">+{reward.points} pts</span>
-                      <span className="reward-date">
-                        {new Date(reward.createdAt).toLocaleDateString()}
-                      </span>
+                    <div className="reward-details">
+                      <div className="reward-description">
+                        {display.description}
+                      </div>
+                      <div className="reward-meta">
+                        <span className={display.className}>{display.points}</span>
+                        <span className="reward-date">
+                          {new Date(reward.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -184,13 +204,13 @@ const Leaderboard = ({ user }) => {
                 <p>1 point per video</p>
               </div>
             </div>
-            <div className="point-item">
-              <div className="point-icon">📝</div>
-              <div className="point-details">
-                <h4>Quiz Completion</h4>
-                <p>10 points per quiz</p>
-              </div>
-            </div>
+                            <div className="point-item">
+                  <div className="point-icon">📝</div>
+                  <div className="point-details">
+                    <h4>Quiz Success</h4>
+                    <p>5 points per successful attempt (&gt;50%)</p>
+                  </div>
+                </div>
             <div className="point-item">
               <div className="point-icon">🎯</div>
               <div className="point-details">
