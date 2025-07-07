@@ -676,3 +676,8 @@
   font-weight: 700;
   margin-top: 2px;
 }
+
+.cd-root, .cd-main, .cd-main-right, .cd-main-left {
+  position: static !important;
+  overflow: visible !important;
+}

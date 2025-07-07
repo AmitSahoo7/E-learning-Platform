@@ -1,0 +1,668 @@
+.manageAssessmentsPage {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.assessmentsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.headerContent h1 {
+  color: #333;
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+}
+
+.courseInfo {
+  color: #666;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.createBtn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.createBtn:hover {
+  background: #1e7e34;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.viewAttemptsBtn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.2);
+}
+
+.viewAttemptsBtn:hover {
+  background: #138496;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.assessmentsContainer {
+  min-height: 400px;
+}
+
+.noAssessments {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+}
+
+.noAssessments h3 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.noAssessments p {
+  color: #6c757d;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.assessmentsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.assessmentCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.assessmentCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.assessmentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.assessmentHeader h3 {
+  color: #333;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.statusBadge {
+  margin-left: 1rem;
+}
+
+.statusBadge span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.statusBadge .active {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.statusBadge .inactive {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.assessmentDetails {
+  margin-bottom: 1.5rem;
+}
+
+.description {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.stat .label {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.stat .value {
+  color: #333;
+  font-weight: 600;
+}
+
+.assessmentActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.actionBtn.editBtn {
+  background: #007bff;
+  color: white;
+}
+
+.actionBtn.editBtn:hover {
+  background: #0056b3;
+}
+
+.actionBtn.toggleBtn {
+  background: #ffc107;
+  color: #212529;
+}
+
+.actionBtn.toggleBtn:hover {
+  background: #e0a800;
+}
+
+.actionBtn.viewBtn {
+  background: #6c757d;
+  color: white;
+}
+
+.actionBtn.viewBtn:hover {
+  background: #545b62;
+}
+
+.actionBtn.deleteBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.actionBtn.deleteBtn:hover {
+  background: #c82333;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.deleteConfirmModal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.deleteConfirmModal h3 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.deleteConfirmModal p {
+  color: #666;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.modalActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.modalActions button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.modalActions .cancelBtn {
+  background: #6c757d;
+  color: white;
+}
+
+.modalActions .cancelBtn:hover {
+  background: #545b62;
+}
+
+.modalActions .deleteBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.modalActions .deleteBtn:hover {
+  background: #c82333;
+}
+
+/* Loading Styles */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Form Styles */
+.adminAssessmentForm {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.adminAssessmentForm h3 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.adminAssessmentForm label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.adminAssessmentForm input,
+.adminAssessmentForm textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.adminAssessmentForm input:focus,
+.adminAssessmentForm textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.adminAssessmentForm h4 {
+  color: #333;
+  margin: 1.5rem 0 1rem 0;
+  font-size: 1.2rem;
+}
+
+.questionSection {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.questionSection h5 {
+  color: #495057;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.questionInputs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.optionInput {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.optionInput input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #f8f9fa;
+  transition: border-color 0.2s;
+}
+
+.optionInput input[type="text"]:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.optionInput input[type="radio"],
+.optionInput input[type="checkbox"] {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  width: 18px;
+  height: 18px;
+}
+
+.optionInput span {
+  margin-right: 0.5rem;
+  font-size: 0.98rem;
+  color: #444;
+}
+
+.optionInput button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: background 0.18s;
+}
+
+.optionInput button:hover {
+  background: #b71c1c;
+}
+
+.questionActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.questionActions button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.questionActions .addOptionBtn {
+  background: #28a745;
+  color: white;
+}
+
+.questionActions .addOptionBtn:hover {
+  background: #1e7e34;
+}
+
+.questionActions .removeOptionBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.questionActions .removeOptionBtn:hover {
+  background: #c82333;
+}
+
+.questionActions .removeQuestionBtn {
+  background: #6c757d;
+  color: white;
+}
+
+.questionActions .removeQuestionBtn:hover {
+  background: #545b62;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.formActions button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.formActions .cancelBtn {
+  background: #6c757d;
+  color: white;
+}
+
+.formActions .cancelBtn:hover {
+  background: #545b62;
+}
+
+.formActions .submitBtn {
+  background: #007bff;
+  color: white;
+}
+
+.formActions .submitBtn:hover {
+  background: #0056b3;
+}
+
+/* Preview Modal Styles */
+.previewModal {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.previewModal h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.previewStats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.previewStats div {
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  border: 1px solid #e9ecef;
+}
+
+.previewQuestion {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.previewQuestion h4 {
+  color: #333;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.previewOptions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.previewOptions li {
+  padding: 0.5rem;
+  margin-bottom: 0.25rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.previewOptions .correct {
+  background: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .manageAssessmentsPage {
+    padding: 1rem;
+  }
+
+  .assessmentsHeader {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .assessmentsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .assessmentActions {
+    flex-direction: column;
+  }
+
+  .actionBtn {
+    flex: none;
+  }
+
+  .adminAssessmentForm,
+  .previewModal {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .previewStats {
+    flex-direction: column;
+  }
+} 

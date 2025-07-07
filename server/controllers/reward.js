@@ -2,6 +2,8 @@ import { Reward } from "../models/Reward.js";
 import { User } from "../models/User.js";
 import { Lecture } from "../models/Lecture.js";
 import TryCatch from "../middlewares/TryCatch.js";
+import { Progress } from "../models/Progress.js";
+import Quiz from "../models/Quiz.js";
 
 // Award points for completing a video
 export const awardVideoPoints = TryCatch(async (req, res) => {
@@ -131,6 +133,36 @@ export const awardAssessmentPoints = TryCatch(async (req, res) => {
   });
 });
 
+// Helper function to calculate total points including quiz bonus
+const calculateTotalPointsWithQuizBonus = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user || user.role === 'admin' || user.role === 'instructor') {
+    return user ? user.totalPoints : 0;
+  }
+
+  // Get user's progress and calculate quiz bonus
+  const progresses = await Progress.find({ user: userId });
+  const quizzes = await Quiz.find({});
+  const quizMap = {};
+  quizzes.forEach(q => {
+    quizMap[q._id.toString()] = q;
+  });
+
+  let successfulAttempts = 0;
+  progresses.forEach(progress => {
+    (progress.quizScores || []).forEach(qs => {
+      const quiz = quizMap[qs.quiz?.toString()];
+      if (quiz && quiz.questions && quiz.questions.length > 0) {
+        if ((qs.bestScore / quiz.questions.length) > 0.5) {
+          successfulAttempts++;
+        }
+      }
+    });
+  });
+
+  return user.totalPoints + (5 * successfulAttempts);
+};
+
 // Get user's reward history
 export const getUserRewards = TryCatch(async (req, res) => {
   const rewards = await Reward.find({ user: req.user._id })
@@ -139,9 +171,49 @@ export const getUserRewards = TryCatch(async (req, res) => {
 
   const user = await User.findById(req.user._id);
 
+  // Get user's quiz attempts for achievement history
+  const progresses = await Progress.find({ user: req.user._id });
+  const quizzes = await Quiz.find({});
+  const quizMap = {};
+  quizzes.forEach(q => {
+    quizMap[q._id.toString()] = q;
+  });
+
+  // Create quiz attempt rewards for achievement history
+  const quizAttemptRewards = [];
+  progresses.forEach(progress => {
+    (progress.quizScores || []).forEach(qs => {
+      const quiz = quizMap[qs.quiz?.toString()];
+      if (quiz && quiz.questions && quiz.questions.length > 0) {
+        const scorePercentage = (qs.bestScore / quiz.questions.length) * 100;
+        const isSuccessful = scorePercentage > 50;
+        quizAttemptRewards.push({
+          _id: `quiz_${qs.quiz}_${progress._id}`,
+          user: req.user._id,
+          course: progress.course,
+          activityType: "quiz",
+          points: isSuccessful ? 5 : 0,
+          description: `Quiz attempt: ${quiz.title} (${scorePercentage.toFixed(1)}%)`,
+          createdAt: progress.updatedAt || progress.createdAt,
+          isQuizAttempt: true,
+          quizTitle: quiz.title,
+          scorePercentage: scorePercentage.toFixed(1),
+          isSuccessful
+        });
+      }
+    });
+  });
+
+  // Combine regular rewards with quiz attempts and sort by date
+  const allRewards = [...rewards, ...quizAttemptRewards].sort((a, b) => 
+    new Date(b.createdAt) - new Date(a.createdAt)
+  );
+
+  const totalPointsWithBonus = await calculateTotalPointsWithQuizBonus(req.user._id);
+
   res.json({
-    rewards,
-    totalPoints: user.totalPoints
+    rewards: allRewards,
+    totalPoints: totalPointsWithBonus
   });
 });
 
@@ -152,11 +224,49 @@ export const getLeaderboard = TryCatch(async (req, res) => {
     .sort({ totalPoints: -1 })
     .limit(50);
 
-  // For safety, if any admin/instructor sneaks in, mark their points as 'Not Applicable'
-  const leaderboard = users.map(u => ({
-    ...u.toObject(),
-    totalPoints: (u.role === 'admin' || u.role === 'instructor') ? 'Not Applicable' : u.totalPoints
-  }));
+  // Get all progresses and quizzes for efficient lookup
+  const progresses = await Progress.find({});
+  const quizzes = await Quiz.find({});
+  const quizMap = {};
+  quizzes.forEach(q => {
+    quizMap[q._id.toString()] = q;
+  });
+
+  // For each user, count successful quiz attempts (>50% score)
+  const userIdToProgress = {};
+  progresses.forEach(p => {
+    if (!userIdToProgress[p.user]) userIdToProgress[p.user] = [];
+    userIdToProgress[p.user].push(p);
+  });
+
+  let leaderboard = users.map(u => {
+    let successfulAttempts = 0;
+    const progresses = userIdToProgress[u._id.toString()] || [];
+    progresses.forEach(progress => {
+      (progress.quizScores || []).forEach(qs => {
+        const quiz = quizMap[qs.quiz?.toString()];
+        if (quiz && quiz.questions && quiz.questions.length > 0) {
+          if ((qs.bestScore / quiz.questions.length) > 0.5) {
+            successfulAttempts++;
+          }
+        }
+      });
+    });
+    const bonusPoints = 5 * successfulAttempts;
+    return {
+      ...u.toObject(),
+      totalPoints: (u.role === 'admin' || u.role === 'instructor') ? 'Not Applicable' : (u.totalPoints + bonusPoints),
+      quizSuccessBonus: bonusPoints,
+      successfulQuizAttempts: successfulAttempts
+    };
+  });
+
+  // Sort leaderboard by totalPoints (desc), handling 'Not Applicable' as lowest
+  leaderboard = leaderboard.sort((a, b) => {
+    if (typeof a.totalPoints === 'string') return 1;
+    if (typeof b.totalPoints === 'string') return -1;
+    return b.totalPoints - a.totalPoints;
+  });
 
   res.json({
     leaderboard
@@ -175,17 +285,31 @@ export const getUserRanking = TryCatch(async (req, res) => {
     });
   }
 
-  // Count users with more points than current user
-  const usersWithMorePoints = await User.countDocuments({
-    totalPoints: { $gt: user.totalPoints },
-    role: "user"
-  });
+  // Get current user's total points including quiz bonus
+  const currentUserTotalPoints = await calculateTotalPointsWithQuizBonus(req.user._id);
 
-  const ranking = usersWithMorePoints + 1;
+  // Get all users and their total points including quiz bonus for ranking
+  const allUsers = await User.find({ role: "user" });
+  // Use Promise.all to ensure all points are calculated before sorting
+  const userPointsWithBonus = await Promise.all(
+    allUsers.map(async (u) => {
+      const totalPoints = await calculateTotalPointsWithQuizBonus(u._id);
+      return {
+        userId: u._id,
+        totalPoints
+      };
+    })
+  );
+
+  // Sort by total points (including bonus) in descending order
+  userPointsWithBonus.sort((a, b) => b.totalPoints - a.totalPoints);
+
+  // Find current user's rank
+  const userRank = userPointsWithBonus.findIndex(u => u.userId.toString() === req.user._id.toString()) + 1;
 
   res.json({
-    ranking,
-    totalPoints: user.totalPoints,
-    totalUsers: await User.countDocuments({ role: "user" })
+    ranking: userRank,
+    totalPoints: currentUserTotalPoints,
+    totalUsers: allUsers.length
   });
 }); 
