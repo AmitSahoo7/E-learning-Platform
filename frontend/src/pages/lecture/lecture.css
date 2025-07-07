@@ -594,13 +594,21 @@ footer, .footer {
 
 .lecture-list-vertical-scroll {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
+  min-width: 220px;
+  min-height: 350px;
+  max-height: 650px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin: 0 auto;
   overflow-y: auto;
-  max-height: 400px;
+  padding: 18px 8px;
+}
+@media (min-height: 900px) {
+  .lecture-list-vertical-scroll {
+    max-height: 70vh;
+  }
 }
 .lecture-list-vertical-scroll .lecture-list-btn-modern {
   width: 100%;

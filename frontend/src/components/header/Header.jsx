@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom";
 import "./header.css";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, Trophy, User } from "lucide-react";
+import { Bell, Trophy, User, ChevronUp, ChevronDown } from "lucide-react";
 import ProfileModal from "../ProfileModal";
 import { UserData } from "../../context/UserContext";
 
@@ -23,7 +24,7 @@ function timeAgo(dateStr) {
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Courses", path: "/courses" },
-  { name: "Webinar", path: "/webinar" },
+  { name: "Webinars", path: "/webinar" },
   { name: "About", path: "/about" },
   { name: "Leaderboard", path: "/leaderboard", icon: <Trophy size={18} style={{ marginLeft: 4, color: '#FFD700' }} /> },
 ];
@@ -40,11 +41,32 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
     }
   });
   const [liveAnnouncements, setLiveAnnouncements] = useState(announcements);
+  const dropdownRef = useRef(null);
+  const dropdownContentRef = useRef(null);
   const { user, setIsAuth, setUser } = UserData ? UserData() : { user: null, setIsAuth: () => {}, setUser: () => {} };
+  const bellRef = useRef(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 60, right: 20 });
   // Filter out invalid announcements
   const validAnnouncements = liveAnnouncements.filter(a => a && typeof a === 'object' && typeof a.message === 'string' && !clearedIds.includes(a._id));
   const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).length;
   const location = useLocation();
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
 
   const handleAnnouncementClick = (a) => {
     setModal(a);
@@ -125,6 +147,65 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
     }, 10000);
     return () => clearInterval(interval);
   }, [announcements]);
+
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (showDropdown && bellRef.current) {
+      const rect = bellRef.current.getBoundingClientRect();
+      setDropdownPos({
+        top: rect.bottom + 8, // 8px below the bell
+        right: window.innerWidth - rect.right
+      });
+    }
+  }, [showDropdown]);
+
+  // Dropdown JSX
+  const dropdownJSX = (
+    <div
+      className="notification-dropdown"
+      ref={dropdownRef}
+      style={{
+        position: 'fixed',
+        top: dropdownPos.top,
+        right: dropdownPos.right,
+        left: 'auto',
+        zIndex: 9999
+      }}
+    >
+      <div className="dropdown-title">Announcements</div>
+      {validAnnouncements.length > 0 && (
+        <div className="dropdown-actions-row">
+          <button className="dropdown-action-btn" onClick={handleClearAll}>Clear All</button>
+          {unreadCount > 0 && (
+            <button className="dropdown-action-btn" onClick={handleReadAll}>Read All</button>
+          )}
+        </div>
+      )}
+      {validAnnouncements.length === 0 ? (
+        <div className="dropdown-empty">No announcements yet.</div>
+      ) : (
+        <div className="dropdown-content" ref={dropdownContentRef}>
+          {validAnnouncements.map((a, i) => (
+            <div
+              className={`dropdown-announcement${readAnnouncements.includes(a._id) ? '' : ' unread'}`}
+              key={a._id || i}
+              onClick={() => handleAnnouncementClick(a)}
+            >
+              <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
+              <div className="dropdown-announcement-time">{a.createdAt ? timeAgo(a.createdAt) : (a.timestamp ? timeAgo(a.timestamp) : '')}</div>
+              <div style={{display:'flex',gap:'6px',marginTop:'4px'}}>
+                {!readAnnouncements.includes(a._id) && (
+                  <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleReadOne(a._id);}}>Read</button>
+                )}
+                <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleClearOne(a._id);}}>Clear</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <header className="modern-header glassy-header">
       <div className="header-logo">SkillNest</div>
@@ -153,45 +234,19 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
           <Link to="/login" className="header-login-btn" id="login">Login</Link>
         )}
         <div className="notification-bell-wrapper">
-          <button type="button" className="notification-bell" onClick={() => setShowDropdown((v) => !v)} aria-label="Notifications">
+          <button
+            type="button"
+            className="notification-bell"
+            ref={bellRef}
+            onClick={() => setShowDropdown((v) => !v)}
+            aria-label="Notifications"
+          >
             <BellIcon />
             {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
           </button>
-          {showDropdown && (
-            <div className="notification-dropdown">
-              <div className="dropdown-title">Announcements</div>
-              {validAnnouncements.length > 0 && (
-                <>
-                  <button className="clear-all-btn" onClick={handleClearAll} style={{marginBottom:'8px',float:'right',background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'4px 10px',cursor:'pointer'}}>Clear All</button>
-                  {unreadCount > 0 && (
-                    <button className="clear-all-btn" onClick={handleReadAll} style={{marginBottom:'8px',marginRight:'8px',float:'right',background:'#3b82f6',color:'#fff',border:'none',borderRadius:'4px',padding:'4px 10px',cursor:'pointer'}}>Read All</button>
-                  )}
-                </>
-              )}
-              {validAnnouncements.length === 0 ? (
-                <div className="dropdown-empty">No announcements yet.</div>
-              ) : (
-                validAnnouncements.map((a, i) => (
-                  <div
-                    className={`dropdown-announcement${readAnnouncements.includes(a._id) ? '' : ' unread'}`}
-                    key={a._id || i}
-                    onClick={() => handleAnnouncementClick(a)}
-                  >
-                    <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
-                    <div className="dropdown-announcement-time">{a.createdAt ? timeAgo(a.createdAt) : (a.timestamp ? timeAgo(a.timestamp) : '')}</div>
-                    <div style={{display:'flex',gap:'6px',marginTop:'4px'}}>
-                      {!readAnnouncements.includes(a._id) && (
-                        <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleReadOne(a._id);}}>Read</button>
-                      )}
-                      <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleClearOne(a._id);}}>Clear</button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
         </div>
       </div>
+      {showDropdown && ReactDOM.createPortal(dropdownJSX, document.body)}
       {modal && (
         <div className="announcement-modal-bg" onClick={() => setModal(null)}>
           <div className="announcement-modal-content" onClick={e => e.stopPropagation()}>

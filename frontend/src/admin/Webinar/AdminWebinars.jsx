@@ -81,8 +81,8 @@ const AdminWebinars = () => {
                 <td>{w.topic}</td>
                 <td>{w.instructors && w.instructors.join(', ')}</td>
                 <td>
-                  <button onClick={() => handleEdit(w)}>Edit</button>
-                  <button onClick={() => handleDelete(w._id)} className="delete-btn">Delete</button>
+                  <button className="edit-btn" onClick={() => handleEdit(w)}>Edit</button>
+                  <button className="delete-btn" onClick={() => handleDelete(w._id)}>Delete</button>
                 </td>
               </tr>
             ))}

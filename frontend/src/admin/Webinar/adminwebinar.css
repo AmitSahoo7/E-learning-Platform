@@ -41,17 +41,39 @@
 .webinar-table tr:nth-child(even) {
   background: #1b2a47;
 }
+.edit-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px #10b98122;
+}
+.edit-btn:hover {
+  background: #0e9e6e;
+  box-shadow: 0 4px 16px #10b98133;
+}
 .delete-btn {
   background: #e74c3c;
   color: #fff;
   border: none;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 4px;
-  margin-left: 8px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
+  margin-left: 0;
+  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 8px #e74c3c22;
 }
 .delete-btn:hover {
   background: #c0392b;
+  box-shadow: 0 4px 16px #e74c3c33;
 }
 .webinar-modal-bg {
   position: fixed;
