@@ -1,5 +1,6 @@
 .modal-overlay {
   position: fixed;
+
   top: 0; left: 0; width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.55);
   z-index: 2000;
@@ -7,6 +8,7 @@
   align-items: center;
   justify-content: center;
   overflow-y: auto;
+
 }
 
 .modal-content {
@@ -21,19 +23,20 @@
   overflow-y: auto;
   z-index: 2001;
   position: relative;
+
 }
 
 .modal-close-btn {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #10b981;
+  top: 16px;
+  right: 16px;
+  background: #34d399;
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 2.2rem;
-  height: 2.2rem;
-  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  font-size: 1.3rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -43,7 +46,7 @@
 }
 
 .modal-close-btn:hover {
-  background: #059669;
+  background: #8a4baf;
 }
 
 @media (max-width: 600px) {
