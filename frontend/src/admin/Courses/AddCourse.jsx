@@ -37,6 +37,7 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
   const [previewVideo, setPreviewVideo] = useState("");
   const [previewVideoPrev, setPreviewVideoPrev] = useState("");
   const [instructors, setInstructors] = useState([]);
+  const [selectedInstructors, setSelectedInstructors] = useState([]);
 
   // Pre-fill form in edit mode
   useEffect(() => {
@@ -121,6 +122,7 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
     if (image) myForm.append("image", image);
     if (instructorAvatar) myForm.append("instructorAvatar", instructorAvatar);
     if (previewVideo) myForm.append("previewVideo", previewVideo);
+    selectedInstructors.forEach(id => myForm.append('instructors', id));
     try {
       let res;
       if (editMode && initialData && initialData._id) {
@@ -158,6 +160,7 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
         setInstructorAvatarPrev("");
         setPreviewVideo("");
         setPreviewVideoPrev("");
+        setSelectedInstructors([]);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
@@ -196,16 +199,19 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
                 onChange={(e) => setPrice(e.target.value)}
                 required
               />
-              <label>Instructor</label>
+              <label>Instructors (assign multiple)</label>
               <select
                 className="cd-input"
-                value={instructorName}
-                onChange={(e) => setInstructorName(e.target.value)}
-                required
+                multiple
+                value={selectedInstructors}
+                onChange={e => {
+                  const options = Array.from(e.target.selectedOptions);
+                  setSelectedInstructors(options.map(opt => opt.value));
+                }}
+                required={selectedInstructors.length === 0}
               >
-                <option value="">Select Instructor</option>
                 {instructors.map(inst => (
-                  <option value={inst.name} key={inst._id}>{inst.name} ({inst.email})</option>
+                  <option value={inst._id} key={inst._id}>{inst.name} ({inst.email})</option>
                 ))}
               </select>
               <label>Category</label>
@@ -340,16 +346,19 @@ const AddCourse = ({ user, editMode = false, initialData = {}, onSuccess }) => {
                   onChange={(e) => setPrice(e.target.value)}
                   required
                 />
-                <label>Instructor</label>
+                <label>Instructors (assign multiple)</label>
                 <select
                   className="cd-input"
-                  value={instructorName}
-                  onChange={(e) => setInstructorName(e.target.value)}
-                  required
+                  multiple
+                  value={selectedInstructors}
+                  onChange={e => {
+                    const options = Array.from(e.target.selectedOptions);
+                    setSelectedInstructors(options.map(opt => opt.value));
+                  }}
+                  required={selectedInstructors.length === 0}
                 >
-                  <option value="">Select Instructor</option>
                   {instructors.map(inst => (
-                    <option value={inst.name} key={inst._id}>{inst.name} ({inst.email})</option>
+                    <option value={inst._id} key={inst._id}>{inst.name} ({inst.email})</option>
                   ))}
                 </select>
                 <label>Category</label>

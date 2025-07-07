@@ -86,6 +86,12 @@ const CourseStudy = ({ user }) => {
 
   const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
+  const isSuperadmin = user && user.role === "superadmin";
+  const isCourseInstructor = user && (
+    user.role === 'admin' ||
+    user.role === 'superadmin' ||
+    (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
+  );
 
   // Fetch course and progress data
   useEffect(() => {
@@ -307,18 +313,14 @@ const CourseStudy = ({ user }) => {
                   All lectures available for management
                 </div>
               </div>
-            ) : isEnrolled ? (
+            ) : (isCourseInstructor || isEnrolled) ? (
               lectLength === 0 ? (
-                <div
-                  className="lecture-progress-bar"
-                  style={{ margin: "12px 0", textAlign: "center" }}
-                >
+                <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
                     No lectures available yet.
                   </div>
                 </div>
               ) : completed === 0 ? (
-
                 <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
                     Lecture Progress: 0% (No lectures completed yet)
@@ -327,12 +329,10 @@ const CourseStudy = ({ user }) => {
                     <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
                   </div>
                   <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
-
                     Start your first lecture!
                   </span>
                 </div>
               ) : (
-
                 <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
                     Lecture Progress - {completedLec} out of {lectLength}
@@ -341,7 +341,6 @@ const CourseStudy = ({ user }) => {
                     <div className="lecture-progress-bar-fill" style={{ width: `${completed}%`, background: '#1cc524' }}></div>
                   </div>
                   <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
-
                     {completed}%
                   </span>
                 </div>
@@ -351,7 +350,7 @@ const CourseStudy = ({ user }) => {
             {/* Add spacing between lecture and quiz progress */}
             <div style={{ height: 24 }} />
 
-            {isAdmin ? null : isEnrolled ? (
+            {isAdmin ? null : (isCourseInstructor || isEnrolled) ? (
               totalQuizCount === 0 ? (
                 <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, color: '#000' }}>
@@ -399,10 +398,16 @@ const CourseStudy = ({ user }) => {
             )}
             
 
-            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
+            {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
-                onClick={() => navigate(`/lectures/${course._id}`)}
+                onClick={() => {
+                  if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
+                    navigate(`/lectures/${course._id}`);
+                  } else {
+                    alert("Invalid course ID");
+                  }
+                }}
                 disabled={enrolling}
               >
                 Start Learning
@@ -423,10 +428,16 @@ const CourseStudy = ({ user }) => {
                 Total Quizzes: {quizCount}
               </div>
             )}
-            {isAdmin || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id)) ? (
+            {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
               <button
                 className="cd-btn-primary cd-enroll-btn"
-                onClick={() => navigate(`/quiz/${course._id}`)}
+                onClick={() => {
+                  if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
+                    navigate(`/quiz/${course._id}`);
+                  } else {
+                    alert("Invalid course ID");
+                  }
+                }}
                 disabled={enrolling}
               >
                 Quizs

@@ -30,8 +30,12 @@ export const fetchLectures = TryCatch(async (req, res) => {
   const lectures = await Lecture.find({ course: req.params.id });
 
   const user = await User.findById(req.user._id);
+  const course = await Courses.findById(req.params.id);
+  const isCourseInstructor = user.role === 'admin' ||
+    user.role === 'superadmin' ||
+    (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)));
 
-  if (user.role === "admin") {
+  if (isCourseInstructor) {
     return res.json({ lectures });
   }
 
@@ -46,10 +50,13 @@ export const fetchLectures = TryCatch(async (req, res) => {
 
 export const fetchLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);
-
   const user = await User.findById(req.user._id);
+  const course = await Courses.findById(lecture.course);
+  const isCourseInstructor = user.role === 'admin' ||
+    user.role === 'superadmin' ||
+    (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)));
 
-  if (user.role === "admin") {
+  if (isCourseInstructor) {
     return res.json({ lecture });
   }
 

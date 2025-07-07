@@ -71,6 +71,12 @@ const schema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  instructors: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+    default: [],
+  }],
 });
 
 export const Courses = mongoose.model("Courses", schema);
