@@ -13,8 +13,24 @@ import Quiz from '../models/Quiz.js';
 
 export const getAllCourses = TryCatch(async (req, res) => {
   const courses = await Courses.find();
+  // Aggregate ratings for all courses
+  const courseIds = courses.map(c => c._id);
+  const ratingAgg = await (await import('../models/CourseReview.js')).CourseReview.aggregate([
+    { $match: { courseId: { $in: courseIds } } },
+    { $group: { _id: "$courseId", avgRating: { $avg: "$rating" }, ratingCount: { $sum: 1 } } }
+  ]);
+  // Map for quick lookup
+  const ratingMap = {};
+  ratingAgg.forEach(r => {
+    ratingMap[r._id.toString()] = { rating: r.avgRating || 0, ratingCount: r.ratingCount || 0 };
+  });
+  // Attach ratings to each course
+  const coursesWithRatings = courses.map(course => {
+    const r = ratingMap[course._id.toString()] || { rating: 0, ratingCount: 0 };
+    return { ...course.toObject(), rating: r.rating, ratingCount: r.ratingCount };
+  });
   res.json({
-    courses,
+    courses: coursesWithRatings,
   });
 });
 

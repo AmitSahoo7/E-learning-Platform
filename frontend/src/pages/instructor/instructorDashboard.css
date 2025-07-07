@@ -1,27 +1,41 @@
+/* Modern Glassy/Glowing Instructor Dashboard Styles */
 :root {
   --primary-green: #6fffbf;
   --accent-green: #34c759;
   --soft-green-bg: #eafff1;
-  --card-bg: #f8fff9;
-  --text-dark: #1a3a2a;
-  --text-light: #4b6b5a;
+  --card-bg: rgba(24, 28, 40, 0.65);
+  --text-dark: #f3f4f6;
+  --text-light: #b9f8d3;
+  --neon-green: #7cffb2;
+  --neon-blue: #00fff7;
+}
+
+body, html, #root {
+  background: linear-gradient(135deg, #0a0a13 0%, #181c24 100%) !important;
 }
 
 .instructor-dashboard-wrapper {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  background: linear-gradient(135deg, var(--soft-green-bg) 0%, #f6fff9 100%);
+  background: none;
   min-height: 100vh;
+  position: relative;
+  z-index: 2;
 }
 
 .instructor-dashboard-title {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--accent-green);
-  margin-bottom: 2.5rem;
+  font-size: 2.4rem;
+  font-weight: 800;
   text-align: center;
   letter-spacing: 1px;
+  background: linear-gradient(90deg, #fff 40%, #3ecf8e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  margin-bottom: 2.5rem;
+  text-shadow: 0 0 24px #34d39988, 0 2px 8px #34d39922;
 }
 
 .instructor-courses-list {
@@ -34,44 +48,50 @@
 
 .instructor-course-card {
   background: var(--card-bg);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(52, 199, 89, 0.10);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(52,211,153,0.18), 0 1.5px 8px 0 #0002;
+  border: 1.5px solid rgba(124,255,178,0.18);
+  backdrop-filter: blur(18px);
+  color: #fff;
   padding: 2rem 2.5rem;
   width: 100%;
   max-width: 350px;
   min-width: 280px;
   margin-bottom: 2rem;
-  border: 1.5px solid var(--accent-green);
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: box-shadow 0.3s, transform 0.3s, border 0.3s;
+  position: relative;
 }
-
 .instructor-course-card:hover {
-  box-shadow: 0 8px 32px rgba(52, 199, 89, 0.18);
-  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 0 32px #34d39977, 0 4px 16px #34d39933;
+  transform: translateY(-6px) scale(1.03);
+  border: 1.5px solid #7cffb2;
 }
 
 .instructor-course-title {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--text-dark);
+  color: var(--neon-green);
   margin-bottom: 1.2rem;
   text-align: left;
   letter-spacing: 0.5px;
+  text-shadow: 0 0 8px #34d39955;
 }
 
 .instructor-course-stats {
-  background: var(--soft-green-bg);
-  border-radius: 10px;
-  padding: 1rem;
+  background: rgba(36, 41, 51, 0.65);
+  border-radius: 12px;
+  padding: 1.2rem;
   margin-bottom: 1.5rem;
-  border: 1px solid var(--accent-green);
+  border: 1.5px solid #7cffb288;
+  color: #fff;
+  box-shadow: 0 0 16px #34d39933;
 }
 
 .stat-item {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  font-size: 1rem;
+  font-size: 1.08rem;
 }
 
 .stat-label {
@@ -80,37 +100,48 @@
 }
 
 .stat-value {
-  color: var(--accent-green);
-  font-weight: 700;
+  color: #7cffb2;
+  font-weight: 800;
+  font-size: 1.13rem;
+  text-shadow: 0 0 8px #34d39988;
 }
 
 .instructor-course-actions {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.7rem;
   justify-content: flex-start;
 }
 
 .instructor-btn {
-  padding: 0.5rem 1.5rem;
+  padding: 0.7rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 12px;
+  font-size: 1.08rem;
+  font-weight: 700;
   cursor: pointer;
-  background: var(--accent-green);
+  background: linear-gradient(90deg, #3ecf8e 0%, #6fffa2 100%);
+  color: #181c24;
+  transition: background 0.22s, box-shadow 0.22s, color 0.18s, transform 0.18s;
+  box-shadow: 0 2px 8px #34d39922;
+  letter-spacing: 0.5px;
+}
+.instructor-btn:hover {
+  background: linear-gradient(90deg, #10b981 0%, #3ecf8e 100%);
   color: #fff;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.08);
+  box-shadow: 0 0 16px #7cffb288;
+  transform: translateY(-2px) scale(1.04);
 }
 
 .instructor-btn:last-child {
-  background: #f3f4f6;
-  color: var(--text-dark);
+  background: #232a34;
+  color: #7cffb2;
+  border: 1.5px solid #7cffb2;
 }
-
-.instructor-btn:hover {
-  background: var(--primary-green);
-  color: var(--text-dark);
+.instructor-btn:last-child:hover {
+  background: #181c24;
+  color: #fff;
+  box-shadow: 0 0 12px #7cffb288;
 }
 
 .loading, .error, .no-courses {
@@ -195,21 +226,22 @@
 
 .dashboard-chart-container {
   background: var(--card-bg);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(52, 199, 89, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px 0 rgba(52,211,153,0.18), 0 1.5px 8px 0 #0002;
+  border: 1.5px solid rgba(124,255,178,0.18);
+  backdrop-filter: blur(18px);
+  color: #fff;
   padding: 2rem 2.5rem;
-  margin: 0 auto 2.5rem auto;
-  max-width: 900px;
-  width: 100%;
-  border: 1.5px solid var(--accent-green);
+  margin-bottom: 2.5rem;
+  position: relative;
 }
-
 .dashboard-chart-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--accent-green);
-  margin-bottom: 1.5rem;
+  color: #7cffb2;
+  font-size: 1.25rem;
+  font-weight: 700;
   text-align: center;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 0 8px #34d39955;
 }
 
 .dashboard-chart-scroll {
@@ -252,26 +284,68 @@
   border: 2px solid #fff;
 }
 
-@media (max-width: 768px) {
+/* Floating Orbs and Sparkles for Depth */
+.instructor-dashboard-wrapper::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120vw;
+  height: 120vh;
+  background: radial-gradient(circle at 60% 40%, rgba(16,185,129,0.13) 0%, rgba(0,0,0,0.01) 80%);
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  pointer-events: none;
+}
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.5;
+  filter: blur(2.5px) drop-shadow(0 0 24px #34d39988);
+  animation: float-orb 9s ease-in-out infinite alternate;
+  z-index: 1;
+}
+.floating-orb-1 {
+  width: 70px; height: 70px; background: #34d399cc;
+  left: 8vw; top: 18vh; animation-delay: 0s;
+}
+.floating-orb-2 {
+  width: 48px; height: 48px; background: #7cffb2cc;
+  right: 10vw; top: 12vh; animation-delay: 2.5s;
+}
+.floating-orb-3 {
+  width: 60px; height: 60px; background: #3ecf8ecc;
+  left: 6vw; bottom: 10vh; animation-delay: 1.2s;
+}
+.floating-orb-4 {
+  width: 40px; height: 40px; background: #00e6e6cc;
+  right: 7vw; bottom: 14vh; animation-delay: 3.7s;
+}
+@keyframes float-orb {
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-18px) scale(1.08); opacity: 0.7; }
+  100% { transform: translateY(0) scale(1); opacity: 0.5; }
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
   .instructor-dashboard-wrapper {
     padding: 1rem;
   }
-  
   .instructor-courses-list {
-    grid-template-columns: 1fr;
+    gap: 1.2rem;
   }
-  
-  .instructor-course-stats {
-    margin-bottom: 1rem;
+}
+@media (max-width: 768px) {
+  .instructor-dashboard-wrapper {
+    padding: 0.5rem;
   }
-  
-  .stat-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
+  .instructor-course-card {
+    padding: 1.2rem 0.7rem;
+    min-width: 90vw;
+    max-width: 98vw;
   }
-  
-  .instructor-course-actions {
-    flex-direction: column;
+  .dashboard-chart-container {
+    padding: 1.2rem 0.7rem;
   }
 } 
