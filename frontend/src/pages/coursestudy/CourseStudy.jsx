@@ -452,17 +452,25 @@ const CourseStudy = ({ user }) => {
               </button>
             )}
             {/* Final Assessment Button */}
-            {isEnrolled && (
+            {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
               <button
                 className="cd-btn-primary cd-enroll-btn"
                 style={{ marginTop: 8, background: '#34d399' }}
-                onClick={() => navigate(`/course/${course._id}/assessment`)}
+                onClick={() => {
+                  if (isAdmin || isSuperadmin) {
+                    navigate(`/admin/course/${course._id}/assessments`);
+                  } else if (isCourseInstructor) {
+                    navigate(`/instructor/course/${course._id}/assessments`);
+                  } else {
+                    navigate(`/course/${course._id}/assessment`);
+                  }
+                }}
               >
                 Final Assessment
               </button>
             )}
             {/* Certificate Button */}
-            {isEnrolled && (
+            {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
               <button
                 className="cd-btn-primary cd-enroll-btn"
                 style={{ marginTop: 8, background: '#f59e0b' }}

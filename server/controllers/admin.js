@@ -23,13 +23,21 @@ export const createCourse = TryCatch(async (req, res) => {
     courseOutcomes,
     instructorName,
     instructorBio,
-    instructors
+    instructors // This may be an array or a string
   } = req.body;
 
   const image = req.files?.image?.[0] || req.file;
   const pdf = req.files?.pdf?.[0];
   const instructorAvatar = req.files?.instructorAvatar?.[0];
   const previewVideo = req.files?.previewVideo?.[0];
+
+  // Normalize instructors to an array of strings/ObjectIds
+  let instructorsArray = [];
+  if (Array.isArray(instructors)) {
+    instructorsArray = instructors;
+  } else if (typeof instructors === 'string' && instructors.length > 0) {
+    instructorsArray = instructors.split(',').map(s => s.trim()).filter(Boolean);
+  }
 
   const course = await Courses.create({
     title,
@@ -49,13 +57,7 @@ export const createCourse = TryCatch(async (req, res) => {
     instructorBio,
     instructorAvatar: instructorAvatar?.path,
     previewVideo: previewVideo?.path,
-    instructors: instructors
-      ? Array.isArray(instructors)
-        ? instructors
-        : typeof instructors === 'string' && instructors.length > 0
-          ? instructors.split(',').map(s => s.trim()).filter(Boolean)
-          : []
-      : [],
+    instructors: instructorsArray,
   });
 
   // Auto-enroll the creator as a student in their own course
@@ -67,6 +69,7 @@ export const createCourse = TryCatch(async (req, res) => {
 
   res.status(201).json({
     message: "Course Created Successfully",
+    course
   });
 });
 

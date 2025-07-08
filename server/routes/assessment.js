@@ -1,5 +1,5 @@
 import express from 'express';
-import { isAuth, isAdmin } from '../middlewares/isAuth.js';
+import { isAuth, isAdmin, isInstructorOrAdmin } from '../middlewares/isAuth.js';
 import {
   createAssessment,
   updateAssessment,
@@ -14,7 +14,8 @@ import {
   getAllAttempts,
   getAttemptDetails,
   generateCertificate,
-  downloadCertificate
+  downloadCertificate,
+  deleteAssessment
 } from '../controllers/assessment.js';
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.patch('/admin/assessment/:id/deactivate', isAuth, isAdmin, deactivateAsse
 router.get('/admin/assessments/:courseId', isAuth, isAdmin, listAssessments);
 router.get('/admin/attempts/:courseId', isAuth, isAdmin, getAllAttempts);
 router.get('/admin/attempt/:attemptId', isAuth, isAdmin, getAttemptDetails);
+router.delete('/admin/assessment/:id', isAuth, isAdmin, deleteAssessment);
 
 // User routes
 router.get('/assessment/:courseId/active', isAuth, getActiveAssessment);
@@ -38,5 +40,23 @@ router.get('/certificate/:courseId/eligibility', isAuth, checkCertificateEligibi
 // Certificate routes
 router.post('/certificate/:courseId/generate', isAuth, generateCertificate);
 router.get('/certificate/:certificateId/download', isAuth, downloadCertificate);
+
+// Instructor routes
+router.get('/instructor/assessments/:courseId', isAuth, isInstructorOrAdmin, listAssessments);
+router.patch('/instructor/assessment/:id/activate', isAuth, isInstructorOrAdmin, activateAssessment);
+router.patch('/instructor/assessment/:id/deactivate', isAuth, isInstructorOrAdmin, deactivateAssessment);
+router.get('/instructor/assessment/:id/preview', isAuth, isInstructorOrAdmin, previewAssessment);
+router.put('/instructor/assessment/:id', isAuth, isInstructorOrAdmin, updateAssessment);
+router.post('/instructor/assessment', isAuth, isInstructorOrAdmin, createAssessment);
+router.delete('/instructor/assessment/:id', isAuth, isInstructorOrAdmin, async (req, res) => {
+  // Use the same logic as admin delete (not shown in your code, but you can add a deleteAssessment controller if needed)
+  const FinalAssessment = (await import('../models/FinalAssessment.js')).default;
+  const assessment = await FinalAssessment.findById(req.params.id);
+  if (!assessment) return res.status(404).json({ message: 'Assessment not found.' });
+  await assessment.deleteOne();
+  res.json({ message: 'Assessment deleted successfully' });
+});
+router.get('/instructor/attempts/:courseId', isAuth, isInstructorOrAdmin, getAllAttempts);
+router.get('/instructor/attempt/:attemptId', isAuth, isInstructorOrAdmin, getAttemptDetails);
 
 export default router; 
