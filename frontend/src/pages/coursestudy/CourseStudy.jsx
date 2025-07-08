@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../coursedescription/coursedescription.css";
+import "./coursestudy.css";
 import { useNavigate, useParams } from "react-router-dom";
 import { CourseData } from "../../context/CourseContext";
 import axios from "axios";
@@ -225,347 +226,312 @@ const CourseStudy = ({ user }) => {
 
   return (
     <div className="cd-root">
-      {/* Top: Course Image Banner with Overlay */}
-      <div className="cd-image-banner">
-        <img
-          src={`${server}/${course.image}`}
-          alt={course.title}
-          className="cd-banner-img"
-        />
-        <div className="cd-banner-overlay">
-          <h1 className="cd-title">{course.title}</h1>
-          {course.tagline && <p className="cd-tagline">{course.tagline}</p>}
-          {course.difficulty && (
-            <span className="cd-category-badge">{course.difficulty}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="cd-main">
-        {/* Left Side */}
-        <div className="cd-main-left">
-          <div className="cd-main-left-card" data-aos="fade-up">
-
-            <div className="cd-section">
-              <h3>Prerequisites</h3>
-              <ul className="cd-list">
-                {prerequisites.map((item, i) => (
-                  <li key={i}>
-                    <span className="cd-list-icon">✔️</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="cd-section">
-              <h3>What you'll learn</h3>
-              <ul className="cd-list">
-                {whatYouLearn.map((item, i) => (
-                  <li key={i}>
-                    <span className="cd-list-icon">✔️</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="cd-section">
-              <h3>Course Outcome</h3>
-              <ul className="cd-list">
-                {courseOutcome.map((item, i) => (
-                  <li key={i}>
-                    <span className="cd-list-icon">✔️</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
+      <div className="cd-content-container">
+        {/* Top: Course Image Banner with Overlay */}
+        <div className="cd-image-banner">
+          <img
+            src={`${server}/${course.image}`}
+            alt={course.title}
+            className="cd-banner-img"
+          />
+          <div className="cd-banner-overlay">
+            <h1 className="cd-title">{course.title}</h1>
+            {course.tagline && <p className="cd-tagline">{course.tagline}</p>}
+            {course.difficulty && (
+              <span className="cd-category-badge">{course.difficulty}</span>
+            )}
           </div>
         </div>
 
-        {/* Right Side */}
-        <div className="cd-main-right">
-          <div className="cd-card cd-info-card" data-aos="fade-up">
-            <div className="cd-info-row">
-              <span className="cd-info-label">Price:</span>
-              <span className="cd-info-value">₹{course.price}</span>
-            </div>
-            <div className="cd-info-row">
-              <span className="cd-info-label">Duration:</span>
-              <span className="cd-info-value">{course.duration} weeks</span>
-            </div>
+        {/* Main Content */}
+        <div className="cd-main">
+          {/* Left Side */}
+          <div className="cd-main-left">
+            <div className="cd-main-left-card" data-aos="fade-up">
 
-            {course.difficulty && (
+              <div className="cd-section">
+                <h3>Prerequisites</h3>
+                <ul className="cd-list">
+                  {prerequisites.map((item, i) => (
+                    <li key={i}>
+                      <span className="cd-list-icon">✔️</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="cd-section">
+                <h3>What you'll learn</h3>
+                <ul className="cd-list">
+                  {whatYouLearn.map((item, i) => (
+                    <li key={i}>
+                      <span className="cd-list-icon">✔️</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="cd-section">
+                <h3>Course Outcome</h3>
+                <ul className="cd-list">
+                  {courseOutcome.map((item, i) => (
+                    <li key={i}>
+                      <span className="cd-list-icon">✔️</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div className="cd-main-right">
+            <div className="cd-card cd-info-card" data-aos="fade-up">
               <div className="cd-info-row">
-                <span className="cd-info-label">Difficulty:</span>
-                <span className="cd-info-value">{course.difficulty}</span>
+                <span className="cd-info-label">Price:</span>
+                <span className="cd-info-value">₹{course.price}</span>
               </div>
-            )}
+              <div className="cd-info-row">
+                <span className="cd-info-label">Duration:</span>
+                <span className="cd-info-value">{course.duration} weeks</span>
+              </div>
 
-            {/* Progress tracker for admins and enrolled users */}
-            {isAdmin ? (
-              <div
-                className="lecture-progress-bar"
-                style={{ margin: "12px 0", textAlign: "center" }}
-              >
-                <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                  All lectures available for management
+              {course.difficulty && (
+                <div className="cd-info-row">
+                  <span className="cd-info-label">Difficulty:</span>
+                  <span className="cd-info-value">{course.difficulty}</span>
                 </div>
-              </div>
-            ) : (isCourseInstructor || isEnrolled) ? (
-              lectLength === 0 ? (
-                <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+              )}
+
+              {/* Progress tracker for admins and enrolled users */}
+              {isAdmin ? (
+                <div
+                  className="lecture-progress-bar"
+                  style={{ margin: "12px 0", textAlign: "center" }}
+                >
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                    No lectures available yet.
+                    All lectures available for management
                   </div>
                 </div>
-              ) : completed === 0 ? (
-                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
-                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                    Lecture Progress: 0% (No lectures completed yet)
+              ) : (isCourseInstructor || isEnrolled) ? (
+                lectLength === 0 ? (
+                  <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                      No lectures available yet.
+                    </div>
                   </div>
-                  <div className="lecture-progress-bar-track">
-                    <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
+                ) : completed === 0 ? (
+                  <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                      Lecture Progress: 0% (No lectures completed yet)
+                    </div>
+                    <div className="lecture-progress-bar-track">
+                      <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
+                    </div>
+                    <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                      Start your first lecture!
+                    </span>
                   </div>
-                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
-                    Start your first lecture!
-                  </span>
-                </div>
-              ) : (
-                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
-                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
-                    Lecture Progress - {completedLec} out of {lectLength}
+                ) : (
+                  <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center" }}>
+                      Lecture Progress - {completedLec} out of {lectLength}
+                    </div>
+                    <div className="lecture-progress-bar-track">
+                      <div className="lecture-progress-bar-fill" style={{ width: `${completed}%`, background: '#1cc524' }}></div>
+                    </div>
+                    <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                      {completed}%
+                    </span>
                   </div>
-                  <div className="lecture-progress-bar-track">
-                    <div className="lecture-progress-bar-fill" style={{ width: `${completed}%`, background: '#1cc524' }}></div>
-                  </div>
-                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
-                    {completed}%
-                  </span>
-                </div>
-              )
-            ) : null}
+                )
+              ) : null}
 
-            {/* Add spacing between lecture and quiz progress */}
-            <div style={{ height: 24 }} />
+              {/* Add spacing between lecture and quiz progress */}
+              <div style={{ height: 24 }} />
 
-            {isAdmin ? null : (isCourseInstructor || isEnrolled) ? (
-              totalQuizCount === 0 ? (
+              {isAdmin ? null : (isCourseInstructor || isEnrolled) ? (
+                totalQuizCount === 0 ? (
+                  <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, color: '#000' }}>
+                      Quiz Progress: 0%
+                    </div>
+                  </div>
+                ) : quizProgress === 0 ? (
+                  <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
+                      Quiz Progress: 0% (No quizzes attempted yet)
+                    </div>
+                    <div className="lecture-progress-bar-track">
+                      <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
+                    </div>
+                    <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                      Start your first quiz!
+                    </span>
+                  </div>
+                ) : (
+                  <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
+                      Quiz Progress - {completedQuizCount} out of {totalQuizCount}
+                    </div>
+                    <div className="lecture-progress-bar-track">
+                      <div className="lecture-progress-bar-fill" style={{ width: `${quizProgress}%`, background: '#1cc524' }}></div>
+                    </div>
+                    <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
+                      {quizProgress}%
+                    </span>
+                  </div>
+                )
+              ) : quizCount > 0 ? (
                 <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
                   <div style={{ fontWeight: 600, marginBottom: 8, color: '#000' }}>
                     Quiz Progress: 0%
                   </div>
                 </div>
-              ) : quizProgress === 0 ? (
-                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
-                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
-                    Quiz Progress: 0% (No quizzes attempted yet)
-                  </div>
-                  <div className="lecture-progress-bar-track">
-                    <div className="lecture-progress-bar-fill" style={{ width: `0%`, background: '#1cc524' }}></div>
-                  </div>
-                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
-                    Start your first quiz!
-                  </span>
+              ) : null}
+              
+              {/* Show total lectures and quizzes count above the buttons */}
+              {lectLength > 0 && (
+                <div style={{ fontWeight: 500, color: '#007aff', margin: '10px 0 2px 0', textAlign: 'center' }}>
+                  Total Lectures: {lectLength}
                 </div>
-              ) : (
-                <div className="lecture-progress-bar" style={{ margin: "12px 0" }}>
-                  <div style={{ fontWeight: 600, marginBottom: 8, textAlign: "center", color: '#000' }}>
-                    Quiz Progress - {completedQuizCount} out of {totalQuizCount}
-                  </div>
-                  <div className="lecture-progress-bar-track">
-                    <div className="lecture-progress-bar-fill" style={{ width: `${quizProgress}%`, background: '#1cc524' }}></div>
-                  </div>
-                  <span className="lecture-progress-bar-percent" style={{ color: "#1cc524", fontWeight: 700, fontSize: "1.1rem" }}>
-                    {quizProgress}%
-                  </span>
-                </div>
-              )
-            ) : quizCount > 0 ? (
-              <div className="lecture-progress-bar" style={{ margin: "12px 0", textAlign: "center" }}>
-                <div style={{ fontWeight: 600, marginBottom: 8, color: '#000' }}>
-                  Quiz Progress: 0%
-                </div>
-              </div>
-            ) : null}
-            
-            {/* Show total lectures and quizzes count above the buttons */}
-            {lectLength > 0 && (
-              <div style={{ fontWeight: 500, color: '#007aff', margin: '10px 0 2px 0', textAlign: 'center' }}>
-                Total Lectures: {lectLength}
-              </div>
-            )}
-            
+              )}
+              
 
-            {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                onClick={() => {
-                  if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
-                    navigate(`/lectures/${course._id}`);
-                  } else {
-                    alert("Invalid course ID");
-                  }
-                }}
-                disabled={enrolling}
-              >
-                Start Learning
-              </button>
-            ) : (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                onClick={handleEnroll}
-                disabled={enrolling}
-              >
-                {enrolling ? "Processing..." : "Enroll"}
-              </button>
-            )}
-
-            
-            {quizCount > 0 && (
-              <div style={{ fontWeight: 500, color: '#007aff', margin: '2px 0 14px 0', textAlign: 'center' }}>
-                Total Quizzes: {quizCount}
-              </div>
-            )}
-            {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                onClick={() => {
-                  if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
-                    navigate(`/quiz/${course._id}`);
-                  } else {
-                    alert("Invalid course ID");
-                  }
-                }}
-                disabled={enrolling}
-              >
-                Quizs
-              </button>
-            ) : (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                onClick={handleEnroll}
-                disabled={enrolling}
-              >
-                {enrolling ? "Processing..." : "Enroll"}
-              </button>
-            )}
-            {/* Final Assessment Button */}
-            {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                style={{ marginTop: 8, background: '#34d399' }}
-                onClick={() => {
-                  if (isAdmin || isSuperadmin) {
-                    navigate(`/admin/course/${course._id}/assessments`);
-                  } else if (isCourseInstructor) {
-                    navigate(`/instructor/course/${course._id}/assessments`);
-                  } else {
-                    navigate(`/course/${course._id}/assessment`);
-                  }
-                }}
-              >
-                Final Assessment
-              </button>
-            )}
-            {/* Certificate Button */}
-            {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
-              <button
-                className="cd-btn-primary cd-enroll-btn"
-                style={{ marginTop: 8, background: '#f59e0b' }}
-                onClick={() => navigate(`/course/${course._id}/certificate`)}
-              >
-                🎓 Get Certificate
-              </button>
-            )}
-
-            {/* Preview Video */}
-            {course.previewVideo && (
-              <div className="cd-preview-video">
-                <video
-                  width="100%"
-                  height="160"
-                  controls
-                  style={{ borderRadius: 12, marginTop: 12 }}
+              {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
+                <button
+                  className="cd-btn-primary cd-enroll-btn"
+                  onClick={() => {
+                    if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
+                      navigate(`/lectures/${course._id}`);
+                    } else {
+                      alert("Invalid course ID");
+                    }
+                  }}
+                  disabled={enrolling}
                 >
-                  <source
-                    src={`${server}/${course.previewVideo}`}
-                    type="video/mp4"
-                  />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            )}
+                  Start Learning
+                </button>
+              ) : (
+                <button
+                  className="cd-btn-primary cd-enroll-btn"
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                >
+                  {enrolling ? "Processing..." : "Enroll"}
+                </button>
+              )}
+
+              
+              {quizCount > 0 && (
+                <div style={{ fontWeight: 500, color: '#007aff', margin: '2px 0 14px 0', textAlign: 'center' }}>
+                  Total Quizzes: {quizCount}
+                </div>
+              )}
+              {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
+                <button
+                  className="cd-btn-primary cd-enroll-btn"
+                  onClick={() => {
+                    if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
+                      navigate(`/quiz/${course._id}`);
+                    } else {
+                      alert("Invalid course ID");
+                    }
+                  }}
+                  disabled={enrolling}
+                >
+                  Quizs
+                </button>
+              ) : (
+                <button
+                  className="cd-btn-primary cd-enroll-btn"
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                >
+                  {enrolling ? "Processing..." : "Enroll"}
+                </button>
+              )}
+              {/* Final Assessment Button */}
+              {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
+                <button
+                  className="cd-btn-primary cd-enroll-btn"
+                  style={{ marginTop: 8, background: '#34d399' }}
+                  onClick={() => {
+                    if (isAdmin || isSuperadmin) {
+                      navigate(`/admin/course/${course._id}/assessments`);
+                    } else if (isCourseInstructor) {
+                      navigate(`/instructor/course/${course._id}/assessments`);
+                    } else {
+                      navigate(`/course/${course._id}/assessment`);
+                    }
+                  }}
+                >
+                  Final Assessment
+                </button>
+              )}
+              {/* Certificate Button */}
+              {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
+                <button
+                  className="cd-btn-primary cd-enroll-btn"
+                  style={{ marginTop: 8, background: '#f59e0b' }}
+                  onClick={() => navigate(`/course/${course._id}/certificate`)}
+                >
+                  🎓 Get Certificate
+                </button>
+              )}
+
+              {/* Preview Video */}
+              {course.previewVideo && (
+                <div className="cd-preview-video">
+                  <video
+                    width="100%"
+                    height="160"
+                    controls
+                    style={{ borderRadius: 12, marginTop: 12 }}
+                  >
+                    <source
+                      src={`${server}/${course.previewVideo}`}
+                      type="video/mp4"
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="cd-instructor-card" data-aos="fade-up">
-        <img
-          src={
-            course.instructorAvatar
-              ? `${server}/${course.instructorAvatar}`
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  course.instructorName || course.createdBy || "Instructor"
-                )}&background=34c759&color=fff&rounded=true&size=64`
-          }
-          alt="Instructor"
-          className="cd-instructor-avatar"
-        />
-        <div>
-          <div className="cd-instructor-name">
-            {course.instructorName || course.createdBy || "Instructor"}
+        {/* Instructor and Review Section Side by Side */}
+        <div className="cd-side-by-side-row">
+          <div className="cd-instructor-card" data-aos="fade-up">
+            <img
+              src={
+                course.instructorAvatar
+                  ? `${server}/${course.instructorAvatar}`
+                  : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      course.instructorName || course.createdBy || "Instructor"
+                    )}&background=34c759&color=fff&rounded=true&size=64`
+              }
+              alt="Instructor"
+              className="cd-instructor-avatar"
+            />
+            <div>
+              <div className="cd-instructor-name">
+                {course.instructorName || course.createdBy || "Instructor"}
+              </div>
+              <div className="cd-instructor-bio">
+                {course.instructorBio ||
+                  "Experienced software engineer and educator with a passion for teaching data structures and algorithms."}
+              </div>
+            </div>
           </div>
-          <div className="cd-instructor-bio">
-            {course.instructorBio ||
-              "Experienced educator and subject matter expert."}
+          <div className="cd-review-box-wrapper" data-aos="fade-up">
+            <CourseReviewBox courseId={course._id} user={user} />
           </div>
         </div>
-      </div>
-      <div className="cd-review-box-wrapper" data-aos="fade-up">
-        <CourseReviewBox courseId={course._id} user={user} />
-      </div>
-
-      <div className="cd-section" style={{ marginTop: 32 }}>
-        <h3>Course Content</h3>
-        {loadingContent ? (
-          <div>Loading content...</div>
-        ) : (
-          isInstructor ? (
-            <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                {contentList.map(item => (
-                  <DraggableItem key={item.id} item={item} isDraggable={true} />
-                ))}
-              </SortableContext>
-            </DndContext>
-          ) : (
-            contentList.map(item => (
-              <div
-                key={item.id}
-                style={{
-                  border: '1px solid #eee',
-                  borderRadius: 8,
-                  margin: '8px 0',
-                  background: '#fff',
-                  padding: 16,
-                  cursor: item.type === 'lecture' || item.type === 'quiz' ? 'pointer' : 'default'
-                }}
-                onClick={() => {
-                  if (item.type === 'lecture') navigate(`/lectures/${course._id}?lectureId=${item.id}`);
-                  else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
-                }}
-              >
-                {item.type === 'lecture' ? (
-                  <span>Lecture: {item.title}</span>
-                ) : (
-                  <span>Quiz: {item.title}</span>
-                )}
-              </div>
-            ))
-          )
-        )}
+        {/* Removed Course Content section here */}
       </div>
     </div>
   );
