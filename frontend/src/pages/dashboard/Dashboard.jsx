@@ -28,6 +28,7 @@ import { MdTrendingUp } from 'react-icons/md';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import Modal from '../../components/Modal';
+import ProfileModal from '../../components/ProfileModal';
 
 const Dashboard = () => {
   const { mycourse } = CourseData();
@@ -72,6 +73,7 @@ const Dashboard = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDayDetails, setSelectedDayDetails] = useState([]);
   const [calendarLoading, setCalendarLoading] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   // Calculate quiz points from userRewards
   const quizPoints = userRewards
@@ -345,7 +347,15 @@ const Dashboard = () => {
           </div>
           <div className="welcome-avatar">
             <div className="avatar-circle">
-              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              {user?.photo ? (
+                <img
+                  src={`${server}/${user.photo}`}
+                  alt="Profile"
+                  style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                user?.name?.charAt(0)?.toUpperCase() || 'U'
+              )}
             </div>
           </div>
         </div>
@@ -567,7 +577,7 @@ const Dashboard = () => {
                 <FaCalendarAlt />
                 <span>Events</span>
               </button>
-              <button className="action-btn" onClick={() => navigate('/account')}>
+              <button className="action-btn" onClick={() => setProfileModalOpen(true)}>
                 <FaCog />
                 <span>Settings</span>
               </button>
@@ -713,6 +723,14 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      <ProfileModal
+        open={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        user={user}
+        logoutHandler={() => {}}
+        goToDashboard={() => {}}
+        canEdit={true}
+      />
     </div>
   );
 };

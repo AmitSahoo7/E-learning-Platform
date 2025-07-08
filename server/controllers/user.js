@@ -10,7 +10,7 @@ import { Reward } from "../models/Reward.js";
 import { UserActivity } from "../models/UserActivity.js";
 
 export const register = TryCatch(async (req, res) => {
-  const { email, name, password, role } = req.body;
+  const { email, name, password, role, mobile } = req.body;
 
   let user = await User.findOne({ email });
 
@@ -21,11 +21,18 @@ export const register = TryCatch(async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
+  let photo = '';
+  if (req.file) {
+    photo = req.file.path;
+  }
+
   user = {
     name,
     email,
     password: hashPassword,
     role: role || 'user',
+    mobile: mobile || '',
+    photo,
   };
 
   const otp = Math.floor(Math.random() * 1000000);
@@ -74,6 +81,8 @@ export const verifyUser = TryCatch(async (req, res) => {
     email: verify.user.email,
     password: verify.user.password,
     role: verify.user.role || 'user',
+    mobile: verify.user.mobile || '',
+    photo: verify.user.photo || '',
   });
 
   res.json({
@@ -113,6 +122,20 @@ export const myProfile = TryCatch(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   res.json({ user });
+});
+
+export const updateProfile = TryCatch(async (req, res) => {
+  const userId = req.user._id;
+  const { name, mobile } = req.body;
+  const update = {};
+  if (name) update.name = name;
+  if (mobile) update.mobile = mobile;
+  if (req.file) update.photo = req.file.path;
+
+  if (!name && !mobile && !req.file) return res.status(400).json({ message: "No data to update" });
+
+  const user = await User.findByIdAndUpdate(userId, update, { new: true });
+  res.json({ message: "Profile updated", user });
 });
 
 export const forgotPassword = TryCatch(async (req, res) => {

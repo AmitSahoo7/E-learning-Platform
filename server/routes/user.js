@@ -13,19 +13,22 @@ import {
   getUserRecentActivity,
   getUserWeeklyProgress,
   getTodayLectureMinutes,
-  logLectureWatch
+  logLectureWatch,
+  updateProfile
 } from "../controllers/user.js";
 import { isAuth } from '../middlewares/isAuth.js';
+import { uploadUserPhoto } from '../middlewares/multer.js';
 import { addProgress, getYourProgress } from '../controllers/course.js';
 
 const router = express.Router();
 
-router.post("/user/register", register);
+router.post("/user/register", uploadUserPhoto, register);
 router.post("/user/verify", verifyUser);
 router.post("/user/login", loginUser);
 router.get("/user/me", isAuth, myProfile);
 router.post("/user/progress", isAuth, addProgress);
 router.get("/user/progress", isAuth, getYourProgress);
+router.patch("/user/update-profile", isAuth, uploadUserPhoto, updateProfile);
 
 // Dashboard routes
 router.get("/user/dashboard-stats", isAuth, getDashboardStats);
