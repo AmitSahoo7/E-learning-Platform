@@ -348,6 +348,12 @@ const Lecture = ({ user }) => {
     marginTop: -2
   };
 
+  // Use existing logic for lecture and quiz progress
+  const lectureProgressPercent = lectLength ? Math.round((completedLec / lectLength) * 100) : 0;
+  const quizCount = contentList.filter(item => item.type === 'quiz').length;
+  const completedQuizCount = progress && progress[0] && Array.isArray(progress[0].quizScores) ? progress[0].quizScores.length : 0;
+  const quizProgressPercent = quizCount ? Math.round((completedQuizCount / quizCount) * 100) : 0;
+
   function DraggableItem({ item, isDraggable, onClick, isActive }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
     return (
@@ -390,10 +396,10 @@ const Lecture = ({ user }) => {
           {item.title}
         </span>
         {item.type === 'lecture' && item.video && (
-          <span className="point-badge-modern" style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>+1 point</span>
+          <span className="point-badge-modern">+1 point</span>
         )}
         {item.type === 'quiz' && (
-          <span className="point-badge-modern" style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>+5 point</span>
+          <span className="point-badge-modern">+5 points</span>
         )}
         {isInstructor && item.type === 'quiz' && (
           <>
@@ -489,130 +495,145 @@ const Lecture = ({ user }) => {
       {loading ? (
         <Loading />
       ) : (
-        <div className="lecture-page-modern">
-          <div className="lecture-main-flex-row">
-            {/* Left: Video, Description, Comments */}
-            <div className="lecture-main-left-col">
-              {lecture?.video ? (
-                <div className="lecture-video-section-modern">
-                  <video
-                    src={`${server}/${lecture.video}`}
-                    width="100%"
-                    controls
-                    controlsList="nodownload noremoteplayback"
-                    disablePictureInPicture
-                    disableRemotePlayback
-                    autoPlay
-                    onEnded={handleVideoEnded}
-                    style={{ borderRadius: "20px", marginBottom: "1.5rem", marginTop: "0.5rem", boxShadow: '0 8px 40px 0 rgba(60, 255, 180, 0.13)' }}
-                  ></video>
+        <>
+          {/* Progress Bars at the very top, outside main content */}
+          <div className="lecture-progress-sticky">
+            <div style={{ width: '100%', maxWidth: 900, margin: '0 auto 0 auto', padding: '0 12px' }}>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontWeight: 700, color: '#63e642', marginBottom: 4 }}>Lecture Progress</div>
+                <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
+                  <div style={{ width: `${lectureProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
                 </div>
-              ) : (
-                <h2 style={{ marginTop: "2rem", textAlign: "center" }}>
-                  Please Select a Lecture
-                </h2>
-              )}
-              {lecture?.title && (
-                <div className="lecture-info-modern">
-                  <h2 className="lecture-title-modern">
-                    {lecture?.title}
-                  </h2>
-                  <div className="lecture-meta-modern" style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
-                    <span>Design</span>
-                    <span style={{ marginLeft: 16 }}>3 Month</span>
-                  </div>
-                  <div className="lecture-description-modern" style={{ margin: "8px 0" }}>
-                    <b>Description:</b>
-                    <div style={{ marginTop: 4 }}>{lecture?.description}</div>
-                  </div>
-                  <button className="notes-btn-modern" onClick={() => {
-                    if (lecture.pdf) {
-                      window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
-                    } else {
-                      window.alert('No notes available.');
-                    }
-                  }}>Notes</button>
+                <span style={{ color: '#fff', fontSize: 14 }}>{completedLec} / {lectLength} lectures completed ({lectureProgressPercent}%)</span>
+              </div>
+              <div>
+                <div style={{ fontWeight: 700, color: '#43e97b', marginBottom: 4 }}>Quiz Progress</div>
+                <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
+                  <div style={{ width: `${quizProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
                 </div>
-              )}
-              {lecture?._id && (
-                <div className="lecture-comment-modern">
-                  <LectureCommentSection
-                    lectureId={lecture._id}
-                    isPaidUser={user?.subscription?.includes(params.id) || user?.role === "admin"}
-                    user={user}
-                  />
-                </div>
-              )}
-            </div>
-            {/* Right: Lecture/Quiz List */}
-            <div className="lecture-main-right-col">
-              <div className="lecture-list-glass-container">
-                {user && (user.role === 'admin' || user.role === 'instructor') && (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 18 }}>
-                    <button className="common-btn" onClick={() => setShow(!show)}>
-                      {show ? "Close" : "Add Lecture +"}
-                    </button>
-                    <button className="common-btn" onClick={() => setShowCreateQuiz(true)}>
-                      Create Quiz +
-                    </button>
-                  </div>
-                )}
-                {show && user && (user.role === 'admin' || user.role === 'instructor') && (
-                  <div className="lecture-form-box">
-                    <div className="lecture-form">
-                      <form onSubmit={submitHandler}>
-                        <label>Title</label>
-                        <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-                        <label>Description</label>
-                        <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
-                        <label>Video File</label>
-                        <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
-                        <label>PDF File (optional)</label>
-                        <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
-                        <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
-                      </form>
-                    </div>
-                  </div>
-                )}
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                    <div className="lecture-list-vertical-scroll">
-                      {contentList.map((item, i) => (
-                        <DraggableItem
-                          key={item.id}
-                          item={item}
-                          isDraggable={isInstructor}
-                          onClick={() => {
-                            if (item.type === 'lecture') fetchLecture(item.id);
-                            else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
-                          }}
-                          isActive={lecture?._id === item.id}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
+                <span style={{ color: '#fff', fontSize: 14 }}>{completedQuizCount} / {quizCount} quizzes completed ({quizProgressPercent}%)</span>
               </div>
             </div>
           </div>
-          {showEditQuiz && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-                <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowEditQuiz(false)}>×</button>
-                <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ fetchContent(); }} />
+          <div className={`lecture-page-modern`}>
+            <div className={`lecture-main-flex-row${!lecture?.video ? ' center-list' : ''}`}>
+              {lecture?.video && (
+                <div className="lecture-main-left-col">
+                  <div className="lecture-video-section-modern">
+                    <video
+                      src={`${server}/${lecture.video}`}
+                      width="100%"
+                      controls
+                      controlsList="nodownload noremoteplayback"
+                      disablePictureInPicture
+                      disableRemotePlayback
+                      autoPlay
+                      onEnded={handleVideoEnded}
+                      style={{ borderRadius: "20px", marginBottom: "1.5rem", marginTop: "0.5rem", boxShadow: '0 8px 40px 0 rgba(60, 255, 180, 0.13)' }}
+                    ></video>
+                  </div>
+                  {lecture?.title && (
+                    <div className="lecture-info-modern">
+                      <h2 className="lecture-title-modern">
+                        {lecture?.title}
+                      </h2>
+                      <div className="lecture-meta-modern" style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
+                        <span>Design</span>
+                        <span style={{ marginLeft: 16 }}>3 Month</span>
+                      </div>
+                      <div className="lecture-description-modern" style={{ margin: "8px 0" }}>
+                        <b>Description:</b>
+                        <div style={{ marginTop: 4 }}>{lecture?.description}</div>
+                      </div>
+                      <button className="notes-btn-modern" onClick={() => {
+                        if (lecture.pdf) {
+                          window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
+                        } else {
+                          window.alert('No notes available.');
+                        }
+                      }}>Notes</button>
+                    </div>
+                  )}
+                  {lecture?._id && (
+                    <div className="lecture-comment-modern">
+                      <LectureCommentSection
+                        lectureId={lecture._id}
+                        isPaidUser={user?.subscription?.includes(params.id) || user?.role === "admin"}
+                        user={user}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="lecture-main-right-col">
+                <div className="lecture-list-glass-container">
+                  {user && (user.role === 'admin' || user.role === 'instructor') && (
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 18 }}>
+                      <button className="common-btn" onClick={() => setShow(!show)}>
+                        {show ? "Close" : "Add Lecture +"}
+                      </button>
+                      <button className="common-btn" onClick={() => setShowCreateQuiz(true)}>
+                        Create Quiz +
+                      </button>
+                    </div>
+                  )}
+                  {show && user && (user.role === 'admin' || user.role === 'instructor') && (
+                    <div className="lecture-form-box">
+                      <div className="lecture-form">
+                        <form onSubmit={submitHandler}>
+                          <label>Title</label>
+                          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                          <label>Description</label>
+                          <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
+                          <label>Video File</label>
+                          <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
+                          <label>PDF File (optional)</label>
+                          <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
+                          <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
+                        </form>
+                      </div>
+                    </div>
+                  )}
+                  <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                      <div className="lecture-list-vertical-scroll">
+                        {contentList.map((item, i) => (
+                          <DraggableItem
+                            key={item.id}
+                            item={item}
+                            isDraggable={isInstructor}
+                            onClick={() => {
+                              if (item.type === 'lecture') fetchLecture(item.id);
+                              else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
+                            }}
+                            isActive={lecture?._id === item.id}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                </div>
               </div>
             </div>
-          )}
-          {/* Create Quiz Modal */}
-          {showCreateQuiz && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-                <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowCreateQuiz(false)}>×</button>
-                <AddQuiz courseId={params.id} onSuccess={() => { setShowCreateQuiz(false); /* refresh content list if needed */ }} />
+            {showEditQuiz && (
+              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                  <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowEditQuiz(false)}>×</button>
+                  <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ fetchContent(); }} />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+            {/* Create Quiz Modal */}
+            {showCreateQuiz && (
+              <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
+                  <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowCreateQuiz(false)}>×</button>
+                  <AddQuiz courseId={params.id} onSuccess={() => { setShowCreateQuiz(false); /* refresh content list if needed */ }} />
+                </div>
+              </div>
+            )}
+          </div>
+        </>
       )}
     </>
   );
