@@ -1,12 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend } from "recharts";
 import { useNavigate } from "react-router-dom";
 import "./instructorDashboard.css";
+import { FaChalkboardTeacher } from "react-icons/fa";
 
 const BACKEND_URL = "http://localhost:4000"; // Change to your backend URL if different
 
 const InstructorDashboard = () => {
+  // Move this block to the very top of the component, before any useState/useRef
+  const userStr = localStorage.getItem("user");
+  let instructorName = "Instructor";
+  let instructorEmail = "";
+  let instructorPhoto = "";
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user && user.name) instructorName = user.name;
+      if (user && user.email) instructorEmail = user.email;
+      if (user && user.photo) instructorPhoto = user.photo;
+    } catch {}
+  }
   const [courseStats, setCourseStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +31,10 @@ const InstructorDashboard = () => {
   const [modalError, setModalError] = useState(null);
   const [animatedChartData, setAnimatedChartData] = useState([]);
   const navigate = useNavigate();
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editName, setEditName] = useState(instructorName);
+  const [editPhoto, setEditPhoto] = useState(null);
+  const fileInputRef = useRef();
 
   useEffect(() => {
     const fetchCourseStats = async () => {
@@ -110,8 +128,21 @@ const InstructorDashboard = () => {
   };
 
   return (
-    <div className="instructor-dashboard-wrapper">
-      <h2 className="instructor-dashboard-title">Instructor Dashboard</h2>
+    <div className="instructor-dashboard-wrapper" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+      {/* Floating particles background */}
+      <div className="floating-particles-bg">
+        {[...Array(18)].map((_, i) => (
+          <div key={i} className="floating-particle" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 6}s` }} />
+        ))}
+      </div>
+      
+      <h2 className="instructor-dashboard-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, fontSize: 36, fontWeight: 700, color: '#3ecf8e', margin: '0 auto 18px auto', textAlign: 'center', textShadow: '0 0 16px #3ecf8e55' }}>
+        <FaChalkboardTeacher style={{ fontSize: 40, color: '#3ecf8e', filter: 'drop-shadow(0 0 8px #3ecf8e88)' }} />
+        Instructor Dashboard
+      </h2>
+      <h3 className="instructor-greeting" style={{ color: '#3ecf8e', marginBottom: 32, fontWeight: 500, fontSize: 24, textShadow: '0 0 8px #3ecf8e55' }}>
+        Welcome back, {instructorName}!
+      </h3>
       {/* Bar Chart for Enrolled Users per Course */}
       {Array.isArray(chartData) && chartData.length > 1 && (
         <div className="dashboard-chart-scroll">
@@ -214,6 +245,35 @@ const InstructorDashboard = () => {
           </div>
         </div>
       )}
+      <style>{`
+        .floating-particles-bg {
+          position: absolute;
+          top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 0;
+        }
+        .floating-particle {
+          position: absolute;
+          bottom: -40px;
+          width: 18px; height: 18px;
+          border-radius: 50%;
+          background: radial-gradient(circle, #3ecf8e 60%, #232a34 100%);
+          opacity: 0.18;
+          animation: floatUp 6s linear infinite;
+        }
+        @keyframes floatUp {
+          0% { transform: translateY(0) scale(1); opacity: 0.18; }
+          60% { opacity: 0.32; }
+          100% { transform: translateY(-90vh) scale(1.2); opacity: 0; }
+        }
+        @keyframes bounce {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-10px); }
+        }
+        .glassy-card:hover {
+          box-shadow: 0 0 48px 0 #3ecf8e99, 0 2px 16px 0 #000a;
+          border-color: #3ecf8e88;
+          background: linear-gradient(135deg, #232a34ee 60%, #3ecf8e22 100%);
+        }
+      `}</style>
     </div>
   );
 };

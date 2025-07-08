@@ -28,3 +28,5 @@ export const uploadCourseFiles = multer({ storage }).fields([
   { name: "instructorAvatar", maxCount: 1 },
   { name: "previewVideo", maxCount: 1 },
 ]);
+
+export const uploadUserPhoto = multer({ storage }).single('photo');

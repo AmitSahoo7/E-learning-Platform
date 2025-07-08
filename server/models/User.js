@@ -13,6 +13,14 @@ const schema=new mongoose.Schema({
         type:String,
         required:true,
     },
+    mobile: {
+        type: String,
+        default: '',
+    },
+    photo: {
+        type: String,
+        default: '',
+    },
     role:{
         type:String,
         default:"user",

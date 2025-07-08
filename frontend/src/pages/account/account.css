@@ -43,9 +43,50 @@
 }
 
 .profile-info {
-  text-align: center;
-  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
+.profile-info label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #3ecf8e;
+  font-weight: 600;
+  text-align: left;
+  width: 100%;
+  max-width: 320px;
+}
+
+.profile-info input[type="text"],
+.profile-info input[type="tel"] {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  border: 1.5px solid #3ecf8e;
+  font-size: 1rem;
+  background: #181c28;
+  color: #fff;
+  box-sizing: border-box;
+  display: block;
+}
+
+.profile-info input[type="file"] {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 1rem;
+  padding: 0.3rem 0;
+  background: none;
+  border: none;
+  color: #fff;
+}
+
+.profile-info .profile-avatar {
+  margin-bottom: 1rem;
+}
+
 .profile-info p {
   margin-bottom: 7px;
   color: #333;
