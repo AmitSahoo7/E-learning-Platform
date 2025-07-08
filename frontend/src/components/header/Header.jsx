@@ -29,26 +29,19 @@ const navLinks = [
   { name: "Leaderboard", path: "/leaderboard", icon: <Trophy size={18} style={{ marginLeft: 4, color: '#FFD700' }} /> },
 ];
 
-const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnouncementRead }) => {
+const Header = ({ isAuth, announcements = [], markAnnouncementRead, markAnnouncementCleared }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [modal, setModal] = useState(null); // { message, timestamp }
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [clearedIds, setClearedIds] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem('clearedAnnouncements') || '[]');
-    } catch {
-      return [];
-    }
-  });
   const [liveAnnouncements, setLiveAnnouncements] = useState(announcements);
   const dropdownRef = useRef(null);
   const dropdownContentRef = useRef(null);
   const { user, setIsAuth, setUser } = UserData ? UserData() : { user: null, setIsAuth: () => {}, setUser: () => {} };
   const bellRef = useRef(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 60, right: 20 });
-  // Filter out invalid announcements
-  const validAnnouncements = liveAnnouncements.filter(a => a && typeof a === 'object' && typeof a.message === 'string' && !clearedIds.includes(a._id));
-  const unreadCount = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).length;
+  // Only show announcements that are not cleared
+  const validAnnouncements = liveAnnouncements.filter(a => a && typeof a === 'object' && typeof a.message === 'string' && !a.isCleared);
+  const unreadCount = validAnnouncements.filter(a => !a.isRead).length;
   const location = useLocation();
 
   // Handle click outside to close dropdown
@@ -58,11 +51,9 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
         setShowDropdown(false);
       }
     };
-
     if (showDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -90,57 +81,21 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
     }
   };
   const handleClearAll = () => {
-    const allIds = validAnnouncements.map(a => a._id);
-    localStorage.setItem('readAnnouncements', JSON.stringify(allIds));
-    localStorage.setItem('clearedAnnouncements', JSON.stringify([...clearedIds, ...allIds]));
-    setClearedIds(prev => [...prev, ...allIds]);
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('storage'));
-    }
-    if (typeof markAnnouncementRead === 'function') {
-      markAnnouncementRead('__all__');
-    }
+    if (markAnnouncementCleared) markAnnouncementCleared("__all__");
   };
-  // Add read all handler
   const handleReadAll = () => {
-    const unreadIds = validAnnouncements.filter(a => !readAnnouncements.includes(a._id)).map(a => a._id);
-    const updated = [...readAnnouncements, ...unreadIds];
-    localStorage.setItem('readAnnouncements', JSON.stringify(updated));
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('storage'));
-    }
-    if (typeof markAnnouncementRead === 'function') {
-      markAnnouncementRead('__all__');
-    }
+    if (markAnnouncementRead) markAnnouncementRead("__all__");
   };
-  // Add per-announcement read and clear handlers
   const handleReadOne = (id) => {
-    if (!readAnnouncements.includes(id)) {
-      const updated = [...readAnnouncements, id];
-      localStorage.setItem('readAnnouncements', JSON.stringify(updated));
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('storage'));
-      }
-      if (typeof markAnnouncementRead === 'function') {
-        markAnnouncementRead(id);
-      }
-    }
+    if (markAnnouncementRead) markAnnouncementRead(id);
   };
   const handleClearOne = (id) => {
-    if (!clearedIds.includes(id)) {
-      const updated = [...clearedIds, id];
-      localStorage.setItem('clearedAnnouncements', JSON.stringify(updated));
-      setClearedIds(updated);
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('storage'));
-      }
-    }
+    if (markAnnouncementCleared) markAnnouncementCleared(id);
   };
   // Poll for new announcements every 10 seconds
   useEffect(() => {
     setLiveAnnouncements(announcements);
     const interval = setInterval(() => {
-      // Optionally, fetch announcements from backend here if not passed as prop
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event('storage'));
       }
@@ -187,14 +142,14 @@ const Header = ({ isAuth, announcements = [], readAnnouncements = [], markAnnoun
         <div className="dropdown-content" ref={dropdownContentRef}>
           {validAnnouncements.map((a, i) => (
             <div
-              className={`dropdown-announcement${readAnnouncements.includes(a._id) ? '' : ' unread'}`}
+              className={`dropdown-announcement${a.isRead ? '' : ' unread'}`}
               key={a._id || i}
               onClick={() => handleAnnouncementClick(a)}
             >
               <div className="dropdown-announcement-msg">{a.message ? (a.message.length > 40 ? a.message.slice(0, 40) + '...' : a.message) : 'No message'}</div>
               <div className="dropdown-announcement-time">{a.createdAt ? timeAgo(a.createdAt) : (a.timestamp ? timeAgo(a.timestamp) : '')}</div>
               <div style={{display:'flex',gap:'6px',marginTop:'4px'}}>
-                {!readAnnouncements.includes(a._id) && (
+                {!a.isRead && (
                   <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleReadOne(a._id);}}>Read</button>
                 )}
                 <button className="clear-all-btn" style={{background:'#10b981',color:'#fff',border:'none',borderRadius:'4px',padding:'2px 8px',fontSize:'0.85em',cursor:'pointer'}} onClick={e => {e.stopPropagation(); handleClearOne(a._id);}}>Clear</button>

@@ -7,6 +7,7 @@ import fs from "fs";
 import { User } from "../models/User.js";
 import { Payment } from "../models/Payment.js";
 import Announcement from "../models/Announcement.js";
+import UserAnnouncementStatus from "../models/UserAnnouncementStatus.js";
 
 export const createCourse = TryCatch(async (req, res) => {
   const { 
@@ -333,6 +334,51 @@ export const getAnnouncements = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate("createdBy", "name email role");
     res.json({ announcements });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get all announcements with user-specific status
+export const getAnnouncementsWithStatus = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const announcements = await Announcement.find().sort({ createdAt: -1 }).populate("createdBy", "name email role");
+    const statusList = await UserAnnouncementStatus.find({ userId });
+    const statusMap = {};
+    statusList.forEach(status => {
+      statusMap[status.announcementId.toString()] = status;
+    });
+    const announcementsWithStatus = announcements.map(a => {
+      const status = statusMap[a._id.toString()] || {};
+      return {
+        ...a.toObject(),
+        isRead: status.isRead || false,
+        isCleared: status.isCleared || false,
+      };
+    });
+    res.json({ announcements: announcementsWithStatus });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Mark an announcement as read or cleared for the current user
+export const markAnnouncementStatus = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { announcementId } = req.body;
+    const { isRead, isCleared } = req.body;
+    if (!announcementId) return res.status(400).json({ message: "announcementId is required" });
+    let status = await UserAnnouncementStatus.findOne({ userId, announcementId });
+    if (!status) {
+      status = new UserAnnouncementStatus({ userId, announcementId });
+    }
+    if (typeof isRead === 'boolean') status.isRead = isRead;
+    if (typeof isCleared === 'boolean') status.isCleared = isCleared;
+    status.updatedAt = new Date();
+    await status.save();
+    res.json({ message: "Status updated", status });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
