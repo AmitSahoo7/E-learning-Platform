@@ -20,17 +20,14 @@ const Lecture = ({ user }) => {
   const [lectures, setLectures] = useState([]);
   const [lecture, setLecture] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [lecLoading, setLecLoading] = useState(false);
   const [show, setShow] = useState(false);
   const params = useParams();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [video, setvideo] = useState("");
-  const [videoPrev, setVideoPrev] = useState("");
   const [btnLoading, setBtnLoading] = useState(false);
   const [pdf, setPdf] = useState("");
-  const [showPdfModal, setShowPdfModal] = useState(false);
   const [contentList, setContentList] = useState([]);
   const [loadingContent, setLoadingContent] = useState(true);
   const [showEditQuiz, setShowEditQuiz] = useState(false);
@@ -78,7 +75,6 @@ const Lecture = ({ user }) => {
   }
 
   async function fetchLecture(id) {
-    setLecLoading(true);
     try {
       const { data } = await axios.get(`${server}/api/lecture/${id}`, {
         headers: {
@@ -86,10 +82,8 @@ const Lecture = ({ user }) => {
         },
       });
       setLecture(data.lecture);
-      setLecLoading(false);
     } catch (error) {
       console.log(error);
-      setLecLoading(false);
     }
   }
 
@@ -100,7 +94,6 @@ const Lecture = ({ user }) => {
     reader.readAsDataURL(file);
 
     reader.onloadend = () => {
-      setVideoPrev(reader.result);
       setvideo(file);
     };
   };
@@ -130,7 +123,6 @@ const Lecture = ({ user }) => {
       setTitle("");
       setDescription("");
       setvideo("");
-      setVideoPrev("");
       setPdf("");
     } catch (error) {
       toast.error(error.response.data.message);
@@ -155,10 +147,14 @@ const Lecture = ({ user }) => {
     }
   };
 
-  const [completed, setCompleted] = useState("");
   const [completedLec, setCompletedLec] = useState("");
   const [lectLength, setLectLength] = useState("");
   const [progress, setProgress] = useState([]);
+  // Add state for quiz progress
+  const [quizProgress, setQuizProgress] = useState(0);
+  const [completedQuizCount, setCompletedQuizCount] = useState(0);
+  const [totalQuizCount, setTotalQuizCount] = useState(0);
+
 
   async function fetchProgress() {
     try {
@@ -170,43 +166,28 @@ const Lecture = ({ user }) => {
           },
         }
       );
-      setCompleted(data.courseProgressPercentage || 0);
       setCompletedLec(data.completedLectures || 0);
       setLectLength(data.allLectures || 0);
       setProgress(data.progress || []);
+      // Quiz progress logic
+      const safeQuizCount = data.allQuizzes || 0;
+      const safeCompletedQuiz = Math.min(data.completedQuizzes || 0, safeQuizCount);
+      let quizPercent = safeQuizCount > 0 ? Math.round((safeCompletedQuiz / safeQuizCount) * 100) : 0;
+      quizPercent = Math.min(quizPercent, 100);
+      setQuizProgress(quizPercent);
+      setCompletedQuizCount(safeCompletedQuiz);
+      setTotalQuizCount(safeQuizCount);
     } catch (error) {
       // If 404 or error, set all to 0/defaults
-      setCompleted(0);
       setCompletedLec(0);
       setLectLength(0);
       setProgress([]);
+      setQuizProgress(0);
+      setCompletedQuizCount(0);
+      setTotalQuizCount(0);
       console.log(error);
     }
   }
-
-  const addProgress = async (id) => {
-    try {
-      const { data } = await axios.post(
-        `${server}/api/user/progress?course=${params.id}&lectureId=${id}`,
-        {},
-        {
-          headers: {
-            token: localStorage.getItem("token"),
-          },
-        }
-      );
-      console.log(data.message);
-      
-      // Show points notification if it's a new completion
-      if (data.message === "New Progress added" || data.message === "Progress started") {
-        toast.success("🎉 +1 point earned for completing this video!");
-      }
-      
-      fetchProgress();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   console.log(progress);
 
@@ -445,126 +426,33 @@ const Lecture = ({ user }) => {
         <Loading />
       ) : (
         <div className="lecture-modern">
-          {/* Course Progress */}
-          {user && user.role === "admin" ? (
-            <div
-              className="lecture-progress-bar"
-              style={{
-                margin: "12px 0 auto 12px auto",
-                textAlign: "center",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                All lectures available for management
+          {/* Progress Bars Section */}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 20, margin: '0 0 8px 0' }}>
+            {/* Lecture Progress Bar */}
+            <div className="lecture-progress-bar" style={{ minWidth: 220, textAlign: 'center' }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                Lecture Progress - {completedLec || 0} out of {lectLength || 0}
               </div>
+              <div className="lecture-progress-bar-track" style={{ width: '100%', maxWidth: 220 }}>
+                <div className="lecture-progress-bar-fill" style={{ width: `${Math.min((lectLength ? (completedLec / lectLength) * 100 : 0), 100)}%`, background: '#1cc524' }}></div>
+              </div>
+              <span className="lecture-progress-bar-percent" style={{ color: '#1cc524', fontWeight: 700, fontSize: '1.1rem' }}>
+                {Math.min((lectLength ? (completedLec / lectLength) * 100 : 0), 100).toFixed(0)}%
+              </span>
             </div>
-          ) : user && Array.isArray(user.subscription) && user.subscription.includes(params.id) ? (
-            lectLength === 0 ? (
-              <div
-                className="lecture-progress-bar"
-                style={{
-                  margin: "12px 0 auto 12px auto",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                  No lectures available yet.
-                </div>
+            {/* Quiz Progress Bar */}
+            <div className="lecture-progress-bar" style={{ minWidth: 220, textAlign: 'center' }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                Quiz Progress - {completedQuizCount} out of {totalQuizCount}
               </div>
-            ) : completedLec === 0 ? (
-              <div
-                className="lecture-progress-bar"
-                style={{
-                  margin: "12px 0 auto 12px auto",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 600,
-                    marginBottom: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  Course Progress: 0% (No lectures completed yet)
-                </div>
-                <div
-                  className="lecture-progress-bar-track"
-                  style={{ width: "100%", maxWidth: 400 }}
-                >
-                  <div
-                    className="lecture-progress-bar-fill"
-                    style={{ width: `0%` }}
-                  ></div>
-                </div>
-                <span
-                  className="lecture-progress-bar-percent"
-                  style={{
-                    color: "#34c759",
-                    fontWeight: 700,
-                    fontSize: "1.1rem",
-                    marginTop: 12,
-                  }}
-                >
-                  Start your first lecture!
-                </span>
+              <div className="lecture-progress-bar-track" style={{ width: '100%', maxWidth: 220 }}>
+                <div className="lecture-progress-bar-fill" style={{ width: `${quizProgress}%`, background: '#1cc524' }}></div>
               </div>
-            ) : (
-              <div
-                className="lecture-progress-bar"
-                style={{
-                  margin: "12px 0 auto 12px auto",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 600,
-                    marginBottom: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  Course Progress - {completedLec || 0} out of {lectLength || 0}
-                </div>
-                <div
-                  className="lecture-progress-bar-track"
-                  style={{ width: "100%", maxWidth: 400 }}
-                >
-                  <div
-                    className="lecture-progress-bar-fill"
-                    style={{ width: `${completedLec / lectLength * 100}%` }}
-                  ></div>
-                </div>
-                <span
-                  className="lecture-progress-bar-percent"
-                  style={{
-                    color: "#34c759",
-                    fontWeight: 700,
-                    fontSize: "1.1rem",
-                    marginTop: 12,
-                  }}
-                >
-                  {completedLec / lectLength * 100}%
-                </span>
-              </div>
-            )
-          ) : null}
+              <span className="lecture-progress-bar-percent" style={{ color: '#1cc524', fontWeight: 700, fontSize: '1.1rem' }}>
+                {quizProgress}%
+              </span>
+            </div>
+          </div>
           {/* Admin Add Lecture and Create Quiz Buttons */}
           {user && (user.role === 'admin' || user.role === 'instructor') && (
             <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
@@ -620,9 +508,9 @@ const Lecture = ({ user }) => {
               ></video>
             </div>
           ) : (
-            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>
-              Please Select a Lecture
-            </h2>
+            <h1 style={{ margin: '8px 0 12px 0', textAlign: 'center', fontWeight: 800, fontSize: '2.2rem', letterSpacing: 0.5 }}>
+              Course Contents
+            </h1>
           )}
           {/* Side by Side Layout for Info and List */}
           <div className={lecture?._id ? "lecture-main-grid" : "lecture-main-flex"}>
@@ -650,7 +538,7 @@ const Lecture = ({ user }) => {
               </div>
             )}
 
-            <div className="lecture-list-vertical-scroll">
+            <div className="lecture-list-vertical-scroll" style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'left' }}>
               {loadingContent ? (
                 <div>Loading content...</div>
               ) : isInstructor ? (
@@ -661,7 +549,7 @@ const Lecture = ({ user }) => {
                         <div
                           className={`lecture-list-btn-modern${lecture._id === item.id ? ' active' : ''}`}
                           onClick={() => item.type === 'lecture' ? fetchLecture(item.id) : navigate(`/quiz/${item.id}`)}
-                          style={{ cursor: 'pointer' }}
+                          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left' }}
                         >
                           {i + 1}. <DraggableItem item={item} isDraggable={true} />
                           {item.type === 'lecture' && item.video && (
@@ -693,16 +581,34 @@ const Lecture = ({ user }) => {
                     <div
                       className={`lecture-list-btn-modern${lecture._id === item.id ? ' active' : ''}`}
                       onClick={() => item.type === 'lecture' ? fetchLecture(item.id) : navigate(`/quiz/${item.id}`)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left' }}
                     >
-                      {i + 1}. {item.type === 'lecture' ? <span>🎬 {item.title}</span> : <span style={{ color: '#007aff', fontWeight: 600 }}>📝 Quiz: {item.title}{typeof getBestQuizScore(item.id) === 'number' && (<span style={{ marginLeft: 8, color: '#34c759', fontWeight: 700, fontSize: 14 }}>(Best: {getBestQuizScore(item.id)})</span>)}</span>}
-                      {item.type === 'lecture' && item.video && (
-                        <span style={{ marginLeft: 10, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#155724', fontWeight: 700, fontSize: 13, borderRadius: 8, padding: '2px 10px', boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)', verticalAlign: 'middle', display: 'inline-block', letterSpacing: 0.5, marginTop: -2 }}>
-                          +1 point
-                        </span>
-                      )}
-                      {item.type === 'lecture' && progress[0] && progress[0].completedLectures.includes(item.id) && (
-                        <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
+                      <span style={{ minWidth: 28 }}>{i + 1}.</span>
+                      {item.type === 'lecture' ? (
+                        <>
+                          <span style={{ marginLeft: 8 }}>🎬 {item.title}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', gap: 8 }}>
+                            {item.video && (
+                              <span style={{ background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#155724', fontWeight: 700, fontSize: 13, borderRadius: 8, padding: '2px 10px', boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)', verticalAlign: 'middle', display: 'inline-block', letterSpacing: 0.5, marginTop: -2 }}>
+                                +1 point
+                              </span>
+                            )}
+                            {progress[0] && progress[0].completedLectures.includes(item.id) && (
+                              <span style={{ color: '#000000', fontWeight: 700 }}>✔</span>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ marginLeft: 8, color: '#007aff', fontWeight: 600 }}>📝 {item.title}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', gap: 8 }}>
+                            {typeof getBestQuizScore(item.id) === 'number' && (
+                              <span style={{ color: '#34c759', fontWeight: 700, fontSize: 14 }}>
+                                (Best: {getBestQuizScore(item.id)}/{item.questions?.length || '?'})
+                              </span>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -727,7 +633,7 @@ const Lecture = ({ user }) => {
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 420, maxWidth: '90vw', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
                 <button style={{ position: 'absolute', top: 8, right: 8, background: '#eee', border: 'none', borderRadius: 5, padding: '0.3rem 0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: 18 }} onClick={() => setShowEditQuiz(false)}>×</button>
-                <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ fetchContent(); }} />
+                <AddQuiz courseId={params.id} quizId={editQuizId} onSuccess={() => { setShowEditQuiz(false); setEditQuizId(null); /* refresh content list */ }} />
               </div>
             </div>
           )}
