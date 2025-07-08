@@ -15,3 +15,14 @@ const quizSchema = new mongoose.Schema({
 });
 
 export default mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);
+
+// TEMPORARY: Backfill timer for all quizzes if not set
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const mongoose = await import('mongoose');
+  await mongoose.connect('mongodb://localhost:27017/your-db-name'); // <-- UPDATE DB URI
+  const { default: Quiz } = await import('./quiz.js');
+  const result = await Quiz.updateMany({ $or: [{ timer: { $exists: false } }, { timer: null }] }, { $set: { timer: 10 } });
+  console.log('Backfill result:', result);
+  await mongoose.disconnect();
+  process.exit(0);
+}

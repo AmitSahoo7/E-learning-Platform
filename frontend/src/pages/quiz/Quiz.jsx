@@ -1,6 +1,6 @@
 // Quiz.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../main";
 import "./quiz.css";
@@ -13,15 +13,13 @@ const Quiz = ({ user }) => {
   const params = useParams();
   const courseId = params.courseId;
   const quizId = params.quizId;
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // This line was removed as per the edit hint
 
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [quizProgress, setQuizProgress] = useState({ completed: [], scores: {} });
   const [showReattemptConfirm, setShowReattemptConfirm] = useState(false);
   const [pendingQuiz, setPendingQuiz] = useState(null);
@@ -30,14 +28,13 @@ const Quiz = ({ user }) => {
   const [reorderMode, setReorderMode] = useState(false);
   const [quizOrder, setQuizOrder] = useState([]);
   const [singleQuizCourseId, setSingleQuizCourseId] = useState(null);
-  const [normalizedSubs, setNormalizedSubs] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(null);
 
   // Disambiguate params: if quizId is present, ignore courseId for fetching
   const isSingleQuizView = !!quizId;
 
   // Move fetchQuizzes out of useEffect for reuse
   const fetchQuizzes = async () => {
-    setLoading(true);
     try {
       const { data } = await axios.get(`${server}/api/quiz/${courseId}`, {
         headers: {
@@ -45,17 +42,12 @@ const Quiz = ({ user }) => {
         },
       });
       setQuizzes(data);
-      setError(null);
       setQuizOrder(Array.isArray(data) ? data.map(q => q._id) : []);
     } catch (err) {
       if (err.response && err.response.status === 404) {
         setQuizzes([]);
-        setError(null);
-      } else {
-        setError(err.response?.data?.message || "Failed to load quizzes");
       }
     }
-    setLoading(false);
   };
 
   // Update fetchQuizProgress to handle 404 and accept courseId param
@@ -75,26 +67,19 @@ const Quiz = ({ user }) => {
         completed: Array.isArray(data.completedQuizzes) ? data.completedQuizzes.map(id => id.toString()) : [],
         scores,
       });
-    } catch (err) {
+    } catch {
       setQuizProgress({ completed: [], scores: {} });
     }
   };
 
   // Fetch a single quiz if quizId is present
   const fetchSingleQuiz = async () => {
-    setLoading(true);
-    try {
-      const { data } = await axios.get(`${server}/api/quiz/single/${quizId}`, {
-        headers: { token: localStorage.getItem("token") },
-      });
-      setSelectedQuiz(data);
-      setQuizzes([data]);
-      setSingleQuizCourseId(data.courseId || data.course || null);
-      setError(null);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to load quiz");
-    }
-    setLoading(false);
+    const { data } = await axios.get(`${server}/api/quiz/single/${quizId}`, {
+      headers: { token: localStorage.getItem("token") },
+    });
+    setSelectedQuiz(data);
+    setQuizzes([data]);
+    setSingleQuizCourseId(data.courseId || data.course || null);
   };
 
   useEffect(() => {
@@ -122,7 +107,7 @@ const Quiz = ({ user }) => {
         userSubs = [];
       }
       // Store normalized for enrollment check
-      setNormalizedSubs(userSubs);
+      // setNormalizedSubs(userSubs); // This line was removed as per the edit hint
       fetchQuizProgress(singleQuizCourseId);
     }
   }, [quizId, singleQuizCourseId, user]);
@@ -134,6 +119,32 @@ const Quiz = ({ user }) => {
       setScore(null);
     }
   }, [selectedQuiz]);
+
+  useEffect(() => {
+    if (selectedQuiz && !submitted) {
+      setTimeLeft(600); // 10 minutes in seconds
+    } else {
+      setTimeLeft(null);
+    }
+  }, [selectedQuiz, submitted]);
+
+  useEffect(() => {
+    if (timeLeft === null || submitted) return;
+    if (timeLeft <= 0) {
+      if (!submitted) handleSubmit();
+      return;
+    }
+    const timer = setInterval(() => {
+      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft, submitted]);
+
+  const formatTime = (seconds) => {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  };
 
   const handleOptionToggle = (qIndex, optIndex) => {
     setAnswers((prev) => {
@@ -219,268 +230,236 @@ const Quiz = ({ user }) => {
     try {
       await axios.post(`${server}/api/course/update-content-order`, { courseId, items }, { headers: { token: localStorage.getItem('token') } });
       fetchQuizzes();
-    } catch {}
+    } catch {
+      // Optionally log or handle error, but do not leave block empty
+    }
   };
 
-  if (loading) return <div className="quiz-container">Loading quizzes...</div>;
-  if (error) return <div className="quiz-container error">{error}</div>;
-
-  // If quizId is present, show only that quiz
-  if (quizId && selectedQuiz) {
-    // Enrollment check for single quiz view
-    const enrolled = user && Array.isArray(normalizedSubs) && singleQuizCourseId && normalizedSubs.includes(singleQuizCourseId.toString());
-    if (!enrolled && user?.role !== 'admin' && user?.role !== 'instructor') {
-      return (
-        <div className="quiz-container">
-          <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600, background: '#fff', borderRadius: 12, padding: 24, maxWidth: 480 }}>
-            You must enroll in this course to take the quizzes
+  return (
+    <>
+      {selectedQuiz && timeLeft !== null && !submitted && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          margin: '32px 0 16px 0',
+          width: '100%',
+        }}>
+          <div style={{
+            background: '#fff',
+            border: '2px solid #1cc524',
+            borderRadius: 8,
+            padding: '12px 32px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            fontWeight: 700,
+            color: timeLeft <= 30 ? 'red' : '#1cc524',
+            fontSize: 20,
+            textAlign: 'center',
+            minWidth: 180
+          }}>
+            <div style={{ fontSize: 15, color: '#333', fontWeight: 500, marginBottom: 2 }}>Remaining time</div>
+            <div>{formatTime(timeLeft)}</div>
           </div>
         </div>
-      );
-    }
-    return (
+      )}
       <div className="quiz-container">
-        <div className="quiz-header">
-          <h2>{selectedQuiz.title || "Quiz"}</h2>
-          <button className="quiz-back-btn" onClick={() => navigate(-1)}>
-            ← Back
-          </button>
-        </div>
-        {selectedQuiz.questions.map((q, qIndex) => (
-          <div className="quiz-question-card" key={qIndex}>
-            <h4>
-              Q{qIndex + 1}. {q.question}
-            </h4>
-            {Array.isArray(q.options) && q.options.map((opt, optIndex) => {
-              const selected = Array.isArray(answers[qIndex]) && answers[qIndex].includes(optIndex);
-              const isCorrect = submitted && Array.isArray(q.correctAnswers) && q.correctAnswers.includes(optIndex);
-              const isWrongSelected = submitted && selected && !isCorrect;
-
-              return (
-                <div
-                  key={optIndex}
-                  className={`quiz-option ${selected ? "selected" : ""} ${
-                    submitted && isCorrect ? "correct" : ""
-                  } ${submitted && isWrongSelected ? "wrong" : ""}`}
-                  onClick={() => {
-                    if (!submitted) handleOptionToggle(qIndex, optIndex);
-                  }}
-                >
-                  {opt}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-        {!submitted ? (
-          <button className="quiz-submit-btn" onClick={handleSubmit}>
-            Submit Quiz
-          </button>
-        ) : (
-          <div className="quiz-result">
-            Your Score: {score} / {selectedQuiz.questions.length}
+        {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <button className="quiz-create-btn" onClick={handleCreateQuiz} disabled={reorderMode}>
+              ➕ Create Quiz
+            </button>
+            <button className="quiz-create-btn" style={{ marginLeft: 8 }} onClick={() => setReorderMode(r => !r)}>
+              {reorderMode ? 'Done' : 'Reorder Quizzes'}
+            </button>
+            {showAddQuiz && (
+              <div style={{ marginTop: '1.5rem' }}>
+                <AddQuiz courseId={courseId} quizId={editQuizId} onSuccess={handleQuizSaved} />
+                <button className="quiz-create-btn" style={{ background: '#ff3b30', marginTop: 8 }} onClick={handleCloseAddQuiz}>
+                  Cancel
+                </button>
+              </div>
+            )}
+            {reorderMode && (
+              <div style={{ marginTop: '2rem' }}>
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleQuizDragEnd}>
+                  <SortableContext items={quizOrder} strategy={verticalListSortingStrategy}>
+                    {quizOrder.map(id => {
+                      const quiz = quizzes.find(q => q._id === id);
+                      if (!quiz) return null;
+                      return <DraggableQuizItem key={quiz._id} quiz={quiz} isDraggable={true} />;
+                    })}
+                  </SortableContext>
+                </DndContext>
+              </div>
+            )}
           </div>
         )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="quiz-container">
-      {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
-        <div style={{ marginBottom: '1.5rem' }}>
-          <button className="quiz-create-btn" onClick={handleCreateQuiz} disabled={reorderMode}>
-            ➕ Create Quiz
-          </button>
-          <button className="quiz-create-btn" style={{ marginLeft: 8 }} onClick={() => setReorderMode(r => !r)}>
-            {reorderMode ? 'Done' : 'Reorder Quizzes'}
-          </button>
-          {showAddQuiz && (
-            <div style={{ marginTop: '1.5rem' }}>
-              <AddQuiz courseId={courseId} quizId={editQuizId} onSuccess={handleQuizSaved} />
-              <button className="quiz-create-btn" style={{ background: '#ff3b30', marginTop: 8 }} onClick={handleCloseAddQuiz}>
-                Cancel
-              </button>
+        {!selectedQuiz ? (
+          <>
+            <div className="quiz-header">
+              <h2>Select a Quiz</h2>
             </div>
-          )}
-          {reorderMode && (
-            <div style={{ marginTop: '2rem' }}>
-              <DndContext collisionDetection={closestCenter} onDragEnd={handleQuizDragEnd}>
-                <SortableContext items={quizOrder} strategy={verticalListSortingStrategy}>
-                  {quizOrder.map(id => {
-                    const quiz = quizzes.find(q => q._id === id);
-                    if (!quiz) return null;
-                    return <DraggableQuizItem key={quiz._id} quiz={quiz} isDraggable={true} />;
-                  })}
-                </SortableContext>
-              </DndContext>
-            </div>
-          )}
-        </div>
-      )}
-      {!selectedQuiz ? (
-        <>
-          <div className="quiz-header">
-            <h2>Select a Quiz</h2>
-          </div>
-          <ul className="quiz-list">
-            {quizzes && quizzes.length > 0 ? (
-              quizzes.map((quiz) => {
-                const isCompleted = quizProgress.completed.includes(quiz._id);
-                const bestScore = quizProgress.scores[quiz._id];
-                return (
-                  <li key={quiz._id} className="quiz-list-item">
-                    <button
-                      onClick={() => {
-                        if (isCompleted) {
-                          setPendingQuiz(quiz);
-                          setShowReattemptConfirm(true);
-                        } else {
-                          setSelectedQuiz(quiz);
-                        }
-                      }}
-                      className={`quiz-select-btn${isCompleted ? ' completed' : ''}`}
-                    >
-                      <span className="quiz-title">
-                        {quiz.title || "Untitled Quiz"}
-                      </span>
-                      <span className="quiz-best-score">
-                        Best: {typeof bestScore === 'number' ? bestScore : 0} / {quiz.questions.length}
-                      </span>
-                      {isCompleted && (
-                        <span className="quiz-tick">✔</span>
-                      )}
-                    </button>
-                    {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
-                      <>
-                        <button
-                          className="quiz-edit-btn"
-                          style={{ background: '#007aff', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8 }}
-                          onClick={() => handleEditQuiz(quiz._id)}
-                        >
-                          ✏️ Edit
-                        </button>
-                        <button
-                          className="quiz-delete-btn"
-                          style={{ background: '#ff3b30', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8, marginLeft: 8 }}
-                          onClick={async () => {
-                            if (window.confirm('Are you sure you want to delete this quiz?')) {
-                              try {
-                                await axios.delete(`${server}/api/quiz/${quiz._id}`, {
-                                  headers: { token: localStorage.getItem('token') },
-                                });
-                                fetchQuizzes();
-                              } catch {
-                                alert('Failed to delete quiz');
+            <ul className="quiz-list">
+              {quizzes && quizzes.length > 0 ? (
+                quizzes.map((quiz) => {
+                  const isCompleted = quizProgress.completed.includes(quiz._id);
+                  const bestScore = quizProgress.scores[quiz._id];
+                  return (
+                    <li key={quiz._id} className="quiz-list-item">
+                      <button
+                        onClick={() => {
+                          if (isCompleted) {
+                            setPendingQuiz(quiz);
+                            setShowReattemptConfirm(true);
+                          } else {
+                            setSelectedQuiz(quiz);
+                          }
+                        }}
+                        className={`quiz-select-btn${isCompleted ? ' completed' : ''}`}
+                      >
+                        <span className="quiz-title">
+                          {quiz.title || "Untitled Quiz"}
+                        </span>
+                        <span className="quiz-best-score">
+                          Best: {typeof bestScore === 'number' ? bestScore : 0} / {quiz.questions.length}
+                        </span>
+                        {isCompleted && (
+                          <span className="quiz-tick">✔</span>
+                        )}
+                      </button>
+                      {(user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) && (
+                        <>
+                          <button
+                            className="quiz-edit-btn"
+                            style={{ background: '#007aff', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8 }}
+                            onClick={() => handleEditQuiz(quiz._id)}
+                          >
+                            ✏️ Edit
+                          </button>
+                          <button
+                            className="quiz-delete-btn"
+                            style={{ background: '#ff3b30', color: 'white', border: 'none', borderRadius: 4, padding: '0.3rem 0.7rem', cursor: 'pointer', marginTop: 8, marginLeft: 8 }}
+                            onClick={async () => {
+                              if (window.confirm('Are you sure you want to delete this quiz?')) {
+                                try {
+                                  await axios.delete(`${server}/api/quiz/${quiz._id}`, {
+                                    headers: { token: localStorage.getItem('token') },
+                                  });
+                                  fetchQuizzes();
+                                } catch {
+                                  alert('Failed to delete quiz');
+                                }
                               }
-                            }
-                          }}
-                        >
-                          🗑️ Delete
-                        </button>
-                      </>
-                    )}
-                  </li>
-                );
-              })
-            ) : (
-              (user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) ? (
-                <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
-                  No quizzes found for this course. Create one above!
-                </div>
+                            }}
+                          >
+                            🗑️ Delete
+                          </button>
+                        </>
+                      )}
+                    </li>
+                  );
+                })
               ) : (
-                <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
-                  No quizzes available.
-                </div>
-              )
-            )}
-          </ul>
-          <div className="quiz-card-grid-spacer"></div>
-          {/* Info message about attempts */}
-          <div style={{ color: '#1cc524', fontWeight: 500, marginTop: 16, textAlign: 'center' }}>
-            You can attempt any quiz any number of times. Your best score will always be considered.
-          </div>
-          {/* Reattempt confirmation popup */}
-          {showReattemptConfirm && (
-            <div style={{
-              position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000,
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 320, textAlign: 'center' }}>
-                <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 18, color: '#1cc524' }}>
-                  You have already attempted this quiz.<br />Are you sure you want to reattempt?
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-                  <button
-                    style={{ background: '#1cc524', color: '#fff', border: 'none', borderRadius: 5, padding: '0.5rem 1.2rem', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
-                    onClick={() => {
-                      setSelectedQuiz(pendingQuiz);
-                      setShowReattemptConfirm(false);
-                      setPendingQuiz(null);
-                    }}
-                  >
-                    OK
-                  </button>
-                  <button
-                    style={{ background: '#eee', color: '#333', border: 'none', borderRadius: 5, padding: '0.5rem 1.2rem', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
-                    onClick={() => {
-                      setShowReattemptConfirm(false);
-                      setPendingQuiz(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
+                (user?.role === 'admin' || user?.role === 'instructor' || (Array.isArray(user?.roles) && user?.roles.includes('instructor'))) ? (
+                  <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
+                    No quizzes found for this course. Create one above!
+                  </div>
+                ) : (
+                  <div style={{ margin: '2rem auto', textAlign: 'center', color: '#1cc524', fontWeight: 600 }}>
+                    No quizzes available.
+                  </div>
+                )
+              )}
+            </ul>
+            <div className="quiz-card-grid-spacer"></div>
+            {/* Info message about attempts */}
+            <div style={{ color: '#1cc524', fontWeight: 500, marginTop: 16, textAlign: 'center' }}>
+              You can attempt any quiz any number of times. Your best score will always be considered.
+            </div>
+            {/* Reattempt confirmation popup */}
+            {showReattemptConfirm && (
+              <div style={{
+                position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000,
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <div style={{ background: '#fff', borderRadius: 10, padding: 32, boxShadow: '0 2px 16px rgba(0,0,0,0.15)', minWidth: 320, textAlign: 'center' }}>
+                  <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 18, color: '#1cc524' }}>
+                    You have already attempted this quiz.<br />Are you sure you want to reattempt?
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+                    <button
+                      style={{ background: '#1cc524', color: '#fff', border: 'none', borderRadius: 5, padding: '0.5rem 1.2rem', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+                      onClick={() => {
+                        setSelectedQuiz(pendingQuiz);
+                        setShowReattemptConfirm(false);
+                        setPendingQuiz(null);
+                      }}
+                    >
+                      OK
+                    </button>
+                    <button
+                      style={{ background: '#eee', color: '#333', border: 'none', borderRadius: 5, padding: '0.5rem 1.2rem', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}
+                      onClick={() => {
+                        setShowReattemptConfirm(false);
+                        setPendingQuiz(null);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div className="quiz-header">
-            <h2>{selectedQuiz.title || "Quiz"}</h2>
-            <button className="quiz-back-btn" onClick={() => setSelectedQuiz(null)}>
-              ← Back to Quiz List
-            </button>
-          </div>
-          {selectedQuiz.questions.map((q, qIndex) => (
-            <div className="quiz-question-card" key={qIndex}>
-              <h4>
-                Q{qIndex + 1}. {q.question}
-              </h4>
-              {Array.isArray(q.options) && q.options.map((opt, optIndex) => {
-                const selected = Array.isArray(answers[qIndex]) && answers[qIndex].includes(optIndex);
-                const isCorrect = submitted && Array.isArray(q.correctAnswers) && q.correctAnswers.includes(optIndex);
-                const isWrongSelected = submitted && selected && !isCorrect;
+            )}
+          </>
+        ) : (
+          <>
+            {selectedQuiz && (
+              <div className="quiz-header">
+                <h2>{selectedQuiz.title || "Quiz"}</h2>
+                <button className="quiz-back-btn" onClick={() => setSelectedQuiz(null)}>
+                  ← Back to Quiz List
+                </button>
+              </div>
+            )}
+            {selectedQuiz.questions.map((q, qIndex) => (
+              <div className="quiz-question-card" key={qIndex}>
+                <h4>
+                  Q{qIndex + 1}. {q.question}
+                </h4>
+                {Array.isArray(q.options) && q.options.map((opt, optIndex) => {
+                  const selected = Array.isArray(answers[qIndex]) && answers[qIndex].includes(optIndex);
+                  const isCorrect = submitted && Array.isArray(q.correctAnswers) && q.correctAnswers.includes(optIndex);
+                  const isWrongSelected = submitted && selected && !isCorrect;
 
-                return (
-                  <div
-                    key={optIndex}
-                    className={`quiz-option ${selected ? "selected" : ""} ${
-                      submitted && isCorrect ? "correct" : ""
-                    } ${submitted && isWrongSelected ? "wrong" : ""}`}
-                    onClick={() => {
-                      if (!submitted) handleOptionToggle(qIndex, optIndex);
-                    }}
-                  >
-                    {opt}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-          {!submitted ? (
-            <button className="quiz-submit-btn" onClick={handleSubmit}>
-              Submit Quiz
-            </button>
-          ) : (
-            <div className="quiz-result">
-              Your Score: {score} / {selectedQuiz.questions.length}
-            </div>
-          )}
-        </>
-      )}
-    </div>
+                  return (
+                    <div
+                      key={optIndex}
+                      className={`quiz-option ${selected ? "selected" : ""} ${
+                        submitted && isCorrect ? "correct" : ""
+                      } ${submitted && isWrongSelected ? "wrong" : ""}`}
+                      onClick={() => {
+                        if (!submitted) handleOptionToggle(qIndex, optIndex);
+                      }}
+                    >
+                      {opt}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            {!submitted ? (
+              <button className="quiz-submit-btn" onClick={handleSubmit}>
+                Submit Quiz
+              </button>
+            ) : (
+              <div className="quiz-result">
+                Your Score: {score} / {selectedQuiz.questions.length}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 
