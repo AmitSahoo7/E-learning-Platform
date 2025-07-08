@@ -96,6 +96,15 @@ export const deactivateAssessment = TryCatch(async (req, res) => {
   res.json({ message: 'Assessment deactivated', assessment });
 });
 
+// Admin: Delete assessment
+export const deleteAssessment = TryCatch(async (req, res) => {
+  const { id } = req.params;
+  const assessment = await FinalAssessment.findById(id);
+  if (!assessment) return res.status(404).json({ message: 'Assessment not found.' });
+  await assessment.deleteOne();
+  res.json({ message: 'Assessment deleted successfully' });
+});
+
 // Admin: List all assessments for a course
 export const listAssessments = TryCatch(async (req, res) => {
   const { courseId } = req.params;

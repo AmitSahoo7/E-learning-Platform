@@ -14,7 +14,8 @@ import {
   getAllAttempts,
   getAttemptDetails,
   generateCertificate,
-  downloadCertificate
+  downloadCertificate,
+  deleteAssessment
 } from '../controllers/assessment.js';
 
 const router = express.Router();
@@ -28,6 +29,7 @@ router.patch('/admin/assessment/:id/deactivate', isAuth, isAdmin, deactivateAsse
 router.get('/admin/assessments/:courseId', isAuth, isAdmin, listAssessments);
 router.get('/admin/attempts/:courseId', isAuth, isAdmin, getAllAttempts);
 router.get('/admin/attempt/:attemptId', isAuth, isAdmin, getAttemptDetails);
+router.delete('/admin/assessment/:id', isAuth, isAdmin, deleteAssessment);
 
 // User routes
 router.get('/assessment/:courseId/active', isAuth, getActiveAssessment);

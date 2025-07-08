@@ -180,7 +180,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   min-width: 100px;
   height: 28px;
   padding: 0 22px;
@@ -195,7 +194,6 @@
   top: 8px;
   right: 8px;
   letter-spacing: 0.2px;
-  transition: box-shadow 0.2s;
 }
 .point-badge-modern .badge-icon {
   font-size: 1.1em;
