@@ -343,7 +343,13 @@ export const getAnnouncements = async (req, res) => {
 export const getAnnouncementsWithStatus = async (req, res) => {
   try {
     const userId = req.user._id;
-    const announcements = await Announcement.find().sort({ createdAt: -1 }).populate("createdBy", "name email role");
+    // Fetch user's account creation date
+    const user = await User.findById(userId).select('createdAt');
+    const userCreatedAt = user?.createdAt || new Date(0);
+    // Only fetch announcements created after user's account creation
+    const announcements = await Announcement.find({ createdAt: { $gte: userCreatedAt } })
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "name email role");
     const statusList = await UserAnnouncementStatus.find({ userId });
     const statusMap = {};
     statusList.forEach(status => {
