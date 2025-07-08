@@ -1,8 +1,101 @@
 .course-review-box {
-  background: #f9f9f9;
-  padding: 1.5rem;
-  margin-top: 2rem;
+  background: #181c24;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px #10b98122, 0 0 0 2px #10b98133;
+  color: #f3fef7;
+  padding: 2rem 2rem 1.5rem 2rem;
+  margin: 2rem auto 1.5rem auto;
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.2rem;
+  position: relative;
+}
+
+.course-review-header {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #10b981;
+  margin-bottom: 0.5rem;
+}
+
+.course-review-rating {
+  color: #ffe066;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.course-review-form label,
+.course-review-form textarea,
+.course-review-form input[type="text"] {
+  color: #f3fef7;
+  background: #232a34;
+  border: 1px solid #10b98144;
   border-radius: 8px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.7rem;
+  width: 100%;
+  font-size: 1rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.course-review-form textarea:focus,
+.course-review-form input[type="text"]:focus {
+  outline: none;
+  border: 1.5px solid #10b981;
+  box-shadow: 0 0 8px #10b98144;
+}
+
+.course-review-form button {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+  box-shadow: 0 2px 8px #10b98144;
+}
+.course-review-form button:hover {
+  background: #059669;
+  box-shadow: 0 4px 16px #10b98177;
+  transform: translateY(-2px) scale(1.04);
+}
+
+.course-review-list {
+  margin-top: 1.2rem;
+  width: 100%;
+}
+
+.course-review-item {
+  background: #232a34;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 0.7rem;
+  color: #f3fef7;
+  box-shadow: 0 2px 8px #10b98111;
+}
+
+.course-review-item .review-author {
+  color: #10b981;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.course-review-item .review-rating {
+  color: #ffe066;
+  font-size: 1rem;
+  margin-left: 0.5rem;
+}
+
+.course-review-item .review-text {
+  color: #f3fef7;
+  font-size: 1rem;
+  margin-top: 0.2rem;
 }
 
 .stars span {

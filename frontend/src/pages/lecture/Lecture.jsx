@@ -495,27 +495,27 @@ const Lecture = ({ user }) => {
       {loading ? (
         <Loading />
       ) : (
-        <>
-          {/* Progress Bars at the very top, outside main content */}
-          <div className="lecture-progress-sticky">
-            <div style={{ width: '100%', maxWidth: 900, margin: '0 auto 0 auto', padding: '0 12px' }}>
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ fontWeight: 700, color: '#63e642', marginBottom: 4 }}>Lecture Progress</div>
-                <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
-                  <div style={{ width: `${lectureProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+        <div className="lecture-page-modern">
+          <div className="lecture-content-container">
+            {/* Progress Bars at the very top, outside main content */}
+            <div className="lecture-progress-sticky">
+              <div style={{ width: '100%', maxWidth: 900, margin: '0 auto 0 auto', padding: '0 12px' }}>
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ fontWeight: 700, color: '#63e642', marginBottom: 4 }}>Lecture Progress</div>
+                  <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
+                    <div style={{ width: `${lectureProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+                  </div>
+                  <span style={{ color: '#fff', fontSize: 14 }}>{completedLec} / {lectLength} lectures completed ({lectureProgressPercent}%)</span>
                 </div>
-                <span style={{ color: '#fff', fontSize: 14 }}>{completedLec} / {lectLength} lectures completed ({lectureProgressPercent}%)</span>
-              </div>
-              <div>
-                <div style={{ fontWeight: 700, color: '#43e97b', marginBottom: 4 }}>Quiz Progress</div>
-                <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
-                  <div style={{ width: `${quizProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#43e97b', marginBottom: 4 }}>Quiz Progress</div>
+                  <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
+                    <div style={{ width: `${quizProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+                  </div>
+                  <span style={{ color: '#fff', fontSize: 14 }}>{completedQuizCount} / {quizCount} quizzes completed ({quizProgressPercent}%)</span>
                 </div>
-                <span style={{ color: '#fff', fontSize: 14 }}>{completedQuizCount} / {quizCount} quizzes completed ({quizProgressPercent}%)</span>
               </div>
             </div>
-          </div>
-          <div className={`lecture-page-modern`}>
             <div className={`lecture-main-flex-row${!lecture?.video ? ' center-list' : ''}`}>
               {lecture?.video && (
                 <div className="lecture-main-left-col">
@@ -633,7 +633,7 @@ const Lecture = ({ user }) => {
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </>
   );
