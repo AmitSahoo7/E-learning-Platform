@@ -163,7 +163,7 @@
 
 .user-name {
   font-weight: 500;
-  color: #333;
+  color: #000 !important;
 }
 
 .user-email {
@@ -227,7 +227,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -235,54 +235,61 @@
 }
 
 .modal-content {
-  background: white;
-  border-radius: 10px;
+  background: #000 !important;
+  color: #fff !important;
+  border-radius: 12px;
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.7);
+  border: 2px solid #28a745;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 20px 20px 10px 20px;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #333;
+  color: #fff;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 28px;
   cursor: pointer;
-  color: #666;
+  color: #fff;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 16px;
 }
 
 .close-btn:hover {
-  color: #333;
+  color: #28a745;
 }
 
 .modal-body {
   padding: 20px;
+  color: #fff;
 }
 
 .attempt-details {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  color: #fff;
 }
 
 .detail-section {
@@ -297,26 +304,27 @@
 
 .detail-section h4 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: #28a745;
   font-size: 16px;
 }
 
 .detail-section p {
   margin: 5px 0;
-  color: #555;
+  color: #e0e0e0;
 }
 
 .answers-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  color: #fff;
 }
 
 .answer-item {
-  background: #f8f9fa;
+  background: #232a36;
   padding: 10px;
   border-radius: 6px;
-  border-left: 3px solid #007bff;
+  border-left: 3px solid #28a745;
 }
 
 .answer-item p {

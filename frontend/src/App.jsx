@@ -36,6 +36,8 @@ import Webinar from "./pages/webinar/Webinar";
 import AdminWebinars from "./admin/Webinar/AdminWebinars";
 import AddQuiz from './admin/Courses/AddQuiz.jsx';
 import RegisterInstructor from "./pages/auth/RegisterInstructor";
+import InstructorFinalAssessmentPage from './admin/Courses/InstructorFinalAssessmentPage';
+import InstructorFinalAssessmentAttemptsViewer from './admin/Courses/InstructorFinalAssessmentAttemptsViewer';
 
 const App = () => {
   const { isAuth, user, loading } = UserData();
@@ -183,6 +185,14 @@ const App = () => {
           <Route
             path="/admin/course/:courseId/attempts"
             element={isAuth && user.role === "admin" ? <AssessmentAttemptsViewer /> : <Home />}
+          />
+          <Route
+            path="/instructor/course/:courseId/assessments"
+            element={isAuth && user.role === "instructor" ? <InstructorFinalAssessmentPage /> : <Home />}
+          />
+          <Route
+            path="/instructor/course/:courseId/attempts"
+            element={isAuth && user.role === "instructor" ? <InstructorFinalAssessmentAttemptsViewer /> : <Home />}
           />
           <Route path="/leaderboard" element={<Leaderboard user={user} />} />
           <Route path="/events" element={<Events />} />

@@ -36,6 +36,7 @@ const Lecture = ({ user }) => {
   const [showEditQuiz, setShowEditQuiz] = useState(false);
   const [editQuizId, setEditQuizId] = useState(null);
   const [showCreateQuiz, setShowCreateQuiz] = useState(false);
+  const [activeTab, setActiveTab] = useState('lectures');
 
   const { fetchCourse, course } = CourseData();
 
@@ -328,49 +329,90 @@ const Lecture = ({ user }) => {
     return found ? found.bestScore : null;
   };
 
-  function DraggableItem({ item, isDraggable }) {
+  // Define a consistent style for point badges
+  const pointBadgeStyle = {
+    width: 110,
+    minWidth: 110,
+    display: 'inline-block',
+    textAlign: 'center',
+    marginLeft: 0,
+    background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)',
+    color: '#155724',
+    fontWeight: 700,
+    fontSize: 16,
+    borderRadius: 14,
+    padding: '10px 0',
+    boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)',
+    verticalAlign: 'middle',
+    letterSpacing: 0.5,
+    marginTop: -2
+  };
+
+  function DraggableItem({ item, isDraggable, onClick, isActive }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
     return (
-      <div style={{ background: '#f4f4fb', borderRadius: 16, margin: '8px 0', padding: 0 }}>
-        <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, display: 'flex', alignItems: 'center', cursor: isDraggable ? 'grab' : 'pointer', padding: 16 }}>
-          {isDraggable && <span {...attributes} {...listeners} style={{ marginRight: 12, fontWeight: 700, cursor: 'grab' }}>≡</span>}
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            {item.type === 'lecture' ? (
-              <>
-                <span style={{ fontSize: 20, marginRight: 8 }}>🎬</span>
-                <span style={{ fontWeight: 500 }}>{item.title}</span>
-              </>
-            ) : (
-              <>
-                <span style={{ fontSize: 20, marginRight: 8 }}>📝</span>
-                <span style={{ color: '#007aff', fontWeight: 600, marginRight: 8 }}>{item.title}</span>
-                {typeof getBestQuizScore(item.id) === 'number' && (
-                  <span style={{ color: '#34c759', fontWeight: 700, fontSize: 14 }}>
-                    (Best: {getBestQuizScore(item.id)})
-                  </span>
-                )}
-                {isInstructor && (
-                  <>
-                    <button
-                      style={{ marginLeft: 10, background: '#007aff', color: 'white', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 13 }}
-                      onClick={e => { e.stopPropagation(); handleEditQuiz(item.id); }}
-                      title="Edit Quiz"
-                    >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      style={{ marginLeft: 6, background: '#ff3b30', color: 'white', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 13 }}
-                      onClick={e => { e.stopPropagation(); handleDeleteQuiz(item.id); }}
-                      title="Delete Quiz"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        </div>
+      <div
+        ref={setNodeRef}
+        className={`lecture-list-btn-modern${item.type === 'quiz' ? ' quiz' : ''}${isActive ? ' active' : ''}`}
+        style={{ cursor: 'default', position: 'relative', opacity: isDragging ? 0.5 : 1, userSelect: 'none', display: 'flex', alignItems: 'center' }}
+      >
+        {isDraggable && (
+          <span
+            {...attributes}
+            {...listeners}
+            className="drag-handle"
+            style={{ marginRight: 18, fontSize: 22, color: '#43e97b', cursor: 'grab', userSelect: 'none' }}
+            onClick={e => e.stopPropagation()}
+          >
+            ≡
+          </span>
+        )}
+        <div className="accent-bar" />
+        <span style={{ fontSize: 20, marginRight: 16 }}>{item.type === 'lecture' ? '🎬' : '📝'}</span>
+        <span
+          className="lecture-title-link"
+          style={{ fontWeight: 600, color: item.type === 'quiz' ? '#43e97b' : '#fff', marginRight: 12, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
+          onClick={e => {
+            e.stopPropagation();
+            if (item.type === 'lecture') onClick && onClick();
+            else if (item.type === 'quiz') onClick && onClick();
+          }}
+          tabIndex={0}
+          role="button"
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (item.type === 'lecture') onClick && onClick();
+              else if (item.type === 'quiz') onClick && onClick();
+            }
+          }}
+        >
+          {item.title}
+        </span>
+        {item.type === 'lecture' && item.video && (
+          <span className="point-badge-modern" style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>+1 point</span>
+        )}
+        {item.type === 'quiz' && (
+          <span className="point-badge-modern" style={{ position: 'absolute', top: 16, right: 16, zIndex: 2 }}>+5 point</span>
+        )}
+        {isInstructor && item.type === 'quiz' && (
+          <>
+            <button
+              style={{ background: 'transparent', color: '#007aff', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18, marginLeft: 8 }}
+              onClick={e => { e.stopPropagation(); handleEditQuiz(item.id); }}
+              title="Edit Quiz"
+            >
+              ✏️
+            </button>
+            <button
+              style={{ marginLeft: 6, background: 'transparent', color: '#ff3b30', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18 }}
+              onClick={e => { e.stopPropagation(); handleDeleteQuiz(item.id); }}
+              title="Delete Quiz"
+            >
+              🗑️
+            </button>
+          </>
+        )}
       </div>
     );
   }
@@ -439,289 +481,119 @@ const Lecture = ({ user }) => {
     }
   };
 
+  const lecturesOnly = contentList.filter(item => item.type === 'lecture');
+  const quizzesOnly = contentList.filter(item => item.type === 'quiz');
+
   return (
     <>
       {loading ? (
         <Loading />
       ) : (
-        <div className="lecture-modern">
-          {/* Course Progress */}
-          {user && user.role === "admin" ? (
-            <div
-              className="lecture-progress-bar"
-              style={{
-                margin: "12px 0 auto 12px auto",
-                textAlign: "center",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                All lectures available for management
-              </div>
-            </div>
-          ) : user && Array.isArray(user.subscription) && user.subscription.includes(params.id) ? (
-            lectLength === 0 ? (
-              <div
-                className="lecture-progress-bar"
-                style={{
-                  margin: "12px 0 auto 12px auto",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div style={{ fontWeight: 600, marginBottom: 8 }}>
-                  No lectures available yet.
+        <div className="lecture-page-modern">
+          <div className="lecture-main-flex-row">
+            {/* Left: Video, Description, Comments */}
+            <div className="lecture-main-left-col">
+              {lecture?.video ? (
+                <div className="lecture-video-section-modern">
+                  <video
+                    src={`${server}/${lecture.video}`}
+                    width="100%"
+                    controls
+                    controlsList="nodownload noremoteplayback"
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    autoPlay
+                    onEnded={handleVideoEnded}
+                    style={{ borderRadius: "20px", marginBottom: "1.5rem", marginTop: "0.5rem", boxShadow: '0 8px 40px 0 rgba(60, 255, 180, 0.13)' }}
+                  ></video>
                 </div>
-              </div>
-            ) : completedLec === 0 ? (
-              <div
-                className="lecture-progress-bar"
-                style={{
-                  margin: "12px 0 auto 12px auto",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 600,
-                    marginBottom: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  Course Progress: 0% (No lectures completed yet)
-                </div>
-                <div
-                  className="lecture-progress-bar-track"
-                  style={{ width: "100%", maxWidth: 400 }}
-                >
-                  <div
-                    className="lecture-progress-bar-fill"
-                    style={{ width: `0%` }}
-                  ></div>
-                </div>
-                <span
-                  className="lecture-progress-bar-percent"
-                  style={{
-                    color: "#34c759",
-                    fontWeight: 700,
-                    fontSize: "1.1rem",
-                    marginTop: 12,
-                  }}
-                >
-                  Start your first lecture!
-                </span>
-              </div>
-            ) : (
-              <div
-                className="lecture-progress-bar"
-                style={{
-                  margin: "12px 0 auto 12px auto",
-                  textAlign: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 600,
-                    marginBottom: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  Course Progress - {completedLec || 0} out of {lectLength || 0}
-                </div>
-                <div
-                  className="lecture-progress-bar-track"
-                  style={{ width: "100%", maxWidth: 400 }}
-                >
-                  <div
-                    className="lecture-progress-bar-fill"
-                    style={{ width: `${completedLec / lectLength * 100}%` }}
-                  ></div>
-                </div>
-                <span
-                  className="lecture-progress-bar-percent"
-                  style={{
-                    color: "#34c759",
-                    fontWeight: 700,
-                    fontSize: "1.1rem",
-                    marginTop: 12,
-                  }}
-                >
-                  {completedLec / lectLength * 100}%
-                </span>
-              </div>
-            )
-          ) : null}
-          {/* Admin Add Lecture and Create Quiz Buttons */}
-          {user && (user.role === 'admin' || user.role === 'instructor') && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 16 }}>
-              <button
-                className="common-btn"
-                onClick={() => setShow(!show)}
-              >
-                {show ? "Close" : "Add Lecture +"}
-              </button>
-              <button
-                className="common-btn"
-                onClick={() => setShowCreateQuiz(true)}
-              >
-                Create Quiz +
-              </button>
-            </div>
-          )}
-          {/* Admin Add Lecture Form */}
-          {show && user && (user.role === 'admin' || user.role === 'instructor') && (
-            <div className="lecture-form-box">
-              <div className="lecture-form">
-                <form onSubmit={submitHandler}>
-                  <label>Title</label>
-                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-                  <label>Description</label>
-                  <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
-                  <label>Video File</label>
-                  <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
-                  <label>PDF File (optional)</label>
-                  <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
-                  <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
-                </form>
-              </div>
-            </div>
-          )}
-          {/* Video Section (if present) */}
-          {lecture?.video ? (
-            <div className="lecture-video-section-modern">
-              <video
-                src={`${server}/${lecture.video}`}
-                width="100%"
-                controls
-                controlsList="nodownload noremoteplayback"
-                disablePictureInPicture
-                disableRemotePlayback
-                autoPlay
-                onEnded={handleVideoEnded}
-                style={{
-                  borderRadius: "16px",
-                  marginBottom: "1.5rem",
-                  marginTop: "2rem",
-                }}
-              ></video>
-            </div>
-          ) : (
-            <h2 style={{ marginTop: "2rem", textAlign: "center" }}>
-              Please Select a Lecture
-            </h2>
-          )}
-          {/* Side by Side Layout for Info and List */}
-          <div className={lecture?._id ? "lecture-main-grid" : "lecture-main-flex"}>
-            {lecture?.title && (
-              <div className="lecture-info-modern" ref={infoRef}>
-                <h2>
-                  Lecture {lectures.findIndex((l) => l._id === lecture._id) + 1}
-                  : {lecture?.title}
-                </h2>
-                <div style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
-                  <span>Design</span>
-                  <span style={{ marginLeft: 16 }}>3 Month</span>
-                </div>
-                <div style={{ margin: "8px 0" }}>
-                  <b>Description:</b>
-                  <div style={{ marginTop: 4 }}>{lecture?.description}</div>
-                </div>
-                <button className="notes-btn-modern" onClick={() => {
-                  if (lecture.pdf) {
-                    window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
-                  } else {
-                    window.alert('No notes available.');
-                  }
-                }}>Notes</button>
-              </div>
-            )}
-
-            <div className="lecture-list-vertical-scroll">
-              {loadingContent ? (
-                <div>Loading content...</div>
-              ) : isInstructor ? (
-                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                  <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                    {contentList.map((item, i) => (
-                      <div key={item.id} style={{ position: 'relative', display: 'inline-block' }}>
-                        <div
-                          className={`lecture-list-btn-modern${lecture._id === item.id ? ' active' : ''}`}
-                          onClick={() => item.type === 'lecture' ? fetchLecture(item.id) : navigate(`/quiz/${item.id}`)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          {i + 1}. <DraggableItem item={item} isDraggable={true} />
-                          {item.type === 'lecture' && item.video && (
-                            <span style={{ marginLeft: 10, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#155724', fontWeight: 700, fontSize: 13, borderRadius: 8, padding: '2px 10px', boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)', verticalAlign: 'middle', display: 'inline-block', letterSpacing: 0.5, marginTop: -2 }}>
-                              +1 point
-                            </span>
-                          )}
-                          {item.type === 'lecture' && progress[0] && progress[0].completedLectures.includes(item.id) && (
-                            <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
-                          )}
-                        </div>
-                        {isInstructor && (user.role === 'admin' || user.role === 'instructor') && item.type === 'lecture' && (
-                          <button
-                            className="delete-lecture-btn"
-                            style={{ position: 'absolute', top: 6, right: 6, background: 'red', color: 'white', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', fontWeight: 700, fontSize: 14, zIndex: 2 }}
-                            onClick={() => deleteHandler(item.id)}
-                            title={`Delete ${item.title}`}
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </SortableContext>
-                </DndContext>
               ) : (
-                contentList.map((item, i) => (
-                  <div key={item.id} style={{ position: 'relative', display: 'inline-block' }}>
-                    <div
-                      className={`lecture-list-btn-modern${lecture._id === item.id ? ' active' : ''}`}
-                      onClick={() => item.type === 'lecture' ? fetchLecture(item.id) : navigate(`/quiz/${item.id}`)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      {i + 1}. {item.type === 'lecture' ? <span>🎬 {item.title}</span> : <span style={{ color: '#007aff', fontWeight: 600 }}>📝 Quiz: {item.title}{typeof getBestQuizScore(item.id) === 'number' && (<span style={{ marginLeft: 8, color: '#34c759', fontWeight: 700, fontSize: 14 }}>(Best: {getBestQuizScore(item.id)})</span>)}</span>}
-                      {item.type === 'lecture' && item.video && (
-                        <span style={{ marginLeft: 10, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', color: '#155724', fontWeight: 700, fontSize: 13, borderRadius: 8, padding: '2px 10px', boxShadow: '0 2px 8px rgba(40, 167, 69, 0.10)', verticalAlign: 'middle', display: 'inline-block', letterSpacing: 0.5, marginTop: -2 }}>
-                          +1 point
-                        </span>
-                      )}
-                      {item.type === 'lecture' && progress[0] && progress[0].completedLectures.includes(item.id) && (
-                        <span style={{ marginLeft: 8, color: '#000000', fontWeight: 700 }}>✔</span>
-                      )}
-                    </div>
+                <h2 style={{ marginTop: "2rem", textAlign: "center" }}>
+                  Please Select a Lecture
+                </h2>
+              )}
+              {lecture?.title && (
+                <div className="lecture-info-modern">
+                  <h2 className="lecture-title-modern">
+                    {lecture?.title}
+                  </h2>
+                  <div className="lecture-meta-modern" style={{ color: "#888", fontSize: 16, margin: "8px 0" }}>
+                    <span>Design</span>
+                    <span style={{ marginLeft: 16 }}>3 Month</span>
                   </div>
-                ))
+                  <div className="lecture-description-modern" style={{ margin: "8px 0" }}>
+                    <b>Description:</b>
+                    <div style={{ marginTop: 4 }}>{lecture?.description}</div>
+                  </div>
+                  <button className="notes-btn-modern" onClick={() => {
+                    if (lecture.pdf) {
+                      window.open(`${server}/${lecture.pdf}`, '_blank', 'noopener,noreferrer');
+                    } else {
+                      window.alert('No notes available.');
+                    }
+                  }}>Notes</button>
+                </div>
+              )}
+              {lecture?._id && (
+                <div className="lecture-comment-modern">
+                  <LectureCommentSection
+                    lectureId={lecture._id}
+                    isPaidUser={user?.subscription?.includes(params.id) || user?.role === "admin"}
+                    user={user}
+                  />
+                </div>
               )}
             </div>
-
-            {lecture?._id && (
-              <div className="lecture-comment" ref={commentRef}>
-                <LectureCommentSection
-                  lectureId={lecture._id}
-                  isPaidUser={
-                    user?.subscription?.includes(params.id) ||
-                    user?.role === "admin"
-                  }
-                  user={user}
-                />
+            {/* Right: Lecture/Quiz List */}
+            <div className="lecture-main-right-col">
+              <div className="lecture-list-glass-container">
+                {user && (user.role === 'admin' || user.role === 'instructor') && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 18 }}>
+                    <button className="common-btn" onClick={() => setShow(!show)}>
+                      {show ? "Close" : "Add Lecture +"}
+                    </button>
+                    <button className="common-btn" onClick={() => setShowCreateQuiz(true)}>
+                      Create Quiz +
+                    </button>
+                  </div>
+                )}
+                {show && user && (user.role === 'admin' || user.role === 'instructor') && (
+                  <div className="lecture-form-box">
+                    <div className="lecture-form">
+                      <form onSubmit={submitHandler}>
+                        <label>Title</label>
+                        <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                        <label>Description</label>
+                        <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
+                        <label>Video File</label>
+                        <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
+                        <label>PDF File (optional)</label>
+                        <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
+                        <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
+                      </form>
+                    </div>
+                  </div>
+                )}
+                <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={contentList.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                    <div className="lecture-list-vertical-scroll">
+                      {contentList.map((item, i) => (
+                        <DraggableItem
+                          key={item.id}
+                          item={item}
+                          isDraggable={isInstructor}
+                          onClick={() => {
+                            if (item.type === 'lecture') fetchLecture(item.id);
+                            else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
+                          }}
+                          isActive={lecture?._id === item.id}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               </div>
-            )}
+            </div>
           </div>
           {showEditQuiz && (
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.25)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

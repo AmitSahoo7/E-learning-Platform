@@ -10,6 +10,7 @@ import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,9 +99,25 @@ export const deactivateAssessment = TryCatch(async (req, res) => {
 // Admin: List all assessments for a course
 export const listAssessments = TryCatch(async (req, res) => {
   const { courseId } = req.params;
-  const assessments = await FinalAssessment.find({ courseId }).sort({ createdAt: -1 });
-  console.log('LIST assessments:', assessments);
-  res.json({ assessments });
+  const user = req.user;
+  // Fetch the course to check instructor permissions
+  const course = await Courses.findById(courseId);
+  // Debug patch:
+  console.log('DEBUG: User:', user._id.toString(), user.role);
+  console.log('DEBUG: Course instructors:', course?.instructors?.map(i => i.toString()));
+  const foundAssessments = await FinalAssessment.find({ courseId }).sort({ createdAt: -1 });
+  console.log('DEBUG: Assessments found:', foundAssessments.map(a => a._id.toString()));
+  if (!course) return res.status(404).json({ message: 'Course not found.' });
+  // If user is admin/superadmin, allow
+  if (user.role === 'admin' || user.role === 'superadmin') {
+    return res.json({ assessments: foundAssessments });
+  }
+  // If user is instructor, check if they are assigned to this course (ObjectId equality)
+  if (user.role === 'instructor' && Array.isArray(course.instructors) && course.instructors.some(id => id.equals ? id.equals(user._id) : String(id) === String(user._id))) {
+    return res.json({ assessments: foundAssessments });
+  }
+  // Otherwise, forbidden
+  return res.status(403).json({ message: 'You do not have permission to view assessments for this course.' });
 });
 
 // User: Get active assessment for a course
@@ -397,15 +414,14 @@ export const getAllAttempts = TryCatch(async (req, res) => {
 // Admin: Get detailed attempt info
 export const getAttemptDetails = TryCatch(async (req, res) => {
   const { attemptId } = req.params;
-  
   const attempt = await FinalAssessmentAttempt.findById(attemptId)
     .populate('user', 'name email')
-    .populate('assessmentId', 'title questions');
-    
-  if (!attempt) {
-    return res.status(404).json({ message: 'Attempt not found' });
+    .populate('assessmentId', 'title');
+  console.log('DEBUG: Attempt details:', JSON.stringify(attempt, null, 2));
+  if (!attempt) return res.status(404).json({ message: 'Attempt not found.' });
+  if (!attempt.user || !attempt.assessmentId) {
+    return res.status(500).json({ message: 'Attempt found, but user or assessment not populated. Check database references.' });
   }
-  
   res.json({ attempt });
 });
 
