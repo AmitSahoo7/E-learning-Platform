@@ -39,6 +39,9 @@ export const createCourse = TryCatch(async (req, res) => {
     instructorsArray = instructors.split(',').map(s => s.trim()).filter(Boolean);
   }
 
+  // DEBUG: Log instructorsArray
+  console.log('DEBUG: instructorsArray', instructorsArray);
+
   const course = await Courses.create({
     title,
     description,
@@ -65,6 +68,19 @@ export const createCourse = TryCatch(async (req, res) => {
   if (user && !user.subscription.includes(course._id)) {
     user.subscription.push(course._id);
     await user.save();
+  }
+
+  // Auto-enroll all assigned instructors in the course
+  if (Array.isArray(instructorsArray) && instructorsArray.length > 0) {
+    await Promise.all(instructorsArray.map(async (instructorId) => {
+      const instructor = await User.findById(instructorId);
+      console.log('DEBUG: instructorId', instructorId, 'found:', !!instructor);
+      if (instructor && !instructor.subscription.includes(course._id)) {
+        instructor.subscription.push(course._id);
+        await instructor.save();
+        console.log('DEBUG: instructor', instructor.email, 'enrolled in course', course._id.toString());
+      }
+    }));
   }
 
   res.status(201).json({
@@ -308,6 +324,27 @@ export const updateCourse = TryCatch(async (req, res) => {
   }
 
   await course.save();
+
+  // Auto-enroll newly assigned instructors in the course
+  if (req.body.instructors !== undefined) {
+    let instructorsArray = [];
+    if (Array.isArray(req.body.instructors)) {
+      instructorsArray = req.body.instructors;
+    } else if (typeof req.body.instructors === 'string' && req.body.instructors.length > 0) {
+      instructorsArray = req.body.instructors.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    if (instructorsArray.length > 0) {
+      await Promise.all(instructorsArray.map(async (instructorId) => {
+        const instructor = await User.findById(instructorId);
+        if (instructor && !instructor.subscription.includes(course._id)) {
+          instructor.subscription.push(course._id);
+          await instructor.save();
+        }
+      }));
+    }
+  }
+
   res.json({ message: "Course updated successfully", course });
 });
 
