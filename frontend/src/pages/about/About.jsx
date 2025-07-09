@@ -28,7 +28,7 @@ const About = () => {
           <div className="about-left">
             <h2 className="about-title-gradient">About Us</h2>
             <h3 className="about-subtitle">
-              <span className="highlight">E-learning</span> Providing The Best Opportunities To The Students Around The Globe.
+              <span className="highlight">SkillNest</span> provides the best opportunities to the students around the Globe.
             </h3>
             <p className="about-description">
               We are dedicated to providing high quality online courses to help individuals learn and grow in their desired fields. Our experienced instruction ensure that each course is tailored for effective learning and practical application.

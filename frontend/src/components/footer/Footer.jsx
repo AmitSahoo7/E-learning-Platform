@@ -13,7 +13,7 @@ const Footer = () => {
     <footer className="footer-custom glassy-footer">
       <div className="footer-columns">
         <div className="footer-col">
-          <div className="footer-logo">Skill Nest</div>
+          <div className="footer-logo">SkillNest</div>
           <p className="footer-about">Skill Nest is your modern e-learning platform for interactive, engaging, and career-focused courses. Learn, grow, and achieve your goals with us!</p>
         </div>
         <div className="footer-col">

@@ -210,6 +210,31 @@ export const addLecture = TryCatch(async (req, res) => {
   });
 });
 
+export const updateLecture = TryCatch(async (req, res) => {
+  const lecture = await Lecture.findById(req.params.id);
+  if (!lecture) return res.status(404).json({ message: "Lecture not found" });
+
+  // Update text fields if provided
+  if (req.body.title !== undefined) lecture.title = req.body.title;
+  if (req.body.description !== undefined) lecture.description = req.body.description;
+
+  // Handle files (multer fields: file for video, pdf for PDF)
+  const files = req.files || {};
+  if (files.file && files.file[0]) {
+    if (files.file[0].mimetype.startsWith("video/")) {
+      lecture.video = files.file[0].path;
+    }
+  }
+  if (files.pdf && files.pdf[0]) {
+    if (files.pdf[0].mimetype === "application/pdf") {
+      lecture.pdf = files.pdf[0].path;
+    }
+  }
+
+  await lecture.save();
+  res.json({ message: "Lecture updated successfully", lecture });
+});
+
 export const deleteLecture = TryCatch(async (req, res) => {
   const lecture = await Lecture.findById(req.params.id);
   if (!lecture) return res.status(404).json({ message: "Lecture not found" });

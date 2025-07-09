@@ -13,6 +13,7 @@ import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import AddQuiz from '../../admin/Courses/AddQuiz.jsx';
+import { MdEdit } from "react-icons/md";
 
 // Adjust path
 
@@ -37,6 +38,8 @@ const Lecture = ({ user }) => {
   const [editQuizId, setEditQuizId] = useState(null);
   const [showCreateQuiz, setShowCreateQuiz] = useState(false);
   const [activeTab, setActiveTab] = useState('lectures');
+  const [editingLectureId, setEditingLectureId] = useState(null);
+  const [editLectureData, setEditLectureData] = useState({});
 
   const { fetchCourse, course } = CourseData();
 
@@ -375,81 +378,150 @@ const Lecture = ({ user }) => {
   const quizCount = quizIdsInCourse.size;
   const quizProgressPercent = quizCount ? Math.round((completedQuizCount / quizCount) * 100) : 0;
 
-  function DraggableItem({ item, isDraggable, onClick, isActive, bestScore }) {
+  function DraggableItem({ item, isDraggable, onClick, isActive, bestScore, onLectureEdit, editingLectureId, setEditingLectureId, editLectureData, setEditLectureData }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+    const isEditing = editingLectureId === item.id;
+    // Use parent state for edit fields
+    const editData = isEditing && editLectureData && editLectureData.id === item.id ? editLectureData : { title: item.title, description: item.description, video: null, pdf: null };
+    const handleEdit = (e) => {
+      e.stopPropagation();
+      setEditingLectureId(item.id);
+      setEditLectureData({ id: item.id, title: item.title, description: item.description, video: null, pdf: null });
+    };
+    const handleCancel = (e) => { e && e.stopPropagation(); setEditingLectureId(null); setEditLectureData({}); };
+    const handleSave = async (e) => {
+      e.preventDefault();
+      try {
+        const formData = new FormData();
+        formData.append("title", editData.title);
+        formData.append("description", editData.description);
+        if (editData.video) formData.append("file", editData.video);
+        if (editData.pdf) formData.append("pdf", editData.pdf);
+        await axios.put(`${server}/api/lecture/${item.id}`, formData, {
+          headers: {
+            token: localStorage.getItem("token"),
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (onLectureEdit) onLectureEdit(item.id, { title: editData.title, description: editData.description });
+        setEditingLectureId(null);
+        setEditLectureData({});
+      } catch (err) {
+        alert("Failed to update lecture.");
+      }
+    };
+    if (isEditing) {
+      return (
+        <form ref={setNodeRef} onSubmit={handleSave} style={{ width: '100%', background: '#232a34', borderRadius: 8, margin: '8px 0', padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <label style={{ color: '#fff', fontWeight: 600 }}>Title
+            <input type="text" value={editData.title} onChange={e => setEditLectureData(data => ({ ...data, title: e.target.value }))} required style={{ width: '100%', marginBottom: 8, borderRadius: 6, border: '1px solid #10b981', padding: 6 }} />
+          </label>
+          <label style={{ color: '#fff', fontWeight: 600 }}>Description
+            <input type="text" value={editData.description} onChange={e => setEditLectureData(data => ({ ...data, description: e.target.value }))} required style={{ width: '100%', marginBottom: 8, borderRadius: 6, border: '1px solid #10b981', padding: 6 }} />
+          </label>
+          <label style={{ color: '#fff', fontWeight: 600 }}>Video File
+            <input type="file" accept="video/*" onChange={e => setEditLectureData(data => ({ ...data, video: e.target.files[0] }))} style={{ marginBottom: 8 }} />
+          </label>
+          <label style={{ color: '#fff', fontWeight: 600 }}>PDF File (optional)
+            <input type="file" accept="application/pdf" onChange={e => setEditLectureData(data => ({ ...data, pdf: e.target.files[0] }))} style={{ marginBottom: 8 }} />
+          </label>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button type="submit" className="modern-btn">Save</button>
+            <button type="button" className="modern-btn secondary" onClick={handleCancel}>Cancel</button>
+          </div>
+        </form>
+      );
+    }
     return (
       <div
         ref={setNodeRef}
         className={`lecture-list-btn-modern${item.type === 'quiz' ? ' quiz' : ''}${isActive ? ' active' : ''}`}
-        style={{ cursor: 'default', position: 'relative', opacity: isDragging ? 0.5 : 1, userSelect: 'none', display: 'flex', alignItems: 'center' }}
+        style={{ cursor: 'default', position: 'relative', opacity: isDragging ? 0.5 : 1, userSelect: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 0, paddingRight: 0 }}
       >
-        {isDraggable && (
-          <span
-            {...attributes}
-            {...listeners}
-            className="drag-handle"
-            style={{ marginRight: 18, fontSize: 22, color: '#43e97b', cursor: 'grab', userSelect: 'none' }}
-            onClick={e => e.stopPropagation()}
-          >
-            ≡
-          </span>
-        )}
-        <div className="accent-bar" />
-        <span style={{ fontSize: 20, marginRight: 16 }}>{item.type === 'lecture' ? '🎬' : '📝'}</span>
-        <span
-          className="lecture-title-link"
-          style={{ fontWeight: 600, color: item.type === 'quiz' ? '#43e97b' : '#fff', marginRight: 12, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3 }}
-          onClick={e => {
-            e.stopPropagation();
-            if (item.type === 'lecture') onClick && onClick();
-            else if (item.type === 'quiz') onClick && onClick();
-          }}
-          tabIndex={0}
-          role="button"
-          onKeyDown={e => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              if (item.type === 'lecture') onClick && onClick();
-              else if (item.type === 'quiz') onClick && onClick();
-            }
-          }}
-        >
-          {item.title}
-          {item.type === 'quiz' && bestScore !== null && (
-            <span style={{ marginLeft: 8, fontSize: 13, color: '#ffd700', fontWeight: 700 }}>
-              (Best: {bestScore} points)
+        <div style={{ display: 'flex', alignItems: 'center', minWidth: 0, flex: 1 }}>
+          {isDraggable && (
+            <span
+              {...attributes}
+              {...listeners}
+              className="drag-handle"
+              style={{ marginRight: 18, fontSize: 22, color: '#43e97b', cursor: 'grab', userSelect: 'none' }}
+              onClick={e => e.stopPropagation()}
+            >
+              ≡
             </span>
           )}
-        </span>
-        {item.type === 'lecture' && item.video && (
-          <span className="point-badge-modern">+1 point</span>
-        )}
-        {item.type === 'quiz' && (
-          <span className="point-badge-modern">+5 points</span>
-        )}
-        {isInstructor && item.type === 'quiz' && (
-          <>
-            <button
-              style={{ background: 'transparent', color: '#007aff', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18, marginLeft: 8 }}
-              onClick={e => { e.stopPropagation(); handleEditQuiz(item.id); }}
-              title="Edit Quiz"
-            >
-              ✏️
-            </button>
-            <button
-              style={{ marginLeft: 6, background: 'transparent', color: '#ff3b30', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18 }}
-              onClick={e => { e.stopPropagation(); handleDeleteQuiz(item.id); }}
-              title="Delete Quiz"
-            >
-              🗑️
-            </button>
-          </>
-        )}
+          <div className="accent-bar" />
+          <span style={{ fontSize: 20, marginRight: 16, flexShrink: 0 }}>{item.type === 'lecture' ? '🎬' : '📝'}</span>
+          <span
+            className="lecture-title-link"
+            style={{ fontWeight: 600, color: item.type === 'quiz' ? '#43e97b' : '#fff', marginRight: 0, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: 3, display: 'flex', alignItems: 'center', minWidth: 0, flex: 1, overflow: 'hidden' }}
+            onClick={e => {
+              e.stopPropagation();
+              if (item.type === 'lecture') onClick && onClick();
+              else if (item.type === 'quiz') onClick && onClick();
+            }}
+            tabIndex={0}
+            role="button"
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (item.type === 'lecture') onClick && onClick();
+                else if (item.type === 'quiz') onClick && onClick();
+              }
+            }}
+          >
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160, display: 'inline-block', verticalAlign: 'middle' }}>{item.title}</span>
+            {isInstructor && item.type === 'lecture' && (
+              <button
+                style={{ background: 'transparent', color: '#007aff', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18, marginLeft: 8, display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}
+                onClick={handleEdit}
+                title="Edit Lecture"
+              >
+                ✏️
+              </button>
+            )}
+            {item.type === 'quiz' && bestScore !== null && (
+              <span style={{ marginLeft: 8,marginTop: 20, fontSize: 13, color: '#ffd700', fontWeight: 700 }}>
+                (Best: {bestScore} points)
+              </span>
+            )}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 12, flexShrink: 0 , marginTop: 0}}>
+          {item.type === 'lecture' && item.video && (
+            <span className="point-badge-modern">+1 point</span>
+          )}
+          {item.type === 'quiz' && (
+            <span className="point-badge-modern">+5 points</span>
+          )}
+          {isInstructor && item.type === 'quiz' && (
+            <>
+              <button
+                style={{ background: 'transparent', color: '#007aff', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18, marginLeft: 8, marginTop: 20, display: 'inline-flex', alignItems: 'center' }}
+                onClick={e => { e.stopPropagation(); handleEditQuiz(item.id); }}
+                title="Edit Quiz"
+              >
+                ✏️
+              </button>
+              <button
+                style={{ marginLeft: 6, background: 'transparent', color: '#ff3b30', border: 'none', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontSize: 18, marginTop: 20, display: 'inline-flex', alignItems: 'center' }}
+                onClick={e => { e.stopPropagation(); handleDeleteQuiz(item.id); }}
+                title="Delete Quiz"
+              >
+                🗑️
+              </button>
+            </>
+          )}
+        </div>
       </div>
     );
   }
 
-  const isInstructor = user && (user.role === 'admin' || user.role === 'superadmin' || user.role === 'instructor');
+  const isInstructor = user && (user.role === 'admin' || user.role === 'instructor');
+  const isInstructorOrAdmin = user && (
+    user.role === 'admin' ||
+    user.role === 'instructor'
+  );
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
@@ -524,24 +596,26 @@ const Lecture = ({ user }) => {
         <div className="lecture-page-modern">
           <div className="lecture-content-container">
             {/* Progress Bars at the very top, outside main content */}
-            <div className="lecture-progress-sticky">
-              <div style={{ width: '100%', maxWidth: 900, margin: '0 auto 0 auto', padding: '0 12px' }}>
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ fontWeight: 700, color: '#63e642', marginBottom: 4 }}>Lecture Progress</div>
-                  <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
-                    <div style={{ width: `${lectureProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+            {!isInstructorOrAdmin && (
+              <div className="lecture-progress-sticky">
+                <div style={{ width: '100%', maxWidth: 900, margin: '0 auto 0 auto', padding: '0 12px' }}>
+                  <div style={{ marginBottom: 10 }}>
+                    <div style={{ fontWeight: 700, color: '#63e642', marginBottom: 4 }}>Lecture Progress</div>
+                    <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
+                      <div style={{ width: `${lectureProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+                    </div>
+                    <span style={{ color: '#fff', fontSize: 14 }}>{completedLec} / {lectLength} lectures completed ({lectureProgressPercent}%)</span>
                   </div>
-                  <span style={{ color: '#fff', fontSize: 14 }}>{completedLec} / {lectLength} lectures completed ({lectureProgressPercent}%)</span>
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, color: '#43e97b', marginBottom: 4 }}>Quiz Progress</div>
-                  <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
-                    <div style={{ width: `${quizProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: '#43e97b', marginBottom: 4 }}>Quiz Progress</div>
+                    <div style={{ background: '#232a36', borderRadius: 8, height: 18, width: '100%', marginBottom: 8, overflow: 'hidden', boxShadow: '0 1px 4px #0002' }}>
+                      <div style={{ width: `${quizProgressPercent}%`, background: 'linear-gradient(90deg, #43e97b 0%, #38f9d7 100%)', height: '100%', borderRadius: 8, transition: 'width 0.5s' }}></div>
+                    </div>
+                    <span style={{ color: '#fff', fontSize: 14 }}>{completedQuizCount} / {quizCount} quizzes completed ({quizProgressPercent}%)</span>
                   </div>
-                  <span style={{ color: '#fff', fontSize: 14 }}>{completedQuizCount} / {quizCount} quizzes completed ({quizProgressPercent}%)</span>
                 </div>
               </div>
-            </div>
+            )}
             <div className={`lecture-main-flex-row${!lecture?.video ? ' center-list' : ''}`}>
               {lecture?.video && (
                 <div className="lecture-main-left-col">
@@ -605,20 +679,30 @@ const Lecture = ({ user }) => {
                     </div>
                   )}
                   {show && user && (user.role === 'admin' || user.role === 'instructor') && (
-                    <div className="lecture-form-box">
-                      <div className="lecture-form">
-                        <form onSubmit={submitHandler}>
-                          <label>Title</label>
-                          <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-                          <label>Description</label>
-                          <input type="text" value={description} onChange={e => setDescription(e.target.value)} required />
-                          <label>Video File</label>
-                          <input type="file" accept="video/mp4" onChange={changeVideoHandler} />
-                          <label>PDF File (optional)</label>
-                          <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} />
-                          <button type="submit" className="common-btn" disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
-                        </form>
-                      </div>
+                    <div className="lecture-form-box" style={{ background: 'rgba(24,28,36,0.92)', borderRadius: 24, boxShadow: '0 8px 32px rgba(16,185,129,0.10)', padding: '2.5rem 2rem', marginBottom: 24, maxWidth: 420, width: '100%', marginLeft: 'auto', marginRight: 'auto', border: '1.5px solid rgba(16,185,129,0.18)' }}>
+                      <form onSubmit={submitHandler} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1, minWidth: 160 }}>
+                            <label style={{ color: '#10b981', fontWeight: 700, marginBottom: 6, display: 'block', fontSize: 16 }}>Title</label>
+                            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required style={{ width: '100%', borderRadius: 10, border: '1.5px solid #10b981', background: '#181c24', color: '#fff', padding: '10px 12px', fontSize: 15, marginBottom: 0, outline: 'none', boxShadow: '0 2px 8px #10b98111', transition: 'border 0.2s' }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 160 }}>
+                            <label style={{ color: '#10b981', fontWeight: 700, marginBottom: 6, display: 'block', fontSize: 16 }}>Description</label>
+                            <input type="text" value={description} onChange={e => setDescription(e.target.value)} required style={{ width: '100%', borderRadius: 10, border: '1.5px solid #10b981', background: '#181c24', color: '#fff', padding: '10px 12px', fontSize: 15, marginBottom: 0, outline: 'none', boxShadow: '0 2px 8px #10b98111', transition: 'border 0.2s' }} />
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                          <div style={{ flex: 1, minWidth: 160 }}>
+                            <label style={{ color: '#10b981', fontWeight: 700, marginBottom: 6, display: 'block', fontSize: 16 }}>Video File</label>
+                            <input type="file" accept="video/mp4,video/*" onChange={changeVideoHandler} style={{ width: '100%', borderRadius: 10, border: '1.5px solid #10b981', background: '#181c24', color: '#fff', padding: '8px 6px', fontSize: 15, marginBottom: 0, outline: 'none', boxShadow: '0 2px 8px #10b98111', transition: 'border 0.2s' }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 160 }}>
+                            <label style={{ color: '#10b981', fontWeight: 700, marginBottom: 6, display: 'block', fontSize: 16 }}>PDF File <span style={{ color: '#bdbdbd', fontWeight: 400, fontSize: 13 }}>(optional)</span></label>
+                            <input type="file" accept="application/pdf" onChange={e => setPdf(e.target.files[0])} style={{ width: '100%', borderRadius: 10, border: '1.5px solid #10b981', background: '#181c24', color: '#fff', padding: '8px 6px', fontSize: 15, marginBottom: 0, outline: 'none', boxShadow: '0 2px 8px #10b98111', transition: 'border 0.2s' }} />
+                          </div>
+                        </div>
+                        <button type="submit" className="modern-btn" style={{ marginTop: 18, width: 120, alignSelf: 'flex-start', fontSize: 18, fontWeight: 700, borderRadius: 14, boxShadow: '0 2px 8px #10b98144' }} disabled={btnLoading}>{btnLoading ? "Adding..." : "Add"}</button>
+                      </form>
                     </div>
                   )}
                   <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -635,6 +719,19 @@ const Lecture = ({ user }) => {
                             }}
                             isActive={lecture?._id === item.id}
                             bestScore={item.type === 'quiz' ? getBestQuizScore(item.id) : null}
+                            onLectureEdit={(id, updatedItem) => {
+                              const updatedContentList = contentList.map(item => {
+                                if (item.id === id) {
+                                  return { ...item, ...updatedItem };
+                                }
+                                return item;
+                              });
+                              setContentList(updatedContentList);
+                            }}
+                            editingLectureId={editingLectureId}
+                            setEditingLectureId={setEditingLectureId}
+                            editLectureData={editLectureData}
+                            setEditLectureData={setEditLectureData}
                           />
                         ))}
                       </div>

@@ -730,6 +730,7 @@ body, html, #root, .home-main-wrapper {
 }
 
 .section-title {
+  margin-left: 10%;
   font-size: 2.1rem;
   font-weight: 700;
   color: #ffffff;
@@ -1295,7 +1296,7 @@ body, html, #root, .home-main-wrapper {
 /* Learn More Section */
 .learn-more-section {
   padding: 3rem 0 3rem 0;
-  background: linear-gradient(90deg, #232a34 60%, #3ecf8e22 100%);
+  background: #000000;
   border-radius: 2rem;
   margin: 2rem 0;
   display: flex;
@@ -1836,7 +1837,7 @@ body, html, #root, .home-main-wrapper {
 }
 
 .home-webinars-section {
-  background: #19223a;
+  background: #000000;
   border-radius: 1.5rem;
   margin: 2.5rem auto 2.5rem auto;
   padding: 2.5rem 1.5rem 2rem 1.5rem;

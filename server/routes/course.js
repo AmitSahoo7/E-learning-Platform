@@ -13,6 +13,7 @@ import {
   getInstructorCourseStats,
   getCourseUserStats,
   updateCourseContentOrder,
+  updateLecture,
 } from "../controllers/course.js";
 import { isAuth } from "../middlewares/isAuth.js";
 import { uploadFiles } from "../middlewares/multer.js";
@@ -38,6 +39,7 @@ router.post("/verification/:id", isAuth, paymentVerification);
 
 // Generic route last
 router.post("/course/:id", isAuth, uploadFiles, addLecture);
+router.put("/lecture/:id", isAuth, uploadFiles, updateLecture);
 
 router.delete("/lecture/:id", isAuth, deleteLecture);
 
