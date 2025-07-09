@@ -47,6 +47,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/reward", rewardRoutes);
 
 app.use('/api/assessment', assessmentRoutes);
+app.use('/api', assessmentRoutes);
 app.use('/api', finalAssessmentRoutes);
 app.use('/api/webinar', webinarRoutes);
 
