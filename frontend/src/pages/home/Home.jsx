@@ -93,9 +93,9 @@ const Home = () => {
         {/* Hero Section */}
         <section className="hero-section-modern hero-section-glow-bg">
           <div className="hero-content-modern">
-            <h1 className="hero-title-modern hero-title-gradient">Good coaching is good <span className="hero-title-gradient-green">teaching</span></h1>
+            <h1 className="hero-title-modern hero-title-gradient">Curiosity fuels mastery. <span className="hero-title-gradient-green">Mastery shapes tomorrow</span></h1>
             <p className="hero-subtitle-modern">
-              In a coaching role, you ask the questions and rely more on your staff, who become the experts, to provide the information.
+            SkillNest is your go-to hub for mastering in-demand skills with expert-led courses, personalized learning paths, and a supportive community — all in one place. Whether you're upskilling for your career or exploring new passions, SkillNest helps you grow at your own pace.
             </p>
             <div className="hero-cta-row-modern">
               <button className="cta-btn cta-student" onClick={() => navigate('/register')}>Join as Student</button>
@@ -201,9 +201,9 @@ const Home = () => {
           </div>
         </section>
 
+          <h2 className="section-title">Current Webinars</h2>
         {/* Webinars Section */}
         <section className="home-webinars-section">
-          <h2 className="section-title">Current Webinars</h2>
           {loadingWebinars ? (
             <div style={{ color: '#888', fontSize: '1.1rem', padding: '1.5rem' }}>Loading webinars...</div>
           ) : webinars.length === 0 ? (

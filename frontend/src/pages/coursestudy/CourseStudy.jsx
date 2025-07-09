@@ -347,8 +347,7 @@ const CourseStudy = ({ user }) => {
                 )
               ) : null}
 
-              {/* Add spacing between lecture and quiz progress */}
-              <div style={{ height: 24 }} />
+              
 
               {isAdmin ? null : (isCourseInstructor || isEnrolled) ? (
                 totalQuizCount === 0 ? (
@@ -428,29 +427,7 @@ const CourseStudy = ({ user }) => {
                   Total Quizzes: {quizCount}
                 </div>
               )}
-              {(isAdmin || isCourseInstructor || (user && Array.isArray(user.subscription) && user.subscription.includes(course._id))) ? (
-                <button
-                  className="cd-btn-primary cd-enroll-btn"
-                  onClick={() => {
-                    if (course && course._id && /^[a-fA-F0-9]{24}$/.test(course._id)) {
-                      navigate(`/quiz/${course._id}`);
-                    } else {
-                      alert("Invalid course ID");
-                    }
-                  }}
-                  disabled={enrolling}
-                >
-                  Quizs
-                </button>
-              ) : (
-                <button
-                  className="cd-btn-primary cd-enroll-btn"
-                  onClick={handleEnroll}
-                  disabled={enrolling}
-                >
-                  {enrolling ? "Processing..." : "Enroll"}
-                </button>
-              )}
+              
               {/* Final Assessment Button */}
               {(isAdmin || isCourseInstructor || isEnrolled) && (
                 <button
