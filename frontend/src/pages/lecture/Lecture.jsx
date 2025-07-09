@@ -47,27 +47,20 @@ const Lecture = ({ user }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Only run if user, course, and user.subscription are loaded
-    if (!user || !course || !Array.isArray(user.subscription)) return;
-
-    // Debug logs for troubleshooting
-    console.log('DEBUG user:', user);
-    console.log('DEBUG user.subscription:', user.subscription);
-    console.log('DEBUG params.id:', params.id);
+    // Only run if user, course, and user.subscription are loaded and not loading
+    if (loading || !user || !course || !Array.isArray(user.subscription)) return;
 
     const isCourseInstructor = (
       user.role === 'admin' ||
-      user.role === 'superadmin' ||
       (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
     );
-    console.log('DEBUG isCourseInstructor:', isCourseInstructor);
     if (
       !isCourseInstructor &&
       !user.subscription.includes(params.id)
     ) {
       navigate("/");
     }
-  }, [user, params.id, navigate, course]);
+  }, [user, params.id, navigate, course, loading]);
 
   async function fetchLectures() {
     try {
@@ -628,7 +621,7 @@ const Lecture = ({ user }) => {
                             isDraggable={isInstructor}
                             onClick={() => {
                               if (item.type === 'lecture') fetchLecture(item.id);
-                              else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
+                              else if (item.type === 'quiz') navigate(`/quiz/${item.id}?lectureId=${lecture?._id || params.id}`);
                             }}
                             isActive={lecture?._id === item.id}
                             bestScore={item.type === 'quiz' ? getBestQuizScore(item.id) : null}
