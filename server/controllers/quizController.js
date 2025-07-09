@@ -36,7 +36,7 @@ export const getQuizzesByCourse = async (req, res) => {
     const user = req.user;
 
     // Allow admins and instructors to view all quizzes without enrollment
-    const isAdminUser = user.role === 'admin' || user.role === 'superadmin';
+    const isAdminUser = user.role === 'admin';
     const isInstructor = user.role === 'instructor' || (Array.isArray(user.roles) && user.roles.includes('instructor'));
     
     if (!user || (!isAdminUser && !isInstructor && (!Array.isArray(user.subscription) || !user.subscription.includes(courseId)))) {

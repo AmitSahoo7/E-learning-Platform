@@ -23,7 +23,7 @@ export const isAuth = async (req, res, next) => {
 
 export const isAdmin = (req, res, next) => {
   try {
-    if (req.user.role !== "admin" && req.user.role !== "superadmin")
+    if (req.user.role !== "admin")
       return res.status(403).json({
         message: "You are not admin",
       });
@@ -38,8 +38,8 @@ export const isAdmin = (req, res, next) => {
 
 export const isInstructorOrAdmin = (req, res, next) => {
   try {
-    // Check if user is admin, superadmin, or instructor
-    const isAdminUser = req.user.role === "admin" || req.user.role === "superadmin";
+    // Check if user is admin or instructor
+    const isAdminUser = req.user.role === "admin";
     const isInstructor = req.user.role === "instructor" || 
                         (Array.isArray(req.user.roles) && req.user.roles.includes("instructor"));
     
@@ -48,21 +48,6 @@ export const isInstructorOrAdmin = (req, res, next) => {
         message: "You need instructor or admin privileges",
       });
     }
-
-    next();
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-export const isSuperAdmin = (req, res, next) => {
-  try {
-    if (req.user.role !== "superadmin")
-      return res.status(403).json({
-        message: "You are not super admin",
-      });
 
     next();
   } catch (error) {

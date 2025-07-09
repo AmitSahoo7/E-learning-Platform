@@ -201,33 +201,16 @@ export const getAllUser = TryCatch(async (req, res) => {
 
 export const updateRole = TryCatch(async (req, res) => {
   const user = await User.findById(req.params.id);
+  const allowedRoles = ["user", "instructor", "admin"];
+  const { role } = req.body;
 
-  if (user.role === "user") {
-    user.role = "admin";
-    await user.save();
-
-    return res.status(200).json({
-      message: "Role updated to admin",
-    });
+  if (!role || !allowedRoles.includes(role)) {
+    return res.status(400).json({ message: "Invalid role" });
   }
 
-  if (user.role === "admin") {
-    user.role = "superadmin";
-    await user.save();
-
-    return res.status(200).json({
-      message: "Role updated to superadmin",
-    });
-  }
-
-  if (user.role === "superadmin") {
-    user.role = "user";
-    await user.save();
-
-    return res.status(200).json({
-      message: "Role updated to user",
-    });
-  }
+  user.role = role;
+  await user.save();
+  return res.status(200).json({ message: `Role updated to ${role}` });
 });
 
 export const getCoursesWithLectures = TryCatch(async (req, res) => {

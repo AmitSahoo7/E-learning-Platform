@@ -66,7 +66,7 @@ const CourseContentOrder = ({ user }) => {
   };
 
   // Only allow admin/instructor
-  const isInstructor = user && (user.role === 'admin' || user.role === 'superadmin' || user.role === 'instructor');
+  const isInstructor = user && (user.role === 'admin' || user.role === 'instructor');
   if (!isInstructor) return <div style={{ padding: 32, color: 'red' }}>Access denied.</div>;
 
   return (

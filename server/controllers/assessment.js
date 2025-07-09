@@ -118,8 +118,8 @@ export const listAssessments = TryCatch(async (req, res) => {
   const foundAssessments = await FinalAssessment.find({ courseId }).sort({ createdAt: -1 });
   console.log('DEBUG: Assessments found:', foundAssessments.map(a => ({ id: a._id.toString(), courseId: a.courseId.toString(), title: a.title })));
   if (!course) return res.status(404).json({ message: 'Course not found.' });
-  // If user is admin/superadmin, allow
-  if (user.role === 'admin' || user.role === 'superadmin') {
+  // If user is admin, allow
+  if (user.role === 'admin') {
     return res.json({ assessments: foundAssessments });
   }
   // If user is instructor, check if they are assigned to this course (ObjectId equality)

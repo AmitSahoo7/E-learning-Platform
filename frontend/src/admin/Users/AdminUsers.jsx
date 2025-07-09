@@ -30,12 +30,12 @@ const AdminUsers = () => {
     }
   };
 
-  const updateRole = async (id) => {
+  const updateRole = async (id, newRole) => {
     if (window.confirm("Are you sure you want to update this user's role?")) {
       try {
         const { data } = await axios.put(
           `${server}/api/admin/user/${id}`,
-          {},
+          { role: newRole },
           {
             headers: {
               token: localStorage.getItem("token"),
@@ -90,14 +90,15 @@ const AdminUsers = () => {
                   <td>{userItem.email}</td>
                   <td>{userItem.role}</td>
                   <td>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={userItem.role === "admin"}
-                        onChange={() => updateRole(userItem._id)}
-                      />
-                      <span className="slider"></span>
-                    </label>
+                    <select
+                      value={userItem.role}
+                      onChange={e => updateRole(userItem._id, e.target.value)}
+                      style={{ padding: '4px 8px', borderRadius: 4 }}
+                    >
+                      <option value="user">user</option>
+                      <option value="instructor">instructor</option>
+                      <option value="admin">admin</option>
+                    </select>
                   </td>
                 </tr>
               ))}

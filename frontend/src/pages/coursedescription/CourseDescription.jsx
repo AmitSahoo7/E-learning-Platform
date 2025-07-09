@@ -87,10 +87,9 @@ const CourseDescription = ({ user }) => {
 
   // Button logic
   const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
-  // Add isCourseInstructor: true if user is admin, superadmin, or their _id is in course.instructors (compare as strings)
+  // Add isCourseInstructor: true if user is admin or their _id is in course.instructors (compare as strings)
   const isCourseInstructor = user && (
     user.role === 'admin' ||
-    user.role === 'superadmin' ||
     (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
   );
 
