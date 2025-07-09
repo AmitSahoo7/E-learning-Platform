@@ -330,6 +330,13 @@ const Dashboard = () => {
     setSelectedDayDetails(activities);
   };
 
+  // Helper: get most recent activity timestamp for a course
+  const getRecentTimestampForCourse = (courseId) => {
+    const activities = recentActivity.filter(a => a.course === courseId || a.course?._id === courseId);
+    if (activities.length === 0) return 0;
+    return Math.max(...activities.map(a => new Date(a.timestamp).getTime()));
+  };
+
   if (loading) {
     return <Loading message="Loading your learning dashboard..." />;
   }
@@ -418,8 +425,9 @@ const Dashboard = () => {
             </div>
             <div className="continue-learning-content">
               {courseProgress.length > 0 ? (
-                courseProgress
+                [...courseProgress]
                   .filter(cp => cp.progress.courseProgressPercentage < 100)
+                  .sort((a, b) => getRecentTimestampForCourse(b.course._id) - getRecentTimestampForCourse(a.course._id))
                   .slice(0, 3)
                   .map((cp, index) => (
                     <div key={cp.course._id} className="continue-course-card">

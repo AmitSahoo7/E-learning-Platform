@@ -7,19 +7,19 @@ import { FaChalkboardTeacher } from "react-icons/fa";
 
 const BACKEND_URL = "http://localhost:4000"; // Change to your backend URL if different
 
-const InstructorDashboard = () => {
-  // Move this block to the very top of the component, before any useState/useRef
-  const userStr = localStorage.getItem("user");
+const InstructorDashboard = ({ user }) => {
+  // Prefer user prop, fallback to localStorage
   let instructorName = "Instructor";
-  let instructorEmail = "";
-  let instructorPhoto = "";
-  if (userStr) {
-    try {
-      const user = JSON.parse(userStr);
-      if (user && user.name) instructorName = user.name;
-      if (user && user.email) instructorEmail = user.email;
-      if (user && user.photo) instructorPhoto = user.photo;
-    } catch {}
+  if (user && user.name) {
+    instructorName = user.name;
+  } else {
+    const userStr = localStorage.getItem("user");
+    if (userStr) {
+      try {
+        const userObj = JSON.parse(userStr);
+        if (userObj && userObj.name) instructorName = userObj.name;
+      } catch {}
+    }
   }
   const [courseStats, setCourseStats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,10 +137,10 @@ const InstructorDashboard = () => {
       </div>
       
       <h2 className="instructor-dashboard-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, fontSize: 36, fontWeight: 700, color: '#3ecf8e', margin: '0 auto 18px auto', textAlign: 'center', textShadow: '0 0 16px #3ecf8e55' }}>
-        <FaChalkboardTeacher style={{ fontSize: 40, color: '#3ecf8e', filter: 'drop-shadow(0 0 8px #3ecf8e88)' }} />
         Instructor Dashboard
       </h2>
-      <h3 className="instructor-greeting" style={{ color: '#3ecf8e', marginBottom: 32, fontWeight: 500, fontSize: 24, textShadow: '0 0 8px #3ecf8e55' }}>
+      <h3 className="instructor-greeting" style={{ color: '#3ecf8e', marginBottom: 32, fontWeight: 500, fontSize: 24, textShadow: '0 0 8px #3ecf8e55', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 28, color: '#3ecf8e', filter: 'drop-shadow(0 0 8px #3ecf8e88)' }}>👋</span>
         Welcome back, {instructorName}!
       </h3>
       {/* Bar Chart for Enrolled Users per Course */}
@@ -206,6 +206,9 @@ const InstructorDashboard = () => {
                   <button className="instructor-btn" onClick={() => handleManageLecture(course._id)}>
                     Manage Lectures/Quizzes
                   </button>
+                  <button className="instructor-btn" onClick={() => navigate(`/instructor/course/${course._id}/assessments`)}>
+                    Manage Assessment
+                  </button>
                 </div>
               </div>
             ))}
@@ -228,6 +231,7 @@ const InstructorDashboard = () => {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Lectures Completed</th>
+                    <th>Assessment Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -236,6 +240,7 @@ const InstructorDashboard = () => {
                       <td>{user.name}</td>
                       <td>{user.email}</td>
                       <td>{user.watchTime}</td>
+                      <td>{user.assessmentScore !== null && user.assessmentScore !== undefined ? user.assessmentScore : '-'}</td>
                     </tr>
                   ))}
                 </tbody>

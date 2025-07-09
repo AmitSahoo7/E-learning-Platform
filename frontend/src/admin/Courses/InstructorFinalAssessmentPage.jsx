@@ -172,7 +172,7 @@ const InstructorFinalAssessmentPage = () => {
     <div className={styles.manageAssessmentsPage}>
       <div className={styles.assessmentsHeader}>
         <div className={styles.headerContent}>
-          <h1>Manage Final Assessments</h1>
+          <h1 style={{ color: '#7cffb2' }}>Manage Final Assessments</h1>
           <p className={styles.courseInfo}>Course: {course ? course.title : 'Loading...'}</p>
         </div>
         <div className={styles.headerActions}>

@@ -115,7 +115,7 @@ const AssessmentAttemptsViewer = () => {
   return (
     <div className="attempts-viewer">
       <div className="attempts-header">
-        <h2>Final Assessment Attempts</h2>
+        <h2 style={{ color: '#7cffb2' }}>Final Assessment Attempts</h2>
         <div className="header-actions">
           <button className="export-btn" onClick={exportToCSV}>
             Export to CSV
@@ -129,19 +129,19 @@ const AssessmentAttemptsViewer = () => {
       {/* Statistics Cards */}
       <div className="statistics-grid">
         <div className="stat-card">
-          <h3>Total Attempts</h3>
+          <h3 style={{ color: '#7cffb2' }}>Total Attempts</h3>
           <p className="stat-number">{statistics.totalAttempts}</p>
         </div>
         <div className="stat-card">
-          <h3>Unique Users</h3>
+          <h3 style={{ color: '#7cffb2' }}>Unique Users</h3>
           <p className="stat-number">{statistics.uniqueUsers}</p>
         </div>
         <div className="stat-card">
-          <h3>Pass Rate</h3>
+          <h3 style={{ color: '#7cffb2' }}>Pass Rate</h3>
           <p className="stat-number">{statistics.passRate}%</p>
         </div>
         <div className="stat-card">
-          <h3>Average Score</h3>
+          <h3 style={{ color: '#7cffb2' }}>Average Score</h3>
           <p className="stat-number">{statistics.averageScore}%</p>
         </div>
       </div>
@@ -186,7 +186,7 @@ const AssessmentAttemptsViewer = () => {
               <tr key={attempt._id} className={attempt.isPassed ? 'passed-row' : 'failed-row'}>
                 <td>
                   <div className="user-info">
-                    <span className="user-name">{attempt.user?.name || 'N/A'}</span>
+                    <span className="user-name-black">{attempt.user?.name || 'N/A'}</span>
                     <span className="user-email">{attempt.user?.email || 'N/A'}</span>
                   </div>
                 </td>
