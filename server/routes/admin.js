@@ -19,7 +19,8 @@ import {
 
   createAnnouncement,
   getAnnouncements,
-
+  getAnnouncementsWithStatus,
+  markAnnouncementStatus,
 
   getAllComments
 } from "../controllers/admin.js";
@@ -50,6 +51,9 @@ router.put("/course/:id", isAuth, isAdmin, uploadCourseFiles, updateCourse);
 // Announcements
 router.post("/announcement", isAuth, isAdmin, createAnnouncement);
 router.get("/announcements", isAuth, getAnnouncements);
+// New: Announcements with user status
+router.get("/announcements-with-status", isAuth, getAnnouncementsWithStatus);
+router.post("/announcement/mark-status", isAuth, markAnnouncementStatus);
 
 router.get("/comments", isAuth, isAdmin, getAllComments);
 

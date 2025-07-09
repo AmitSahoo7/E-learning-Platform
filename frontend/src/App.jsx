@@ -43,13 +43,12 @@ const App = () => {
   const { isAuth, user, loading } = UserData();
 
   const [announcements, setAnnouncements] = useState([]);
-  const [readAnnouncements, setReadAnnouncements] = useState([]);
 
   useEffect(() => {
     if (!isAuth) return;
     const fetchAnnouncements = async () => {
       try {
-        const { data } = await axios.get(`${server}/api/admin/announcements`, {
+        const { data } = await axios.get(`${server}/api/admin/announcements-with-status`, {
           headers: { token: localStorage.getItem("token") },
         });
         setAnnouncements(data.announcements || []);
@@ -57,29 +56,57 @@ const App = () => {
         setAnnouncements([]);
       }
     };
-
     fetchAnnouncements();
     const intervalId = setInterval(fetchAnnouncements, 5000); // poll every 5s
     return () => clearInterval(intervalId);
   }, [isAuth]);
 
-  useEffect(() => {
-    const read = localStorage.getItem("readAnnouncements");
-    if (read) setReadAnnouncements(JSON.parse(read));
-  }, []);
-
-  const markAnnouncementRead = (id) => {
+  const markAnnouncementRead = async (id) => {
     if (id === "__all__") {
-      const allIds = announcements.map((a) => a._id);
-      setReadAnnouncements(allIds);
-      localStorage.setItem("readAnnouncements", JSON.stringify(allIds));
-      return;
+      // Mark all unread announcements as read
+      const unread = announcements.filter(a => !a.isRead && !a.isCleared);
+      await Promise.all(unread.map(a => axios.post(`${server}/api/admin/announcement/mark-status`, {
+        announcementId: a._id,
+        isRead: true
+      }, { headers: { token: localStorage.getItem("token") } })));
+    } else {
+      const a = announcements.find(a => a._id === id);
+      if (a && !a.isRead) {
+        await axios.post(`${server}/api/admin/announcement/mark-status`, {
+          announcementId: id,
+          isRead: true
+        }, { headers: { token: localStorage.getItem("token") } });
+      }
     }
-    if (!readAnnouncements.includes(id)) {
-      const updated = [id, ...readAnnouncements];
-      setReadAnnouncements(updated);
-      localStorage.setItem("readAnnouncements", JSON.stringify(updated));
+    // Refetch announcements to update status
+    const { data } = await axios.get(`${server}/api/admin/announcements-with-status`, {
+      headers: { token: localStorage.getItem("token") },
+    });
+    setAnnouncements(data.announcements || []);
+  };
+
+  const markAnnouncementCleared = async (id) => {
+    if (id === "__all__") {
+      // Mark all as cleared
+      const uncleared = announcements.filter(a => !a.isCleared);
+      await Promise.all(uncleared.map(a => axios.post(`${server}/api/admin/announcement/mark-status`, {
+        announcementId: a._id,
+        isCleared: true
+      }, { headers: { token: localStorage.getItem("token") } })));
+    } else {
+      const a = announcements.find(a => a._id === id);
+      if (a && !a.isCleared) {
+        await axios.post(`${server}/api/admin/announcement/mark-status`, {
+          announcementId: id,
+          isCleared: true
+        }, { headers: { token: localStorage.getItem("token") } });
+      }
     }
+    // Refetch announcements to update status
+    const { data } = await axios.get(`${server}/api/admin/announcements-with-status`, {
+      headers: { token: localStorage.getItem("token") },
+    });
+    setAnnouncements(data.announcements || []);
   };
 
   const addAnnouncement = async (msg) => {
@@ -103,8 +130,8 @@ const App = () => {
       <Header
         isAuth={isAuth}
         announcements={announcements}
-        readAnnouncements={readAnnouncements}
         markAnnouncementRead={markAnnouncementRead}
+        markAnnouncementCleared={markAnnouncementCleared}
       />
       <div className="app-main-content">
         <Routes>
