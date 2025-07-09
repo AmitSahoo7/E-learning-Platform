@@ -43,6 +43,7 @@ const Lecture = ({ user }) => {
   const watchStartRef = useRef(null);
   const watchDurationRef = useRef(0);
   const lastLectureIdRef = useRef(null);
+  const videoRef = useRef(null);
 
   const location = useLocation();
 
@@ -292,6 +293,14 @@ const Lecture = ({ user }) => {
     const elapsed = Math.round((Date.now() - watchStartRef.current) / 60000);
     logWatchTime(elapsed);
     watchStartRef.current = Date.now(); // reset for possible replay
+    // Only mark progress if user watched at least 90% of the video
+    if (videoRef.current) {
+      const duration = videoRef.current.duration;
+      const watched = videoRef.current.currentTime;
+      if (duration && watched / duration >= 0.9) {
+        addProgress(lecture._id);
+      }
+    }
   };
 
   // Fetch lectures and quizzes, merge and sort by order
@@ -538,6 +547,7 @@ const Lecture = ({ user }) => {
                 <div className="lecture-main-left-col">
                   <div className="lecture-video-section-modern">
                     <video
+                      ref={videoRef}
                       src={`${server}/${lecture.video}`}
                       width="100%"
                       controls

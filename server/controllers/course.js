@@ -9,6 +9,7 @@ import { Reward } from "../models/Reward.js";
 import { UserActivity } from "../models/UserActivity.js";
 import crypto from 'crypto';
 import Quiz from '../models/Quiz.js';
+import FinalAssessmentAttempt from '../models/FinalAssessmentAttempt.js';
 // import { deleteLecture } from "../controllers/course.js";
 
 export const getAllCourses = TryCatch(async (req, res) => {
@@ -396,31 +397,28 @@ export const getYourProgress = TryCatch(async (req, res) => {
 });
 
 export const getInstructorCourses = TryCatch(async (req, res) => {
-  // Find courses where user is creator or uploaded at least one lecture
+  // Find courses where user is creator, uploaded at least one lecture, or is assigned as instructor
   const createdCourses = await Courses.find({ createdBy: req.user._id });
   const lectureCourses = await Lecture.find({ uploadedBy: req.user._id }).distinct('course');
+  const assignedCourses = await Courses.find({ instructors: req.user._id });
   const lectureCourseDocs = await Courses.find({ _id: { $in: lectureCourses } });
   // Merge and remove duplicates
-  const allCourses = [...createdCourses, ...lectureCourseDocs].filter((course, index, self) =>
+  const allCourses = [...createdCourses, ...lectureCourseDocs, ...assignedCourses].filter((course, index, self) =>
     index === self.findIndex((c) => c._id.toString() === course._id.toString())
   );
   res.json({ courses: allCourses });
 });
 
 export const getInstructorCourseStats = TryCatch(async (req, res) => {
-  // Find courses where user is creator or uploaded at least one lecture
+  // Find courses where user is creator, uploaded at least one lecture, or is assigned as instructor
   const createdCourses = await Courses.find({ createdBy: req.user._id });
   const lectureCourses = await Lecture.find({ uploadedBy: req.user._id }).distinct('course');
+  const assignedCourses = await Courses.find({ instructors: req.user._id });
   const lectureCourseDocs = await Courses.find({ _id: { $in: lectureCourses } });
   // Merge and remove duplicates
-  const allCourses = [...createdCourses, ...lectureCourseDocs].filter((course, index, self) =>
+  const allCourses = [...createdCourses, ...lectureCourseDocs, ...assignedCourses].filter((course, index, self) =>
     index === self.findIndex((c) => c._id.toString() === course._id.toString())
   );
-
-  console.log("Instructor ID:", req.user._id);
-  console.log("Created courses:", createdCourses.map(c => c._id));
-  console.log("Lecture courses:", lectureCourses);
-  console.log("All courses:", allCourses.map(c => c._id));
 
   const courseStats = await Promise.all(
     allCourses.map(async (course) => {
@@ -450,14 +448,20 @@ export const getCourseUserStats = TryCatch(async (req, res) => {
   const courseId = req.params.id;
   // Find all users enrolled in this course
   const users = await User.find({ subscription: courseId });
-  // For each user, get their progress for this course
+  // For each user, get their progress for this course and best assessment score
   const userStats = await Promise.all(users.map(async (user) => {
     const progress = await Progress.findOne({ user: user._id, course: courseId });
+    // Find best assessment score for this course
+    const bestAttempt = await FinalAssessmentAttempt.find({ user: user._id, courseId })
+      .sort({ score: -1 })
+      .limit(1);
+    const assessmentScore = bestAttempt.length > 0 ? bestAttempt[0].score : null;
     return {
       _id: user._id,
       name: user.name,
       email: user.email,
       watchTime: progress && progress.completedLectures ? progress.completedLectures.length : 0,
+      assessmentScore,
     };
   }));
   res.json({ userStats });

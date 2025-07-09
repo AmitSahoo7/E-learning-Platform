@@ -133,15 +133,17 @@ body, html, #root {
   transform: translateY(-2px) scale(1.04);
 }
 
+/* Remove or override the last-child rules so all instructor-btn buttons look the same */
 .instructor-btn:last-child {
-  background: #232a34;
-  color: #7cffb2;
-  border: 1.5px solid #7cffb2;
+  background: linear-gradient(90deg, #3ecf8e 0%, #6fffa2 100%) !important;
+  color: #181c24 !important;
+  border: none !important;
 }
 .instructor-btn:last-child:hover {
-  background: #181c24;
-  color: #fff;
-  box-shadow: 0 0 12px #7cffb288;
+  background: linear-gradient(90deg, #10b981 0%, #3ecf8e 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 0 16px #7cffb288 !important;
+  transform: translateY(-2px) scale(1.04) !important;
 }
 
 .loading, .error, .no-courses {
