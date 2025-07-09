@@ -47,16 +47,22 @@ const Lecture = ({ user }) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Allow access for admins, superadmins, assigned instructors, or enrolled students
-    const isCourseInstructor = user && (
+    // Only run if user, course, and user.subscription are loaded
+    if (!user || !course || !Array.isArray(user.subscription)) return;
+
+    // Debug logs for troubleshooting
+    console.log('DEBUG user:', user);
+    console.log('DEBUG user.subscription:', user.subscription);
+    console.log('DEBUG params.id:', params.id);
+
+    const isCourseInstructor = (
       user.role === 'admin' ||
       user.role === 'superadmin' ||
       (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
     );
+    console.log('DEBUG isCourseInstructor:', isCourseInstructor);
     if (
-      user &&
       !isCourseInstructor &&
-      Array.isArray(user.subscription) &&
       !user.subscription.includes(params.id)
     ) {
       navigate("/");
@@ -322,11 +328,11 @@ const Lecture = ({ user }) => {
     fetchContent();
   }, [params.id]);
 
-  // Helper to get best score for a quiz
+  // Helper to get best score for a quiz (in points)
   const getBestQuizScore = (quizId) => {
     if (!progress[0] || !Array.isArray(progress[0].quizScores)) return null;
-    const found = progress[0].quizScores.find(q => q.quiz === quizId || q.quiz?._id === quizId);
-    return found ? found.bestScore : null;
+    const found = progress[0].quizScores.find(q => (q.quiz === quizId || q.quiz?._id === quizId));
+    return found ? (typeof found.bestScore === 'number' ? found.bestScore : (found.score || null)) : null;
   };
 
   // Define a consistent style for point badges
@@ -350,11 +356,24 @@ const Lecture = ({ user }) => {
 
   // Use existing logic for lecture and quiz progress
   const lectureProgressPercent = lectLength ? Math.round((completedLec / lectLength) * 100) : 0;
-  const quizCount = contentList.filter(item => item.type === 'quiz').length;
-  const completedQuizCount = progress && progress[0] && Array.isArray(progress[0].quizScores) ? progress[0].quizScores.length : 0;
+  const quizIdsInCourse = new Set(contentList.filter(item => item.type === 'quiz').map(q => q.id));
+  let completedQuizCount = 0;
+  if (progress && progress[0] && Array.isArray(progress[0].quizScores)) {
+    // Only count unique quizzes in this course where bestScore >= 50% of total points
+    const passedQuizIds = new Set();
+    contentList.filter(item => item.type === 'quiz').forEach(quiz => {
+      const bestScore = getBestQuizScore(quiz.id);
+      const totalPoints = quiz.totalPoints || 1; // fallback to 1 to avoid div by zero
+      if (bestScore !== null && totalPoints > 0 && (bestScore / totalPoints) * 100 >= 50) {
+        passedQuizIds.add(quiz.id);
+      }
+    });
+    completedQuizCount = passedQuizIds.size;
+  }
+  const quizCount = quizIdsInCourse.size;
   const quizProgressPercent = quizCount ? Math.round((completedQuizCount / quizCount) * 100) : 0;
 
-  function DraggableItem({ item, isDraggable, onClick, isActive }) {
+  function DraggableItem({ item, isDraggable, onClick, isActive, bestScore }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
     return (
       <div
@@ -394,6 +413,11 @@ const Lecture = ({ user }) => {
           }}
         >
           {item.title}
+          {item.type === 'quiz' && bestScore !== null && (
+            <span style={{ marginLeft: 8, fontSize: 13, color: '#ffd700', fontWeight: 700 }}>
+              (Best: {bestScore} points)
+            </span>
+          )}
         </span>
         {item.type === 'lecture' && item.video && (
           <span className="point-badge-modern">+1 point</span>
@@ -607,6 +631,7 @@ const Lecture = ({ user }) => {
                               else if (item.type === 'quiz') navigate(`/quiz/${item.id}`);
                             }}
                             isActive={lecture?._id === item.id}
+                            bestScore={item.type === 'quiz' ? getBestQuizScore(item.id) : null}
                           />
                         ))}
                       </div>

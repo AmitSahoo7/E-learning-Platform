@@ -87,10 +87,8 @@ const CourseStudy = ({ user }) => {
 
   const isEnrolled = user && course && Array.isArray(user.subscription) && user.subscription.includes(course._id);
   const isAdmin = user && user.role === "admin";
-  const isSuperadmin = user && user.role === "superadmin";
   const isCourseInstructor = user && (
     user.role === 'admin' ||
-    user.role === 'superadmin' ||
     (Array.isArray(course?.instructors) && course.instructors.map(String).includes(String(user._id)))
   );
 
@@ -454,12 +452,12 @@ const CourseStudy = ({ user }) => {
                 </button>
               )}
               {/* Final Assessment Button */}
-              {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
+              {(isAdmin || isCourseInstructor || isEnrolled) && (
                 <button
                   className="cd-btn-primary cd-enroll-btn"
                   style={{ marginTop: 8, background: '#34d399' }}
                   onClick={() => {
-                    if (isAdmin || isSuperadmin) {
+                    if (isAdmin) {
                       navigate(`/admin/course/${course._id}/assessments`);
                     } else if (isCourseInstructor) {
                       navigate(`/instructor/course/${course._id}/assessments`);
@@ -472,7 +470,7 @@ const CourseStudy = ({ user }) => {
                 </button>
               )}
               {/* Certificate Button */}
-              {(isAdmin || isSuperadmin || isCourseInstructor || isEnrolled) && (
+              {(isAdmin || isCourseInstructor || isEnrolled) && (
                 <button
                   className="cd-btn-primary cd-enroll-btn"
                   style={{ marginTop: 8, background: '#f59e0b' }}

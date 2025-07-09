@@ -115,25 +115,36 @@ const AddQuiz = ({ courseId: propCourseId, quizId: propQuizId, onSuccess }) => {
         courseId,
         questions: formattedQuestions,
       };
+      let res;
       if (quizId) {
         // Edit existing quiz
-        await axios.put(`${server}/api/quiz/${quizId}`, payload, {
+        res = await axios.put(`${server}/api/quiz/${quizId}`, payload, {
           headers: { token: localStorage.getItem("token") },
         });
-        toast.success("Quiz updated!");
       } else {
         // Create new quiz
-        await axios.post(`${server}/api/quiz/create`, payload, {
+        res = await axios.post(`${server}/api/quiz/create`, payload, {
           headers: { token: localStorage.getItem("token") },
         });
-        toast.success("Quiz Created!");
       }
-      setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswers: [], questionType: "single" }]);
-      setQuizTitle("");
-      if (onSuccess) {
-        onSuccess();
+      console.log('Quiz API response:', res);
+      // Only show success if the response is OK
+      if (res && res.status >= 200 && res.status < 300) {
+        toast.success(quizId ? "Quiz updated!" : "Quiz Created!");
+        setQuestions([{ questionText: "", options: ["", "", "", ""], correctAnswers: [], questionType: "single" }]);
+        setQuizTitle("");
+        if (onSuccess) {
+          try {
+            onSuccess();
+          } catch (onSuccessErr) {
+            console.error('Error in onSuccess:', onSuccessErr);
+          }
+        }
+      } else {
+        toast.error(res?.data?.message || "Quiz save failed");
       }
     } catch (err) {
+      console.error('Quiz save error:', err);
       toast.error(err.response?.data?.message || "Quiz save failed");
     }
     setLoading(false);
