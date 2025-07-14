@@ -1,6 +1,26 @@
 # 📚 MERN E-Learning Platform (e-LMS)
 
-A full-stack **E-Learning Management System** built using the **MERN Stack (MongoDB, Express, React, Node.js)**. This is designed to help learners, instructors, and administrators manage and deliver digital learning content seamlessly.
+A full-stack **E-Learning Management System** built using the **MERN Stack (MongoDB, Express, React, Node.js)**. This platform empowers learners, instructors, and administrators to manage and deliver digital learning content seamlessly.
+
+---
+
+## 🚀 Live Demo
+
+- **Backend:** [https://skillnest-backend.onrender.com/](https://skillnest-backend.onrender.com/)
+- **Frontend:** [https://skill-nest-deploy.vercel.app/](https://skill-nest-deploy.vercel.app/)
+
+**Instructions:**
+1. First, open the backend link above (this will wake up the backend server).
+2. Then, open the frontend link to access the full platform experience.
+3. For the best experience, use a desktop browser.
+
+---
+
+## 🖼️ Homepage Preview
+
+![SkillNest Homepage](./frontend/public/SkillNest_Homepage_Screenshot.png)
+
+*SkillNest homepage: Modern, responsive design with clear calls to action for students and instructors.*
 
 ---
 
@@ -24,61 +44,94 @@ A full-stack **E-Learning Management System** built using the **MERN Stack (Mong
 
 ## ✨ Features
 
-### ✅ Authentication & Authorization
-- JWT-based login & signup for **Students**, **Instructors**, and **Admins**
-- Role-based access control (RBAC)
-
-### 📚 Course Management
-- Create, update, and delete courses
-- Upload video lectures (via `multer`)
-- Organize lectures by chapters/modules
-
-### 🧑‍🎓 Student Features
-- Enroll in courses
-- Track progress
-- Watch video lectures
-- View course content and syllabus
+### 👩‍🎓 Student Features
+- **Registration & Authentication**
+  - Secure sign-up and login with email verification (OTP)
+  - JWT-based session management
+  - Profile management (update details, upload photo)
+- **Course Discovery & Enrollment**
+  - Browse and search for courses by category, difficulty, and instructor
+  - View detailed course descriptions, prerequisites, learning outcomes, and instructor bios
+  - Enroll in free or paid courses (integrated with Razorpay for secure payments)
+- **Learning Experience**
+  - Access enrolled courses and structured video lectures
+  - Download course materials (PDFs, resources)
+  - Track progress: see completed lectures, quizzes, and overall course completion
+  - Set and monitor personalized study goals (daily, weekly, monthly)
+  - Visual calendar for tracking learning activities and goals
+  - View recommended courses based on learning history
+- **Assessment & Certification**
+  - Attempt quizzes and final assessments for each course
+  - View quiz scores and assessment results
+  - Download course completion certificates
+- **Community & Engagement**
+  - Participate in lecture-specific comment sections for discussions
+  - Leave reviews and ratings for courses
+  - View and contribute to course reviews
+  - Access platform-wide leaderboard to compare progress and achievements
+  - Join live events and webinars
+- **Notifications & Announcements**
+  - Receive real-time announcements and advanced notifications (smart dropdown, auto-close, scroll controls)
+  - Mark announcements as read or cleared
+  - Get notified about new courses, events, and deadlines
+- **Support**
+  - Access an AI-powered chatbot for general queries and platform guidance
 
 ### 👨‍🏫 Instructor Features
-- Create and manage their own courses
-- Upload and organize lectures
-- View enrolled students
+- **Registration & Authentication**
+  - Register as an instructor (with verification)
+  - Secure login and profile management
+- **Course & Content Management**
+  - Create, edit, and delete courses with rich metadata (title, description, category, price, duration, image, PDF, tagline, difficulty, prerequisites, learning outcomes, preview video)
+  - Upload and organize video lectures and course materials
+  - Add and manage quizzes and final assessments for their courses
+  - View and manage enrolled students
+- **Assessment & Analytics**
+  - Create, edit, and review quizzes and final assessments
+  - View student attempts and performance analytics
+  - Track course engagement and completion rates
+- **Community & Engagement**
+  - Respond to student comments in lecture-specific discussion sections
+  - View and respond to course reviews
+  - Host and manage webinars and live events
+- **Notifications**
+  - Receive notifications about course enrollments, student activity, and platform announcements
 
 ### 🛠️ Admin Features
-- View all users & courses
-- Approve or reject course submissions
-- Delete or ban users
+- **User & Role Management**
+  - View, approve, reject, or delete users (students and instructors)
+  - Assign or revoke instructor/admin roles
+- **Course & Content Oversight**
+  - Approve or reject course submissions
+  - Edit or delete any course or lecture
+  - Manage all course materials and resources
+- **Platform Analytics & Dashboard**
+  - Access comprehensive statistics: total courses, lectures, users, revenue, and system health
+  - Monitor recent activity, feedback, and comments across the platform
+  - View and manage all payments and revenue (integrated with Razorpay)
+- **Assessment & Certification**
+  - Oversee all quizzes and final assessments
+  - Review student attempts and performance across the platform
+  - Manage certificate templates and issuance
+- **Webinar & Event Management**
+  - Create, update, and delete webinars and live events
+  - Monitor participation and engagement
+- **Advanced Notifications & Announcements**
+  - Create and broadcast announcements to all users
+  - Advanced notification system with real-time updates, smart dropdown, and user read/clear tracking
+- **System Tools**
+  - Monitor system status and maintain private admin notes
+  - Access feedback and comments for platform improvement
 
-### 💳 Payment Integration (Future Scope)
-- Razorpay / Stripe (can be added for paid courses)
-
-### Announcement System
-- **Smart Dropdown**: Notification dropdown with scroll functionality when content exceeds half page height
-- **Auto-Close**: Automatically closes when clicking outside the announcement area
-- **Scroll Controls**: Up/down scroll buttons appear when content is scrollable
-- **Responsive Design**: Optimized for both desktop and mobile devices
-- **Real-time Updates**: Polls for new announcements every 10 seconds
-
-### Key Components
-- **Header Component**: Main navigation with integrated announcement system
-- **Scroll Management**: Dynamic scroll button visibility based on content overflow
-- **Click Outside Detection**: Uses event listeners to detect clicks outside dropdown
-- **Mobile Optimization**: Adjusted heights and button sizes for mobile devices
-
-## Technical Implementation
-
-### Announcement Dropdown Features
-1. **Height Limitation**: Dropdown is limited to 50% of viewport height (60% on mobile)
-2. **Scroll Detection**: Automatically detects when content exceeds available space
-3. **Scroll Buttons**: Chevron up/down buttons appear when scrolling is needed
-4. **Auto-Close**: Closes dropdown when clicking anywhere outside the notification area
-5. **Smooth Scrolling**: Custom scroll behavior with 100px increments
-
-### CSS Features
-- Custom scrollbar styling with brand colors
-- Responsive design with mobile-specific adjustments
-- Smooth transitions and hover effects
-- Backdrop blur effects for modern UI
+### 🔒 Platform-Wide Features
+- **Secure Authentication:** JWT, bcrypt password hashing, and protected routes
+- **File Upload Security:** Multer middleware for secure handling of videos, images, and PDFs
+- **Modern Responsive UI:** Mobile-optimized, smooth transitions, custom scrollbars, and accessibility features
+- **AI Chatbot:** Google Gemini-powered chatbot for user support
+- **Loading States & Toast Notifications:** User-friendly feedback for all actions
+- **Payment Integration:** Razorpay for secure course purchases
+- **Leaderboard & Gamification:** Points, badges, and achievement tracking
+- **Learning Analytics:** Visual dashboards for progress, streaks, and time spent
 
 ---
 
@@ -86,13 +139,13 @@ A full-stack **E-Learning Management System** built using the **MERN Stack (Mong
 
 ```bash
 .
-├── client/               # React frontend
+├── frontend/               # React frontend
 │   └── src/
 │       ├── components/
 │       ├── pages/
-│       ├── redux/
-│       └── App.js
-├── server/               # Node backend
+│       ├── context/
+│       └── App.jsx
+├── server/                 # Node backend
 │   ├── controllers/
 │   ├── middlewares/
 │   ├── models/
@@ -160,11 +213,14 @@ npm run dev
 ---
 
 ## 🧪 Future Improvements
-- Add quizzes and assignments
-- Add Stripe/Razorpay for paid courses
-- Chat/Discussion forum for students and instructors
-- Real-time progress tracking
-- Notifications and email support
+- Enhanced chatbot support (contextual, multi-language, voice)
+- Discussion forum for students and instructors
+- Live webinar hosting and real-time Q&A
+- Advanced analytics and reporting
+- More gamification features (badges, streaks, challenges)
+- Integration with additional payment gateways
+- Mobile app version
+- And more...
 
 ---
 
@@ -173,6 +229,6 @@ Project by
 - Amit Kumar Sahoo
 - Jagannath Patra
 - Silva Simran
-- Subham kiran
+- Subham Kiran
 
 ---
