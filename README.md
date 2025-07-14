@@ -18,7 +18,7 @@ A full-stack **E-Learning Management System** built using the **MERN Stack (Mong
 
 ## 🖼️ Homepage Preview
 
-![SkillNest Homepage]<img width="1919" height="1030" alt="Screenshot 2025-07-13 174441" src="https://github.com/user-attachments/assets/98b40274-9d52-4715-b8f4-f1827dce58c0" />
+<img width="1919" height="1030" alt="Screenshot 2025-07-13 174441" src="https://github.com/user-attachments/assets/98b40274-9d52-4715-b8f4-f1827dce58c0" />
 
 *SkillNest homepage: Modern, responsive design with clear calls to action for students and instructors.*
 
