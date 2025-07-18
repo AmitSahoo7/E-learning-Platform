@@ -97,7 +97,7 @@ const LectureCommentSection = ({ lectureId, isPaidUser, user }) => {
             allComments.map((comment) => (
               <div key={comment._id} className="comment-block">
                 <div className="comment-header-row">
-                  <span className="comment-user">{comment.userId?.name || "User"}</span>
+                  <span className="comment-user">{comment.userId?.name || "Student"}</span> {/* Changed from 'User' to 'Student' for consistency */}
 
                   {user && comment.userId && (user._id === comment.userId._id || user.role === "admin") && (
                   <div className="menu-wrapper">

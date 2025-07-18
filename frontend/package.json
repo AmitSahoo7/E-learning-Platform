@@ -17,6 +17,7 @@
     "@google/genai": "^1.5.1",
     "@google/generative-ai": "^0.2.0",
     "@huggingface/inference": "^4.0.5",
+    "aos": "^2.3.4",
     "axios": "^1.10.0",
     "framer-motion": "^12.23.0",
     "lucide-react": "^0.515.0",

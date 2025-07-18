@@ -345,7 +345,7 @@ const Dashboard = () => {
     <div className="user-dashboard">
       {/* Welcome Section */}
       <div className="dashboard-welcome">
-        <div className="welcome-content">
+        <div className="welcome-content2">
           <div className="welcome-text">
             <h1 style={{ color: '#fff', fontWeight: 800, fontSize: '2.5rem', marginBottom: '0.5rem' }}>
               Welcome back, <span className="gradient-title">{user?.name || 'Learner'}</span>! 👋

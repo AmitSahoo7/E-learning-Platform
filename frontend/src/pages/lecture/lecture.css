@@ -423,11 +423,27 @@
   min-height: 70vh;
 }
 .lecture-main-flex-row.center-list .lecture-main-left-col {
-  display: none;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 32px auto;
+  min-height: 60vh;
 }
 .lecture-main-flex-row.center-list .lecture-main-right-col {
   margin: 0 auto;
   float: none;
+  max-width: 600px !important; /* Override the base 420px max-width */
+  width: 100%;
+}
+
+/* Increase width for larger screens (1440px and above) */
+@media (min-width: 1440px) {
+  .lecture-main-flex-row.center-list .lecture-main-right-col {
+    max-width: 800px !important; /* Even wider for laptop/desktop screens */
+  }
 }
 
 .comment-item, .comment-box, .lecture-comment-modern .comment-item {
@@ -436,5 +452,151 @@
   border-radius: 10px;
   box-shadow: 0 0 6px 0 #0000001a;
   border: none;
+}
+
+.lecture-welcome-section {
+  width: 100%;
+  max-width: 700px;
+  background: linear-gradient(135deg, #101924 0%, #181c24 100%);
+  border-radius: 32px;
+  box-shadow: 0 8px 40px 0 rgba(60, 255, 180, 0.13), 0 0 32px 0 #34c75933;
+  padding: 56px 48px 48px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 0;
+  position: relative;
+  animation: glowPulse 3s infinite alternate;
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 8px 40px 0 rgba(60, 255, 180, 0.13), 0 0 32px 0 #34c75933; }
+  100% { box-shadow: 0 8px 40px 0 rgba(60, 255, 180, 0.18), 0 0 48px 8px #34c75944; }
+}
+
+.welcome-content {
+  max-width: 600px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.welcome-icon {
+  font-size: 4.5rem;
+  margin-bottom: 18px;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px #34c75988);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.welcome-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  margin-bottom: 10px;
+  background: linear-gradient(90deg, #63e642 0%, #38f9d7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 12px #34c75922;
+}
+
+.welcome-subtitle {
+  font-size: 1.25rem;
+  color: #b0ffb0;
+  margin-bottom: 18px;
+  font-weight: 500;
+  text-shadow: 0 1px 8px #10192488;
+}
+
+.welcome-features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 32px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  background: rgba(24, 28, 36, 0.85);
+  border-radius: 16px;
+  border: 1.5px solid rgba(99, 230, 66, 0.18);
+  color: #e0ffe0;
+  font-size: 1.08rem;
+  font-weight: 500;
+  box-shadow: 0 2px 12px 0 #34c75911;
+  transition: background 0.2s, border 0.2s, transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-width: 180px;
+  justify-content: center;
+}
+
+.feature-item:hover, .feature-item:focus {
+  background: rgba(36, 48, 66, 0.98);
+  border-color: #34c759;
+  color: #fff;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 24px 0 #34c75933;
+}
+
+.feature-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px #34c75966);
+}
+
+.feature-text {
+  font-size: 1.08rem;
+  color: #e0ffe0;
+  font-weight: 500;
+}
+
+.welcome-instruction {
+  background: rgba(99, 230, 66, 0.13);
+  border: 1.5px solid rgba(99, 230, 66, 0.3);
+  border-radius: 16px;
+  padding: 20px 18px;
+  margin-top: 18px;
+  width: 100%;
+  font-size: 1.1rem;
+  color: #e0ffe0;
+  box-shadow: 0 2px 12px 0 #34c75911;
+}
+
+.welcome-instruction p {
+  margin: 0;
+  color: #e0ffe0;
+  font-size: 1.08rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .lecture-welcome-section {
+    padding: 32px 8px;
+  }
+  .welcome-title {
+    font-size: 2rem;
+  }
+  .welcome-features {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .feature-item {
+    padding: 12px 10px;
+    min-width: 120px;
+  }
 }
 

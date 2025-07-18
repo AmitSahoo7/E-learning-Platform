@@ -617,7 +617,7 @@ const Lecture = ({ user }) => {
               </div>
             )}
             <div className={`lecture-main-flex-row${!lecture?.video ? ' center-list' : ''}`}>
-              {lecture?.video && (
+              {lecture?.video ? (
                 <div className="lecture-main-left-col">
                   <div className="lecture-video-section-modern">
                     <video
@@ -664,6 +664,36 @@ const Lecture = ({ user }) => {
                       />
                     </div>
                   )}
+                </div>
+              ) : (
+                // Welcome section when no video is selected
+                <div className="lecture-main-left-col">
+                  <div className="lecture-welcome-section">
+                    <div className="welcome-content">
+                      <div className="welcome-icon">🎬</div>
+                      <h1 className="welcome-title">Welcome to Your Course!</h1>
+                      <p className="welcome-subtitle">
+                        {course?.title ? `Select a lecture from "${course.title}" to begin learning.` : 'Select a lecture to begin your learning journey.'}
+                      </p>
+                      <div className="welcome-features">
+                        <div className="feature-item">
+                          <span className="feature-icon">📚</span>
+                          <span className="feature-text">Browse all available lectures and quizzes</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-icon">🎯</span>
+                          <span className="feature-text">Track your progress as you learn</span>
+                        </div>
+                        <div className="feature-item">
+                          <span className="feature-icon">🏆</span>
+                          <span className="feature-text">Earn points and certificates</span>
+                        </div>
+                      </div>
+                      <div className="welcome-instruction">
+                        <p>💡 <strong>Tip:</strong> Click on any lecture or quiz from the list to start learning!</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
               <div className="lecture-main-right-col">

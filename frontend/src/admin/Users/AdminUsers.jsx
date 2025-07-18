@@ -88,16 +88,16 @@ const AdminUsers = () => {
                   <td>{userItem._id}</td>
                   <td>{userItem.name}</td>
                   <td>{userItem.email}</td>
-                  <td>{userItem.role}</td>
+                  <td>{userItem.role === "user" ? "Student" : userItem.role}</td> {/* 'user' role is displayed as 'Student' for clarity; see code comment for mapping. */}
                   <td>
                     <select
                       value={userItem.role}
                       onChange={e => updateRole(userItem._id, e.target.value)}
                       style={{ padding: '4px 8px', borderRadius: 4 }}
                     >
-                      <option value="user">user</option>
-                      <option value="instructor">instructor</option>
-                      <option value="admin">admin</option>
+                      <option value="user">Student</option> {/* 'user' value is shown as 'Student' in dropdown for clarity. */}
+                      <option value="instructor">Instructor</option>
+                      <option value="admin">Admin</option>
                     </select>
                   </td>
                 </tr>

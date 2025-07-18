@@ -126,7 +126,11 @@ const CourseStudy = ({ user }) => {
         setQuizProgress(quizPercent);
         setCompletedQuizCount(safeCompletedQuiz);
         setTotalQuizCount(safeQuizCount);
-      } catch {
+      } catch (error) {
+        // Only log if it's not a 404 (no progress found) to reduce console noise
+        if (error.response?.status !== 404) {
+          console.error("Progress fetch error:", error);
+        }
         setCompleted(0);
         setCompletedLec(0);
         setLectLength(1);

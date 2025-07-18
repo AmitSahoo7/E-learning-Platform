@@ -153,7 +153,7 @@ const ProfileModal = ({ open, onClose, user, logoutHandler, goToDashboard, canEd
             </>
           )}
           <p><strong>{user.email}</strong></p>
-          <p className="profile-role">Role: <span>{user.role || (user.roles && user.roles.join(", "))}</span></p>
+          <p className="profile-role">Role: <span>{user.role === "user" ? "Student" : (user.role || (user.roles && user.roles.join(", ")))}</span></p> {/* 'user' role is displayed as 'Student' for clarity; see code comment for mapping. */}
           <p className="profile-points">Total Points: <span className="points-value">🏆 {rewardsTotalPoints !== null ? rewardsTotalPoints : (user.totalPoints || 0)}</span></p>
           {joined && <p className="profile-joined">Joined: <span>{joined}</span></p>}
         </div>

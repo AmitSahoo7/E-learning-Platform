@@ -176,7 +176,7 @@ const Leaderboard = ({ user }) => {
                   <div className="stat-item">
                     <span className="stat-label">Out of</span>
                     <span className="stat-value">
-                      {userRanking.totalUsers} users
+                      {userRanking.totalUsers} students {/* Changed from 'users' to 'students' for clarity */}
                     </span>
                   </div>
                 </div>
