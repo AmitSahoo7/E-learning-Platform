@@ -240,17 +240,22 @@ export const getDashboardStats = TryCatch(async (req, res) => {
   let streak = 0;
   if (activities.length > 0) {
     let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // today at midnight
+    currentDate.setHours(0, 0, 0, 0); // today at midnight UTC
     let activityIdx = 0;
     let keepCounting = true;
+    
+    console.log(`Calculating streak for user ${userId}. Total activities: ${activities.length}`);
+    
     while (keepCounting) {
       // Find if there is any activity for currentDate
       let found = false;
       while (activityIdx < activities.length) {
         const actDate = new Date(activities[activityIdx].timestamp);
-        actDate.setHours(0, 0, 0, 0);
+        actDate.setHours(0, 0, 0, 0); // normalize to midnight UTC
+        
         if (actDate.getTime() === currentDate.getTime()) {
           found = true;
+          console.log(`Found activity for ${currentDate.toDateString()}: ${activities[activityIdx].activityType} - ${activities[activityIdx].title}`);
           // skip all activities for this day
           while (
             activityIdx < activities.length &&
@@ -267,14 +272,17 @@ export const getDashboardStats = TryCatch(async (req, res) => {
       }
       if (found) {
         streak++;
+        console.log(`Streak increased to ${streak} for ${currentDate.toDateString()}`);
         // Move to previous day
         currentDate.setDate(currentDate.getDate() - 1);
       } else {
+        console.log(`No activity found for ${currentDate.toDateString()}, stopping streak calculation`);
         keepCounting = false;
       }
     }
   }
   const learningStreak = streak;
+  console.log(`Final streak for user ${userId}: ${learningStreak}`);
   
   // Get user's rank
   const allUsers = await User.find({ role: { $ne: 'admin' } }).sort({ totalPoints: -1 });
@@ -402,42 +410,36 @@ export const getUserRecentActivity = TryCatch(async (req, res) => {
 export const getUserWeeklyProgress = TryCatch(async (req, res) => {
   const userId = req.user._id;
 
-  // Use IST (UTC+5:30) for week calculation
-  const IST_OFFSET_MINUTES = 330; // 5 hours 30 minutes
+  // Use UTC for consistent timezone handling
   const now = new Date();
-  // Convert current time to IST
-  const nowIST = new Date(now.getTime() + IST_OFFSET_MINUTES * 60000);
-  const istDay = nowIST.getDay(); // 0 (Sun) - 6 (Sat)
-  // Get start of week in IST
-  const startOfWeekIST = new Date(nowIST);
-  startOfWeekIST.setDate(nowIST.getDate() - istDay);
-  startOfWeekIST.setHours(0, 0, 0, 0);
-  // Convert startOfWeekIST back to UTC for DB query
-  const startOfWeekUTC = new Date(startOfWeekIST.getTime() - IST_OFFSET_MINUTES * 60000);
+  const currentDay = now.getDay(); // 0 (Sun) - 6 (Sat)
+  
+  // Get start of current week (Sunday) in UTC
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - currentDay);
+  startOfWeek.setHours(0, 0, 0, 0);
 
-  // Get activities for the current week (in UTC, but week start is IST)
+  // Get activities for the current week
   const weeklyActivities = await UserActivity.find({
     user: userId,
-    timestamp: { $gte: startOfWeekUTC }
+    timestamp: { $gte: startOfWeek }
   }).sort({ timestamp: 1 });
 
-  // Group activities by day (IST) and count only unique activities per type per day
+  // Group activities by day and count only unique activities per type per day
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const weeklyProgress = daysOfWeek.map((day, index) => {
-    // Calculate IST day start/end, then convert to UTC for comparison
-    const dayStartIST = new Date(startOfWeekIST);
-    dayStartIST.setDate(startOfWeekIST.getDate() + index);
-    dayStartIST.setHours(0, 0, 0, 0);
-    const dayEndIST = new Date(dayStartIST);
-    dayEndIST.setDate(dayStartIST.getDate() + 1);
-    // Convert to UTC
-    const dayStartUTC = new Date(dayStartIST.getTime() - IST_OFFSET_MINUTES * 60000);
-    const dayEndUTC = new Date(dayEndIST.getTime() - IST_OFFSET_MINUTES * 60000);
+    // Calculate day start/end in UTC
+    const dayStart = new Date(startOfWeek);
+    dayStart.setDate(startOfWeek.getDate() + index);
+    dayStart.setHours(0, 0, 0, 0);
+    
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayStart.getDate() + 1);
 
     // Filter activities for this day
     const dayActivities = weeklyActivities.filter(activity => {
       const ts = new Date(activity.timestamp);
-      return ts >= dayStartUTC && ts < dayEndUTC;
+      return ts >= dayStart && ts < dayEnd;
     });
 
     // Count only unique activities per type per day
@@ -477,10 +479,20 @@ export const getUserWeeklyProgress = TryCatch(async (req, res) => {
 // Record user activity (to be called from other controllers)
 export const recordUserActivity = async (userId, activityData) => {
   try {
-    await UserActivity.create({
+    const activity = await UserActivity.create({
       user: userId,
       ...activityData
     });
+    
+    // Debug logging to help identify activity recording issues
+    console.log(`Activity recorded for user ${userId}:`, {
+      type: activityData.activityType,
+      title: activityData.title,
+      timestamp: activity.timestamp,
+      dayOfWeek: new Date(activity.timestamp).toLocaleDateString('en-US', { weekday: 'long' })
+    });
+    
+    return activity;
   } catch (error) {
     console.error('Error recording user activity:', error);
   }

@@ -3,7 +3,12 @@ import AOS from 'aos';
 
 AOS.init(); // Initialize AOS
 
-export const server = "http://localhost:4000";
+export const server = import.meta.env.VITE_SERVER;
+
+if (!server) {
+  throw new Error("VITE_SERVER is not defined. Check your environment variables.");
+}
+
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";

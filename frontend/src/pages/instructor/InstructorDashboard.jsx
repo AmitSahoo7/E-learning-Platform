@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./instructorDashboard.css";
 import { FaChalkboardTeacher } from "react-icons/fa";
 
-const BACKEND_URL = "http://localhost:4000"; // Change to your backend URL if different
+const BACKEND_URL = import.meta.env.VITE_SERVER || "http://localhost:4000"; // Change to your backend URL if different
 
 const InstructorDashboard = ({ user }) => {
   // Prefer user prop, fallback to localStorage
@@ -40,7 +40,7 @@ const InstructorDashboard = ({ user }) => {
     const fetchCourseStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("/api/instructor/course-stats", {
+        const res = await axios.get(`${BACKEND_URL}/api/instructor/course-stats`, {
           headers: { token },
         });
         console.log("API response:", res.data);
@@ -68,7 +68,7 @@ const InstructorDashboard = ({ user }) => {
     setModalError(null);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(`/api/instructor/course/${courseId}/users`, {
+      const res = await axios.get(`${BACKEND_URL}/api/instructor/course/${courseId}/users`, {
         headers: { token },
       });
       setModalUsers(res.data.userStats || []);
@@ -283,4 +283,4 @@ const InstructorDashboard = ({ user }) => {
   );
 };
 
-export default InstructorDashboard; 
+export default InstructorDashboard;

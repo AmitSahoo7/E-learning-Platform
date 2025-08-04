@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import "./header.css";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, Trophy, User, ChevronUp, ChevronDown } from "lucide-react";
+import { Bell, Trophy, User, ChevronUp, ChevronDown, Menu, X } from "lucide-react";
 import ProfileModal from "../ProfileModal";
 import { UserData } from "../../context/UserContext";
 
@@ -43,6 +43,7 @@ const Header = ({ isAuth, announcements = [], markAnnouncementRead, markAnnounce
   const validAnnouncements = liveAnnouncements.filter(a => a && typeof a === 'object' && typeof a.message === 'string' && !a.isCleared);
   const unreadCount = validAnnouncements.filter(a => !a.isRead).length;
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -58,6 +59,23 @@ const Header = ({ isAuth, announcements = [], markAnnouncementRead, markAnnounce
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showDropdown]);
+
+  // Close mobile menu on Escape or outside click
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKey = (e) => {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    };
+    const handleClick = (e) => {
+      if (e.target.classList.contains("mobile-menu-overlay")) setMobileMenuOpen(false);
+    };
+    document.addEventListener("keydown", handleKey);
+    document.addEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener("mousedown", handleClick);
+    };
+  }, [mobileMenuOpen]);
 
   const handleAnnouncementClick = (a) => {
     setModal(a);
@@ -163,6 +181,14 @@ const Header = ({ isAuth, announcements = [], markAnnouncementRead, markAnnounce
 
   return (
     <header className="modern-header glassy-header">
+      {/* Hamburger for mobile */}
+      <button
+        className="header-hamburger"
+        aria-label="Open menu"
+        onClick={() => setMobileMenuOpen(true)}
+      >
+        <Menu size={28} />
+      </button>
       <div className="header-logo">SkillNest</div>
       <nav className="header-nav">
         {navLinks.map((link) => (
@@ -201,6 +227,50 @@ const Header = ({ isAuth, announcements = [], markAnnouncementRead, markAnnounce
           </button>
         </div>
       </div>
+      {/* Mobile Side Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-menu-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.18)', zIndex: 99999 }}>
+          <aside className="mobile-menu-drawer">
+            <button className="mobile-menu-close" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)}>
+              <X size={28} />
+            </button>
+            <div className="mobile-menu-logo">SkillNest</div>
+            <nav className="mobile-menu-nav">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`mobile-menu-link${location.pathname === link.path ? " active" : ""}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.name} {link.icon && link.icon}
+                </Link>
+              ))}
+            </nav>
+            <div className="mobile-menu-actions">
+              {isAuth ? (
+                <button
+                  className="mobile-menu-profile"
+                  onClick={() => { setShowProfileModal(true); setMobileMenuOpen(false); }}
+                >
+                  <User size={20} style={{ marginBottom: '-2px' }} /> Profile
+                </button>
+              ) : (
+                <Link to="/login" className="mobile-menu-login" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
+              <button
+                type="button"
+                className="mobile-menu-bell"
+                onClick={() => { setShowDropdown((v) => !v); setMobileMenuOpen(false); }}
+                aria-label="Notifications"
+              >
+                <BellIcon />
+                {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
       {showDropdown && ReactDOM.createPortal(dropdownJSX, document.body)}
       {modal && (
         <div className="announcement-modal-bg" onClick={() => setModal(null)}>

@@ -80,6 +80,13 @@ const Dashboard = () => {
     .filter(r => r.activityType === 'quiz')
     .reduce((sum, r) => sum + (r.points || 0), 0);
 
+  // Helper function to convert date to local date string (YYYY-MM-DD)
+  const toLocalDateString = (date) => {
+    return date.getFullYear() + '-' + 
+           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(date.getDate()).padStart(2, '0');
+  };
+
   // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -225,8 +232,22 @@ const Dashboard = () => {
         const activityRes = await axios.get(`${server}/api/user/recent-activity`, {
           headers: { token: localStorage.getItem("token") }
         });
-        // Convert activity timestamps to ISO date strings
-        const activityDates = (activityRes.data.activities || []).map(a => new Date(a.timestamp).toISOString().slice(0, 10));
+        // Convert activity timestamps to local date strings (not UTC)
+        const activityDates = (activityRes.data.activities || []).map(a => {
+          const date = new Date(a.timestamp);
+          // Use local date conversion to avoid timezone offset issues
+          const localDate = toLocalDateString(date);
+          
+          // Debug logging to verify date conversion
+          console.log(`Activity: ${a.title}`, {
+            originalTimestamp: a.timestamp,
+            convertedDate: localDate,
+            dayOfWeek: date.toLocaleDateString('en-US', { weekday: 'long' }),
+            time: date.toLocaleTimeString()
+          });
+          
+          return localDate;
+        });
         setCalendarActivityDates([...new Set(activityDates)]);
         // For demo: treat all activity days as goal days if daily goal met (customize as needed)
         setCalendarGoalDates([...new Set(activityDates)]);
@@ -235,7 +256,11 @@ const Dashboard = () => {
           const eventsRes = await axios.get(`${server}/api/events`, {
             headers: { token: localStorage.getItem("token") }
           });
-          const eventDates = (eventsRes.data.events || []).map(e => new Date(e.date).toISOString().slice(0, 10));
+          const eventDates = (eventsRes.data.events || []).map(e => {
+            const date = new Date(e.date);
+            // Use local date conversion for events too
+            return toLocalDateString(date);
+          });
           setCalendarEventDates([...new Set(eventDates)]);
         } catch {
           setCalendarEventDates([]);
@@ -325,8 +350,13 @@ const Dashboard = () => {
   const handleCalendarDayClick = (date) => {
     setSelectedDate(date);
     // For demo: show all activities/events for this day
-    const iso = date.toISOString().slice(0, 10);
-    const activities = recentActivity.filter(a => new Date(a.timestamp).toISOString().slice(0, 10) === iso);
+    // Use local date conversion to avoid timezone offset issues
+    const localDate = toLocalDateString(date);
+    const activities = recentActivity.filter(a => {
+      const activityDate = new Date(a.timestamp);
+      const activityLocalDate = toLocalDateString(activityDate);
+      return activityLocalDate === localDate;
+    });
     setSelectedDayDetails(activities);
   };
 
@@ -682,8 +712,9 @@ const Dashboard = () => {
                 return null;
               }}
               tileContent={({ date, view }) => {
-                const iso = date.toISOString().slice(0, 10);
-                if (calendarActivityDates.includes(iso)) {
+                // Use local date conversion to avoid timezone offset issues
+                const localDate = toLocalDateString(date);
+                if (calendarActivityDates.includes(localDate)) {
                   return (
                     <span style={{
                       display: 'flex',
